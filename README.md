@@ -6,7 +6,7 @@
 
 <p align="center">
   <strong>The ultimate open-source hub for shared living.</strong><br/>
-  Inspired by Flatastic — built for everyone.
+  Open-source, self-hostable, built for everyone.
 </p>
 
 <p align="center">
