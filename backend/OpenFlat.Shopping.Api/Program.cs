@@ -48,3 +48,6 @@ app.MapItemEndpoints();
 app.MapHub<ShoppingHub>("/hubs/shopping");
 
 app.Run();
+
+// Enables WebApplicationFactory<Program> for integration tests
+public partial class Program { }

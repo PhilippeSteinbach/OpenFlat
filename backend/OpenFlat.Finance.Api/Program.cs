@@ -41,3 +41,6 @@ app.MapExpenseEndpoints();
 app.MapSettlementEndpoints();
 
 app.Run();
+
+// Enables WebApplicationFactory<Program> for integration tests
+public partial class Program { }

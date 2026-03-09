@@ -94,8 +94,8 @@
 - [X] T034 [US2] Implement create/edit/delete task dialogs and user assignment dropdown in frontend/src/features/cleaning/
 - [X] T035 [US2] Connect cleaning board to SignalR CleaningHub via useSignalR hook in frontend/src/features/cleaning/
 - [X] T035a [P] [US2] Write unit tests for CleaningTaskService (CRUD, move, assign, point credit/deduct, edge cases) and LeaderboardService in backend/tests/OpenFlat.Cleaning.Tests/
-- [ ] T035b [P] [US2] Write integration tests for all 12 Cleaning API endpoints using WebApplicationFactory + Testcontainers in backend/tests/OpenFlat.Cleaning.Tests/Integration/
-- [ ] T035c [US2] Write Playwright E2E test for Kanban board user journey (create task → drag to Done → verify points) in frontend/tests/e2e/cleaning.spec.ts
+- [X] T035b [P] [US2] Write integration tests for all 12 Cleaning API endpoints using WebApplicationFactory + Testcontainers in backend/tests/OpenFlat.Cleaning.Tests/Integration/
+- [X] T035c [US2] Write Playwright E2E test for Kanban board user journey (create task → drag to Done → verify points) in frontend/tests/e2e/cleaning.spec.ts
 - [X] T036 [US2] Create mobile cleaning board with status tabs, task cards, move actions, and create/assign modals in mobile/app/(tabs)/cleaning.tsx
 - [X] T037 [US2] Implement mobile task cards, create/edit/delete forms, and assignment control in mobile/app/(tabs)/cleaning.tsx
 - [X] T038 [US2] Wire leaderboard API data to dashboard leaderboard widgets on web and mobile
@@ -123,8 +123,8 @@
 - [X] T047 [US3] Implement mobile add/edit item form, check-off/undo gestures in mobile/features/shopping/
 - [X] T048 [US3] Connect mobile shopping list to SignalR ShoppingHub in mobile/features/shopping/
 - [X] T048a [P] [US3] Write unit tests for ShoppingItemService (CRUD, buy, undo, validation) and AutoClearService (7-day expiry) in backend/tests/OpenFlat.Shopping.Tests/Unit/
-- [ ] T048b [P] [US3] Write integration tests for all 10 Shopping API endpoints using WebApplicationFactory + Testcontainers in backend/tests/OpenFlat.Shopping.Tests/Integration/
-- [ ] T048c [US3] Write Playwright E2E test for shopping user journey (add item → check off → undo → verify Recently Bought) in frontend/tests/e2e/shopping.spec.ts
+- [X] T048b [P] [US3] Write integration tests for all 10 Shopping API endpoints using WebApplicationFactory + Testcontainers in backend/tests/OpenFlat.Shopping.Tests/Integration/
+- [X] T048c [US3] Write Playwright E2E test for shopping user journey (add item → check off → undo → verify Recently Bought) in frontend/tests/e2e/shopping.spec.ts
 
 **Checkpoint**: Shopping List fully functional with add, edit, buy, undo, auto-clear, real-time sync on web and mobile.
 
@@ -147,8 +147,8 @@
 - [X] T055 [US4] Create mobile expense list and log/edit/delete forms with own-only controls in mobile/app/(tabs)/finance/index.tsx
 - [X] T056 [US4] Implement mobile settlement view with transactions and settled-up state in mobile/features/finance/
 - [X] T056a [P] [US4] Write unit tests for ExpenseService (CRUD, own-only validation) and SettlementService (greedy net-balance, all-settled, single-payer, zero-amount edge cases) in backend/tests/OpenFlat.Finance.Tests/Unit/
-- [ ] T056b [P] [US4] Write integration tests for all 6 Finance API endpoints using WebApplicationFactory + Testcontainers in backend/tests/OpenFlat.Finance.Tests/Integration/
-- [ ] T056c [US4] Write Playwright E2E test for finance user journey (log expense → verify settlement calculation) in frontend/tests/e2e/finance.spec.ts
+- [X] T056b [P] [US4] Write integration tests for all 6 Finance API endpoints using WebApplicationFactory + Testcontainers in backend/tests/OpenFlat.Finance.Tests/Integration/
+- [X] T056c [US4] Write Playwright E2E test for finance user journey (log expense → verify settlement calculation) in frontend/tests/e2e/finance.spec.ts
 
 **Checkpoint**: Finance Tracker fully functional. Expenses logged, own-only edit/delete works, Settlement View shows correct minimized debts.
 
@@ -171,7 +171,7 @@
 - [X] T063 [US5] Integrate comments into mobile task detail screen in mobile/app/(tabs)/cleaning/[taskId].tsx
 - [X] T064 [P] [US5] Integrate comments into mobile shopping item detail screen in mobile/features/shopping/
 - [X] T064a [P] [US5] Write integration tests for comment endpoints (Cleaning + Shopping) covering add, edit own, delete own, reject other's in backend/tests/OpenFlat.Cleaning.Tests/ and backend/tests/OpenFlat.Shopping.Tests/
-- [ ] T064b [US5] Write Playwright E2E test for comments user journey (add comment → edit → delete → verify permission enforcement) in frontend/tests/e2e/comments.spec.ts
+- [X] T064b [US5] Write Playwright E2E test for comments user journey (add comment → edit → delete → verify permission enforcement) in frontend/tests/e2e/comments.spec.ts
 
 **Checkpoint**: Comments work on both cleaning tasks and shopping items, both web and mobile. Own-only edit/delete enforced. Edited indicator shown.
 

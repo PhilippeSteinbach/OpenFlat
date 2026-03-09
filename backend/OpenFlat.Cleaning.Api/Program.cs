@@ -44,3 +44,6 @@ app.MapLeaderboardEndpoints();
 app.MapHub<CleaningHub>("/hubs/cleaning");
 
 app.Run();
+
+// Enables WebApplicationFactory<Program> for integration tests
+public partial class Program { }
