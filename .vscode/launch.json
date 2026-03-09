@@ -1,0 +1,17 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "OpenFlat (Full Stack)",
+      "type": "dotnet",
+      "request": "launch",
+      "projectPath": "${workspaceFolder}/OpenFlat.AppHost/OpenFlat.AppHost.csproj",
+      "preLaunchTask": "build-apphost",
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "Login to the dashboard at (https://\\S+)",
+        "uriFormat": "%s"
+      }
+    }
+  ]
+}

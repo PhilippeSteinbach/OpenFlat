@@ -30,7 +30,7 @@ var financeApi = builder.AddProject<Projects.OpenFlat_Finance_Api>("finance-api"
 
 // React frontend (Vite dev server)
 builder.AddViteApp("frontend", "../frontend")
-    .WithHttpEndpoint(env: "PORT")
+    .WithHttpEndpoint(name: "vite", env: "PORT")
     .WithReference(cleaningApi)
     .WithReference(shoppingApi)
     .WithReference(financeApi);

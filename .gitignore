@@ -63,8 +63,6 @@ android/
 # IDE / Editor
 # =========================
 .vscode/settings.json
-.vscode/launch.json
-.vscode/tasks.json
 .vscode/*.code-workspace
 .idea/
 *.swp

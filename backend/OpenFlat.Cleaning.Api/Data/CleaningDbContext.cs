@@ -30,7 +30,7 @@ public class CleaningDbContext(DbContextOptions<CleaningDbContext> options) : Db
             e.HasIndex(t => new { t.Status, t.SortOrder }).HasDatabaseName("ix_tasks_status_sort");
             e.HasIndex(t => t.AssignedUserId)
                 .HasDatabaseName("ix_tasks_assigned_user_id")
-                .HasFilter("assigned_user_id IS NOT NULL");
+                .HasFilter("\"AssignedUserId\" IS NOT NULL");
         });
 
         modelBuilder.Entity<CleaningComment>(e =>

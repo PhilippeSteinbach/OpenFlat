@@ -25,7 +25,7 @@ public class ShoppingDbContext(DbContextOptions<ShoppingDbContext> options) : Db
             e.HasIndex(i => i.IsBought).HasDatabaseName("ix_items_is_bought");
             e.HasIndex(i => i.BoughtAt)
                 .HasDatabaseName("ix_items_bought_at")
-                .HasFilter("is_bought = true");
+                .HasFilter("\"IsBought\" = true");
         });
 
         modelBuilder.Entity<ShoppingComment>(e =>
