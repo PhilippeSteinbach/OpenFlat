@@ -63,14 +63,14 @@
 
 ### Implementation for User Story 1
 
-- [ ] T019 [US1] Implement user selection screen showing 5 users with names, roles, and avatars in frontend/src/features/user-selection/
-- [ ] T020 [P] [US1] Implement mobile user selection screen in mobile/app/user-selection.tsx
-- [ ] T021 [US1] Implement main dashboard with 3 module tiles (Cleaning Board, Shopping List, Finance Tracker) and user header in frontend/src/features/dashboard/
-- [ ] T022 [P] [US1] Implement mobile dashboard with 3 module tiles and user header in mobile/app/(tabs)/index.tsx
-- [ ] T023 [US1] Add current user's points in dashboard header and compact leaderboard widget in frontend/src/features/dashboard/
-- [ ] T024 [P] [US1] Add points display and leaderboard widget to mobile dashboard in mobile/app/(tabs)/index.tsx
-- [ ] T025 [US1] Implement user switching navigation (back to selection screen) in frontend/src/app/ routes
-- [ ] T026 [P] [US1] Implement mobile user switching in mobile/app/_layout.tsx
+- [X] T019 [US1] Implement user selection screen showing 5 users with names, roles, and avatars in frontend/src/features/user-selection/
+- [X] T020 [P] [US1] Implement mobile user selection screen in mobile/app/user-selection.tsx
+- [X] T021 [US1] Implement main dashboard with 3 module tiles (Cleaning Board, Shopping List, Finance Tracker) and user header in frontend/src/features/dashboard/
+- [X] T022 [P] [US1] Implement mobile dashboard with 3 module tiles and user header in mobile/app/(tabs)/index.tsx
+- [X] T023 [US1] Add current user's points in dashboard header and compact leaderboard widget in frontend/src/features/dashboard/
+- [X] T024 [P] [US1] Add points display and leaderboard widget to mobile dashboard in mobile/app/(tabs)/index.tsx
+- [X] T025 [US1] Implement user switching navigation (back to selection screen) in frontend/src/app/ routes
+- [X] T026 [P] [US1] Implement mobile user switching in mobile/app/_layout.tsx
 
 **Checkpoint**: User selection → dashboard flow works on web and mobile. 3 module tiles visible, leaderboard shows 5 users at 0 points.
 

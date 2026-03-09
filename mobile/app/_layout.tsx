@@ -1,6 +1,22 @@
-import { Stack } from 'expo-router';
+import { useEffect } from 'react';
+import { Stack, useRouter, useSegments } from 'expo-router';
+import { useCurrentUserStore } from '../shared/hooks/useCurrentUser';
+import '../shared/i18n';
 
 export default function RootLayout() {
+  const router = useRouter();
+  const segments = useSegments();
+  const currentUser = useCurrentUserStore((s) => s.currentUser);
+
+  useEffect(() => {
+    const inTabs = segments[0] === '(tabs)';
+
+    if (!currentUser && inTabs) {
+      // No user selected — redirect to user selection
+      router.replace('/user-selection');
+    }
+  }, [currentUser, segments, router]);
+
   return (
     <Stack>
       <Stack.Screen
