@@ -38,7 +38,7 @@ Build the OpenFlat Foundation — a household management platform with user sele
 | III. User Experience Consistency | ✅ PASS | Shared design system via Tailwind/NativeWind tokens. i18next for i18n (EN + DE). ARIA labels + accessibility traits. Empty/error/loading states required per spec. |
 | IV. Performance & Responsiveness | ✅ PASS | Performance budgets in spec (SC-001–SC-009). Aspire health checks. DB indexes required. Bundle size monitoring. |
 | V. Modular & Extensible Architecture | ✅ PASS | 3 separate API services behind Aspire orchestration. Feature-module frontend organization. Schema-per-service in PostgreSQL. |
-| Technology Standards | ✅ PASS | Constitution amended (v1.0.1) to "React Native (Expo)". .NET 10 ≥ .NET 8+ requirement. Node 22 ≥ 20+ requirement. All standards met. |
+| Technology Standards | ✅ PASS | Constitution amended (v1.0.2): "React Native (Expo)", "Docker / .NET Aspire". .NET 10 ≥ .NET 8+ requirement. Node 22 ≥ 20+ requirement. All standards met. |
 
 **GATE RESULT**: PASS
 

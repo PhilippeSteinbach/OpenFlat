@@ -1,17 +1,17 @@
 <!--
   Sync Impact Report
   ==================
-  Version change: 1.0.1 → 1.0.2 (patch — clarification)
-  Modified principles: None
-  Modified sections:
-    - Principle V (Modular & Extensible Architecture):
-      Docker Compose bullet broadened to "Local orchestration
-      (Docker Compose or .NET Aspire AppHost)" since Aspire
-      replaces Compose for this project's local dev workflow.
-    - Technology Standards: Containerization row updated from
-      "Docker / Docker Compose" to "Docker / .NET Aspire" to
-      reflect that Aspire AppHost is the orchestration tool.
+  Version change: 1.0.2 → 1.0.3 (patch — wording clarification)
+  Modified principles:
+    - Principle II (Test-Driven Quality Assurance):
+      E2E examples updated from "bulletin board posting"
+      (future module) to "comment threads" (current P5 feature).
+      Added "e.g." to signal illustrative list.
+  Modified sections: None
   Previous amendments:
+    - 1.0.1 → 1.0.2: Principle V Docker Compose → Local
+      orchestration; Technology Standards Containerization
+      row → "Docker / .NET Aspire".
     - 1.0.0 → 1.0.1: Mobile Apps row updated from
       "React Native" to "React Native (Expo)".
   Removed sections: None
@@ -71,8 +71,8 @@ is considered complete. Untested code is unfinished code.
 - CI pipeline MUST run the full test suite on every pull
   request. Merging with failing tests is forbidden.
 - End-to-end tests MUST cover the primary user journeys for
-  each module (chore completion, shopping list sync, expense
-  settlement, bulletin board posting).
+  each module (e.g., chore completion, shopping list sync,
+  expense settlement, comment threads).
 
 ### III. User Experience Consistency
 
@@ -258,4 +258,4 @@ individual preferences, and ad-hoc decisions.
   be either enforced or formally removed via amendment. Stale
   principles erode trust in the constitution.
 
-**Version**: 1.0.2 | **Ratified**: 2026-03-09 | **Last Amended**: 2026-03-09
+**Version**: 1.0.3 | **Ratified**: 2026-03-09 | **Last Amended**: 2026-03-09

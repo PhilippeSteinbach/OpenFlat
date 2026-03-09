@@ -13,7 +13,7 @@
 - "Coordinator" and "Resident" are display labels only; both roles have identical permissions in this phase. Role-based access control is deferred to a future phase.
 - "Mobile-first UI" means the interface is optimized for smartphone viewports (≤ 428px width) but remains usable on tablet and desktop screens.
 - Currency for the Finance Tracker defaults to EUR (€). Multi-currency support is out of scope.
-- Real-time collaboration (multiple users editing simultaneously on different devices) is not required in this phase; the app serves one active user session at a time.
+- Real-time collaboration (multiple users editing simultaneously on different devices) is not required in this phase; the app is designed for one person acting at a time. However, SignalR keeps any open clients in sync for demo and testing convenience.
 - Drag-and-drop on the Cleaning Board must work with touch gestures on mobile devices.
 
 ## Clarifications
