@@ -1,13 +1,12 @@
 <!--
   Sync Impact Report
   ==================
-  Version change: N/A → 1.0.0 (initial ratification)
-  Modified principles: None (initial version)
-  Added sections:
-    - Core Principles (5 principles)
-    - Technology Standards
-    - Development Workflow & Quality Gates
-    - Governance
+  Version change: 1.0.0 → 1.0.1 (patch — clarification)
+  Modified principles: None
+  Modified sections:
+    - Technology Standards: Mobile Apps row updated from
+      "React Native" to "React Native (Expo)" to reflect
+      that Expo is the chosen React Native framework.
   Removed sections: None
   Templates requiring updates:
     - .specify/templates/plan-template.md ✅ compatible (no changes needed)
@@ -158,7 +157,7 @@ amendment.
 |-------|----------|---------------------|
 | Backend API | .NET (C#) | .NET 8+ |
 | Web Frontend | React | Latest stable |
-| Mobile Apps | React Native | Latest stable (iOS + Android) |
+| Mobile Apps | React Native (Expo) | Latest stable (iOS + Android) |
 | Database | PostgreSQL | 16+ |
 | Real-time | SignalR (WebSockets) | Bundled with .NET |
 | Containerization | Docker / Docker Compose | Latest stable |
@@ -251,4 +250,4 @@ individual preferences, and ad-hoc decisions.
   be either enforced or formally removed via amendment. Stale
   principles erode trust in the constitution.
 
-**Version**: 1.0.0 | **Ratified**: 2026-03-09 | **Last Amended**: 2026-03-09
+**Version**: 1.0.1 | **Ratified**: 2026-03-09 | **Last Amended**: 2026-03-09

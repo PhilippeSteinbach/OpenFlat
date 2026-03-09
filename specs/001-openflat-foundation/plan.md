@@ -38,9 +38,9 @@ Build the OpenFlat Foundation — a household management platform with user sele
 | III. User Experience Consistency | ✅ PASS | Shared design system via Tailwind/NativeWind tokens. i18next for i18n (EN + DE). ARIA labels + accessibility traits. Empty/error/loading states required per spec. |
 | IV. Performance & Responsiveness | ✅ PASS | Performance budgets in spec (SC-001–SC-009). Aspire health checks. DB indexes required. Bundle size monitoring. |
 | V. Modular & Extensible Architecture | ✅ PASS | 3 separate API services behind Aspire orchestration. Feature-module frontend organization. Schema-per-service in PostgreSQL. |
-| Technology Standards | ⚠️ DEVIATION | Constitution specifies "React Native" for mobile. Plan uses Expo (React Native via Expo). Expo is a superset — not a replacement — of React Native. See Complexity Tracking. |
+| Technology Standards | ✅ PASS | Constitution amended (v1.0.1) to "React Native (Expo)". .NET 10 ≥ .NET 8+ requirement. Node 22 ≥ 20+ requirement. All standards met. |
 
-**GATE RESULT**: PASS (1 minor deviation justified below)
+**GATE RESULT**: PASS
 
 ### Post-Design Re-evaluation
 
@@ -53,7 +53,7 @@ Build the OpenFlat Foundation — a household management platform with user sele
 | III. User Experience Consistency | ✅ PASS | Shared locales (en.json, de.json) in shared/locales/. NativeWind + Tailwind for consistent design tokens. Comment DTOs identical across Cleaning and Shopping APIs. User names resolved in DTOs (not raw IDs). Empty/error states specified in spec. |
 | IV. Performance & Responsiveness | ✅ PASS | DB indexes defined for all query patterns (status filtering, chronological ordering, leaderboard). Integer cents for financial amounts (no float precision issues). Settlement algorithm is O(N log N) with N=5. Minimal joins needed. |
 | V. Modular & Extensible Architecture | ✅ PASS | 3 independent schemas with independent migration histories. Each API is self-contained with Endpoints → Services → Data layering. Shared library contains only constants/DTOs. MigrationService is separate from API projects. |
-| Technology Standards | ⚠️ DEVIATION | .NET 10 vs constitution's ".NET 8+" — compliant (10 ≥ 8). Expo vs "React Native" — Expo is a React Native framework. Node 22 vs "20+" — compliant. All within bounds. |
+| Technology Standards | ✅ PASS | .NET 10 ≥ constitution's ".NET 8+". React Native (Expo) matches constitution v1.0.1. Node 22 ≥ 20+. All standards met. |
 
 **POST-DESIGN GATE RESULT**: PASS — All principles satisfied. Design artifacts are constitution-compliant.
 
