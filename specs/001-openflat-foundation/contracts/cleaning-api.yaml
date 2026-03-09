@@ -1,0 +1,553 @@
+openapi: 3.1.0
+info:
+  title: OpenFlat Cleaning API
+  version: 1.0.0
+  description: |
+    REST API for the Cleaning Board module (gamified Kanban).
+    Manages tasks, task assignments, points, and task comments.
+    Real-time updates via SignalR hub at /hubs/cleaning.
+
+servers:
+  - url: https+http://cleaning-api
+    description: Aspire service discovery endpoint
+
+paths:
+  /api/tasks:
+    get:
+      operationId: listTasks
+      summary: List all tasks grouped by status
+      description: Returns all cleaning tasks. Client groups by status for Kanban columns.
+      parameters:
+        - name: X-User-Id
+          in: header
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 5
+          description: Current user ID (1–5)
+      responses:
+        '200':
+          description: All tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TaskDto'
+
+    post:
+      operationId: createTask
+      summary: Create a new task
+      description: Creates a task in the "To Do" column (FR-014).
+      parameters:
+        - name: X-User-Id
+          in: header
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTaskRequest'
+      responses:
+        '201':
+          description: Task created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskDto'
+        '400':
+          description: Validation error (empty title, negative points)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+
+  /api/tasks/{taskId}:
+    parameters:
+      - name: taskId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+
+    get:
+      operationId: getTask
+      summary: Get a single task with comments
+      parameters:
+        - name: X-User-Id
+          in: header
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Task with comments
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskDetailDto'
+        '404':
+          description: Task not found
+
+    put:
+      operationId: updateTask
+      summary: Update task title and/or points
+      description: |
+        Edit a task's title and point value (FR-014a).
+        If task is in "Done" and points change, assigned user's score is recalculated.
+      parameters:
+        - name: X-User-Id
+          in: header
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTaskRequest'
+      responses:
+        '200':
+          description: Task updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskDto'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '404':
+          description: Task not found
+
+    delete:
+      operationId: deleteTask
+      summary: Delete a task
+      description: |
+        Delete a task (FR-014b). If task was in "Done", deduct points from assigned user.
+      parameters:
+        - name: X-User-Id
+          in: header
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Task deleted
+        '404':
+          description: Task not found
+
+  /api/tasks/{taskId}/move:
+    parameters:
+      - name: taskId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+
+    post:
+      operationId: moveTask
+      summary: Move task to a different column
+      description: |
+        Moves a task card between Kanban columns (FR-009, FR-012, FR-013, FR-015).
+        Handles point crediting/deducting and sort order updates.
+        Broadcasts via SignalR CleaningHub.
+      parameters:
+        - name: X-User-Id
+          in: header
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MoveTaskRequest'
+      responses:
+        '200':
+          description: Task moved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MoveTaskResponse'
+        '404':
+          description: Task not found
+
+  /api/tasks/{taskId}/assign:
+    parameters:
+      - name: taskId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+
+    post:
+      operationId: assignTask
+      summary: Assign or unassign a user to a task
+      description: Assign one of the 5 predefined users or unassign (FR-010).
+      parameters:
+        - name: X-User-Id
+          in: header
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignTaskRequest'
+      responses:
+        '200':
+          description: Assignment updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskDto'
+        '400':
+          description: Invalid user ID
+        '404':
+          description: Task not found
+
+  /api/tasks/{taskId}/comments:
+    parameters:
+      - name: taskId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+
+    get:
+      operationId: listTaskComments
+      summary: List comments for a task
+      parameters:
+        - name: X-User-Id
+          in: header
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Comments in chronological order
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CommentDto'
+        '404':
+          description: Task not found
+
+    post:
+      operationId: addTaskComment
+      summary: Add a comment to a task
+      description: Creates a comment on a task card (FR-025).
+      parameters:
+        - name: X-User-Id
+          in: header
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCommentRequest'
+      responses:
+        '201':
+          description: Comment created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentDto'
+        '400':
+          description: Empty comment text (FR-032)
+        '404':
+          description: Task not found
+
+  /api/tasks/{taskId}/comments/{commentId}:
+    parameters:
+      - name: taskId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: commentId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+
+    put:
+      operationId: updateTaskComment
+      summary: Edit own comment
+      description: Only the author can edit (FR-027, FR-028).
+      parameters:
+        - name: X-User-Id
+          in: header
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCommentRequest'
+      responses:
+        '200':
+          description: Comment updated, isEdited set to true (FR-029)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentDto'
+        '400':
+          description: Empty comment text
+        '403':
+          description: Not the author
+        '404':
+          description: Comment not found
+
+    delete:
+      operationId: deleteTaskComment
+      summary: Delete own comment
+      description: Only the author can delete (FR-027, FR-028).
+      parameters:
+        - name: X-User-Id
+          in: header
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Comment deleted
+        '403':
+          description: Not the author
+        '404':
+          description: Comment not found
+
+  /api/leaderboard:
+    get:
+      operationId: getLeaderboard
+      summary: Get points leaderboard
+      description: |
+        Returns total points for each of the 5 users, sorted descending (FR-006a, FR-006b).
+        Points are calculated from tasks in the "Done" column with an assigned user.
+      responses:
+        '200':
+          description: Leaderboard
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LeaderboardEntryDto'
+
+components:
+  schemas:
+    TaskDto:
+      type: object
+      required: [id, title, points, status, sortOrder, createdByUserId, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          maxLength: 200
+        points:
+          type: integer
+          minimum: 0
+        status:
+          type: string
+          enum: [todo, in_progress, awaiting_review, done]
+        assignedUserId:
+          type: integer
+          nullable: true
+          minimum: 1
+          maximum: 5
+        assignedUserName:
+          type: string
+          nullable: true
+        sortOrder:
+          type: integer
+        createdByUserId:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        commentCount:
+          type: integer
+          description: Number of comments on this task
+
+    TaskDetailDto:
+      allOf:
+        - $ref: '#/components/schemas/TaskDto'
+        - type: object
+          properties:
+            comments:
+              type: array
+              items:
+                $ref: '#/components/schemas/CommentDto'
+
+    CreateTaskRequest:
+      type: object
+      required: [title, points]
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        points:
+          type: integer
+          minimum: 0
+
+    UpdateTaskRequest:
+      type: object
+      required: [title, points]
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        points:
+          type: integer
+          minimum: 0
+
+    MoveTaskRequest:
+      type: object
+      required: [targetStatus, targetSortOrder]
+      properties:
+        targetStatus:
+          type: string
+          enum: [todo, in_progress, awaiting_review, done]
+        targetSortOrder:
+          type: integer
+          minimum: 0
+          description: Position in the target column
+
+    MoveTaskResponse:
+      type: object
+      required: [task, pointsDelta]
+      properties:
+        task:
+          $ref: '#/components/schemas/TaskDto'
+        pointsDelta:
+          type: integer
+          description: Points credited (+) or deducted (-). Zero if no assignee.
+        warningNoAssignee:
+          type: boolean
+          description: True if moved to Done without an assignee (FR-015)
+
+    AssignTaskRequest:
+      type: object
+      properties:
+        assignedUserId:
+          type: integer
+          nullable: true
+          minimum: 1
+          maximum: 5
+          description: User ID to assign, or null to unassign
+
+    CommentDto:
+      type: object
+      required: [id, userId, userName, text, isEdited, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: integer
+        userName:
+          type: string
+        text:
+          type: string
+        isEdited:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateCommentRequest:
+      type: object
+      required: [text]
+      properties:
+        text:
+          type: string
+          minLength: 1
+          maxLength: 2000
+
+    UpdateCommentRequest:
+      type: object
+      required: [text]
+      properties:
+        text:
+          type: string
+          minLength: 1
+          maxLength: 2000
+
+    LeaderboardEntryDto:
+      type: object
+      required: [userId, userName, role, totalPoints]
+      properties:
+        userId:
+          type: integer
+        userName:
+          type: string
+        role:
+          type: string
+          enum: [Coordinator, Resident]
+        totalPoints:
+          type: integer
+
+    ProblemDetails:
+      type: object
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+
+  # SignalR Hub (not REST — documented here for completeness)
+  # Hub URL: /hubs/cleaning
+  # Client methods:
+  #   TaskCreated(TaskDto task)
+  #   TaskUpdated(TaskDto task)
+  #   TaskDeleted(Guid taskId)
+  #   TaskMoved(MoveTaskResponse response)
+  #   TaskAssigned(TaskDto task)
+  #   CommentAdded(Guid taskId, CommentDto comment)
+  #   CommentUpdated(Guid taskId, CommentDto comment)
+  #   CommentDeleted(Guid taskId, Guid commentId)
+  #   LeaderboardUpdated(LeaderboardEntryDto[] leaderboard)
