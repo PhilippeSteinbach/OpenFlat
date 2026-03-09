@@ -1,7 +1,8 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
-// PostgreSQL with persistent volume
-var postgres = builder.AddPostgres("postgres")
+// PostgreSQL with persistent volume — pinned password avoids mismatch on restart
+var pgPassword = builder.AddParameter("pg-password", secret: true);
+var postgres = builder.AddPostgres("postgres", password: pgPassword)
     .WithDataVolume()
     .WithLifetime(ContainerLifetime.Persistent);
 
