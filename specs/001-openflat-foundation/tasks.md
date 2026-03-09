@@ -19,12 +19,12 @@
 
 **Purpose**: Create solution structure, Aspire orchestration projects, and initialize web + mobile app scaffolding
 
-- [ ] T001 Create .NET solution file with all project directories per plan.md structure in OpenFlat.sln
-- [ ] T002 [P] Create OpenFlat.AppHost project with Aspire SDK 13.1 in OpenFlat.AppHost/OpenFlat.AppHost.csproj
-- [ ] T003 [P] Create OpenFlat.ServiceDefaults project with health checks and telemetry extensions in OpenFlat.ServiceDefaults/Extensions.cs
-- [ ] T004 [P] Create OpenFlat.Shared project with PredefinedUsers constants and UserInfo record in backend/OpenFlat.Shared/Users/PredefinedUsers.cs
-- [ ] T005 [P] Initialize React 19 frontend with Vite, TypeScript, Tailwind CSS 3.4, ESLint, and Prettier in frontend/
-- [ ] T006 [P] Initialize Expo SDK 52+ app with TypeScript, Expo Router v4, and NativeWind v4 in mobile/
+- [X] T001 Create .NET solution file with all project directories per plan.md structure in OpenFlat.sln
+- [X] T002 [P] Create OpenFlat.AppHost project with Aspire SDK 13.1 in OpenFlat.AppHost/OpenFlat.AppHost.csproj
+- [X] T003 [P] Create OpenFlat.ServiceDefaults project with health checks and telemetry extensions in OpenFlat.ServiceDefaults/Extensions.cs
+- [X] T004 [P] Create OpenFlat.Shared project with PredefinedUsers constants and UserInfo record in backend/OpenFlat.Shared/Users/PredefinedUsers.cs
+- [X] T005 [P] Initialize React 19 frontend with Vite, TypeScript, Tailwind CSS 3.4, ESLint, and Prettier in frontend/
+- [X] T006 [P] Initialize Expo SDK 52+ app with TypeScript, Expo Router v4, and NativeWind v4 in mobile/
 
 ---
 
@@ -34,22 +34,22 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T007 [P] Create OpenFlat.Cleaning.Api project with CleaningDbContext, CleaningTask + CleaningComment entities, and Program.cs in backend/OpenFlat.Cleaning.Api/
-- [ ] T008 [P] Create OpenFlat.Shopping.Api project with ShoppingDbContext, ShoppingItem + ShoppingComment entities, and Program.cs in backend/OpenFlat.Shopping.Api/
-- [ ] T009 [P] Create OpenFlat.Finance.Api project with FinanceDbContext, Expense entity, and Program.cs in backend/OpenFlat.Finance.Api/
-- [ ] T010 Create OpenFlat.MigrationService with MigrationWorker that runs all 3 DbContext migrations and seeds sample data in OpenFlat.MigrationService/
-- [ ] T011 Configure AppHost to orchestrate PostgreSQL, MigrationService, 3 APIs, and Vite frontend in OpenFlat.AppHost/Program.cs
-- [ ] T011a [P] Create test projects (OpenFlat.Cleaning.Tests, OpenFlat.Shopping.Tests, OpenFlat.Finance.Tests, OpenFlat.Integration.Tests) with xUnit, FluentAssertions, Testcontainers, and WebApplicationFactory in backend/tests/
-- [ ] T011b [P] Configure Vitest + React Testing Library in frontend/tests/unit/ and Playwright in frontend/tests/e2e/
-- [ ] T011c [P] Configure Jest + React Native Testing Library in mobile/__tests__/
-- [ ] T011d [P] Create CI pipeline (GitHub Actions) with lint, format, unit tests, integration tests, contract tests, build, bundle size check, and code coverage gates per constitution Quality Gates table in .github/workflows/ci.yml
-- [ ] T012 [P] Create shared locale files with common UI strings (en.json, de.json) in shared/locales/
-- [ ] T013 [P] Create shared UI primitives (Button, Card, Input, Modal, EmptyState) in frontend/src/shared/components/
-- [ ] T014 [P] Setup React Router app shell with root layout and route definitions in frontend/src/app/
-- [ ] T015 [P] Configure TanStack Query v5 provider and API client wrappers per service in frontend/src/shared/api/
-- [ ] T016 [P] Create Zustand v5 current-user store, useSignalR hook, and i18next config in frontend/src/shared/
-- [ ] T017 [P] Setup Expo root layout with stack navigator, tab navigator scaffold, and i18n config in mobile/app/ and mobile/shared/i18n/
-- [ ] T018 [P] Configure mobile API client wrappers, Zustand user store, and SignalR hook in mobile/shared/
+- [X] T007 [P] Create OpenFlat.Cleaning.Api project with CleaningDbContext, CleaningTask + CleaningComment entities, and Program.cs in backend/OpenFlat.Cleaning.Api/
+- [X] T008 [P] Create OpenFlat.Shopping.Api project with ShoppingDbContext, ShoppingItem + ShoppingComment entities, and Program.cs in backend/OpenFlat.Shopping.Api/
+- [X] T009 [P] Create OpenFlat.Finance.Api project with FinanceDbContext, Expense entity, and Program.cs in backend/OpenFlat.Finance.Api/
+- [X] T010 Create OpenFlat.MigrationService with MigrationWorker that runs all 3 DbContext migrations and seeds sample data in OpenFlat.MigrationService/
+- [X] T011 Configure AppHost to orchestrate PostgreSQL, MigrationService, 3 APIs, and Vite frontend in OpenFlat.AppHost/Program.cs
+- [X] T011a [P] Create test projects (OpenFlat.Cleaning.Tests, OpenFlat.Shopping.Tests, OpenFlat.Finance.Tests, OpenFlat.Integration.Tests) with xUnit, FluentAssertions, Testcontainers, and WebApplicationFactory in backend/tests/
+- [X] T011b [P] Configure Vitest + React Testing Library in frontend/tests/unit/ and Playwright in frontend/tests/e2e/
+- [X] T011c [P] Configure Jest + React Native Testing Library in mobile/__tests__/
+- [X] T011d [P] Create CI pipeline (GitHub Actions) with lint, format, unit tests, integration tests, contract tests, build, bundle size check, and code coverage gates per constitution Quality Gates table in .github/workflows/ci.yml
+- [X] T012 [P] Create shared locale files with common UI strings (en.json, de.json) in shared/locales/
+- [X] T013 [P] Create shared UI primitives (Button, Card, Input, Modal, EmptyState) in frontend/src/shared/components/
+- [X] T014 [P] Setup React Router app shell with root layout and route definitions in frontend/src/app/
+- [X] T015 [P] Configure TanStack Query v5 provider and API client wrappers per service in frontend/src/shared/api/
+- [X] T016 [P] Create Zustand v5 current-user store, useSignalR hook, and i18next config in frontend/src/shared/
+- [X] T017 [P] Setup Expo root layout with stack navigator, tab navigator scaffold, and i18n config in mobile/app/ and mobile/shared/i18n/
+- [X] T018 [P] Configure mobile API client wrappers, Zustand user store, and SignalR hook in mobile/shared/
 
 **Checkpoint**: All services start via `dotnet run` in AppHost. Frontend and mobile render empty shells. Database migrated with seed data.
 
