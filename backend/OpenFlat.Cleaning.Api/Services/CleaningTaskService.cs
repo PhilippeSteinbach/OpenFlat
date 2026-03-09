@@ -6,12 +6,18 @@ namespace OpenFlat.Cleaning.Api.Services;
 
 public class CleaningTaskService(CleaningDbContext db)
 {
+    /// <summary>
+    /// List all tasks sorted by urgency:
+    /// active first (overdue → due soon → no deadline), then completed.
+    /// </summary>
     public async Task<List<CleaningTask>> ListAsync(CancellationToken ct = default)
     {
         return await db.Tasks
             .Include(t => t.Comments)
-            .OrderBy(t => t.Status)
-            .ThenBy(t => t.SortOrder)
+            .OrderBy(t => t.IsDone)
+            .ThenBy(t => t.DueDate == null)
+            .ThenBy(t => t.DueDate)
+            .ThenByDescending(t => t.CreatedAt)
             .AsNoTracking()
             .ToListAsync(ct);
     }
@@ -23,7 +29,7 @@ public class CleaningTaskService(CleaningDbContext db)
             .FirstOrDefaultAsync(t => t.Id == id, ct);
     }
 
-    public async Task<CleaningTask> CreateAsync(string title, int points, int createdByUserId, CancellationToken ct = default)
+    public async Task<CleaningTask> CreateAsync(string title, int points, int createdByUserId, DateOnly? dueDate = null, int? assignedUserId = null, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(title))
             throw new ValidationException("Title is required.");
@@ -31,17 +37,16 @@ public class CleaningTaskService(CleaningDbContext db)
             throw new ValidationException("Points must be non-negative.");
         if (!PredefinedUsers.IsValid(createdByUserId))
             throw new ValidationException("Invalid user ID.");
-
-        var maxSort = await db.Tasks
-            .Where(t => t.Status == CleaningTaskStatus.Todo)
-            .MaxAsync(t => (int?)t.SortOrder, ct) ?? -1;
+        if (assignedUserId.HasValue && !PredefinedUsers.IsValid(assignedUserId.Value))
+            throw new ValidationException("Invalid assigned user ID.");
 
         var task = new CleaningTask
         {
             Title = title.Trim(),
             Points = points,
-            Status = CleaningTaskStatus.Todo,
-            SortOrder = maxSort + 1,
+            IsDone = false,
+            DueDate = dueDate,
+            AssignedUserId = assignedUserId,
             CreatedByUserId = createdByUserId,
             CreatedAt = DateTimeOffset.UtcNow,
             UpdatedAt = DateTimeOffset.UtcNow,
@@ -52,7 +57,11 @@ public class CleaningTaskService(CleaningDbContext db)
         return task;
     }
 
-    public async Task<CleaningTask> UpdateAsync(Guid id, string title, int points, CancellationToken ct = default)
+    /// <summary>
+    /// Update task title, points, and due date.
+    /// FR-014a: If the task is done and points change, recalculate delta.
+    /// </summary>
+    public async Task<(CleaningTask Task, int PointsDelta)> UpdateAsync(Guid id, string title, int points, DateOnly? dueDate, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(title))
             throw new ValidationException("Title is required.");
@@ -62,12 +71,20 @@ public class CleaningTaskService(CleaningDbContext db)
         var task = await db.Tasks.FindAsync([id], ct)
             ?? throw new NotFoundException("Task not found.");
 
+        // FR-014a: If task is done and points change, compute delta
+        var pointsDelta = 0;
+        if (task.IsDone && task.AssignedUserId.HasValue && task.Points != points)
+        {
+            pointsDelta = points - task.Points;
+        }
+
         task.Title = title.Trim();
         task.Points = points;
+        task.DueDate = dueDate;
         task.UpdatedAt = DateTimeOffset.UtcNow;
 
         await db.SaveChangesAsync(ct);
-        return task;
+        return (task, pointsDelta);
     }
 
     public async Task<(CleaningTask Task, int PointsDelta)> DeleteAsync(Guid id, CancellationToken ct = default)
@@ -75,9 +92,9 @@ public class CleaningTaskService(CleaningDbContext db)
         var task = await db.Tasks.FindAsync([id], ct)
             ?? throw new NotFoundException("Task not found.");
 
-        // FR-014b: If the deleted task was in Done column, deduct points
+        // FR-014b: If the deleted task was done, deduct points
         var pointsDelta = 0;
-        if (task.Status == CleaningTaskStatus.Done && task.AssignedUserId.HasValue)
+        if (task.IsDone && task.AssignedUserId.HasValue)
         {
             pointsDelta = -task.Points;
         }
@@ -88,23 +105,33 @@ public class CleaningTaskService(CleaningDbContext db)
     }
 
     /// <summary>
-    /// Move task to a target column and position.
-    /// Handles point crediting (→Done) and deducting (Done→elsewhere).
+    /// Toggle task done/undone state.
+    /// Handles point crediting (undone→done) and deducting (done→undone).
     /// FR-009, FR-012, FR-013, FR-015
     /// </summary>
-    public async Task<MoveResult> MoveAsync(Guid id, CleaningTaskStatus targetStatus, int targetSortOrder, CancellationToken ct = default)
+    public async Task<CompleteResult> CompleteAsync(Guid id, CancellationToken ct = default)
     {
         var task = await db.Tasks.FindAsync([id], ct)
             ?? throw new NotFoundException("Task not found.");
 
-        var previousStatus = task.Status;
         var pointsDelta = 0;
         var warningNoAssignee = false;
 
-        // Calculate points delta
-        if (targetStatus == CleaningTaskStatus.Done && previousStatus != CleaningTaskStatus.Done)
+        if (task.IsDone)
         {
-            // Moving to Done — credit points if assigned (FR-012)
+            // Undoing completion — deduct points (FR-013)
+            task.IsDone = false;
+            task.CompletedAt = null;
+            if (task.AssignedUserId.HasValue)
+            {
+                pointsDelta = -task.Points;
+            }
+        }
+        else
+        {
+            // Marking done — credit points (FR-012)
+            task.IsDone = true;
+            task.CompletedAt = DateTimeOffset.UtcNow;
             if (task.AssignedUserId.HasValue)
             {
                 pointsDelta = task.Points;
@@ -114,31 +141,11 @@ public class CleaningTaskService(CleaningDbContext db)
                 warningNoAssignee = true; // FR-015
             }
         }
-        else if (previousStatus == CleaningTaskStatus.Done && targetStatus != CleaningTaskStatus.Done)
-        {
-            // Moving out of Done — deduct points if assigned (FR-013)
-            if (task.AssignedUserId.HasValue)
-            {
-                pointsDelta = -task.Points;
-            }
-        }
 
-        // Shift sort orders in target column to make room
-        var tasksToShift = await db.Tasks
-            .Where(t => t.Status == targetStatus && t.SortOrder >= targetSortOrder && t.Id != task.Id)
-            .ToListAsync(ct);
-        foreach (var t in tasksToShift)
-        {
-            t.SortOrder += 1;
-        }
-
-        task.Status = targetStatus;
-        task.SortOrder = targetSortOrder;
         task.UpdatedAt = DateTimeOffset.UtcNow;
-
         await db.SaveChangesAsync(ct);
 
-        return new MoveResult(task, pointsDelta, warningNoAssignee);
+        return new CompleteResult(task, pointsDelta, warningNoAssignee);
     }
 
     /// <summary>
@@ -221,7 +228,7 @@ public class CleaningTaskService(CleaningDbContext db)
     }
 }
 
-public record MoveResult(CleaningTask Task, int PointsDelta, bool WarningNoAssignee);
+public record CompleteResult(CleaningTask Task, int PointsDelta, bool WarningNoAssignee);
 
 public class ValidationException(string message) : Exception(message);
 public class NotFoundException(string message) : Exception(message);

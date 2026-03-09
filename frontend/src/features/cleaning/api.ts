@@ -6,8 +6,7 @@ import type {
   CommentDto,
   CreateTaskRequest,
   UpdateTaskRequest,
-  MoveTaskRequest,
-  MoveTaskResponse,
+  CompleteTaskResponse,
   AssignTaskRequest,
   CreateCommentRequest,
   LeaderboardEntry,
@@ -87,11 +86,11 @@ export function useDeleteTaskMutation() {
   });
 }
 
-export function useMoveTaskMutation() {
+export function useCompleteTaskMutation() {
   const queryClient = useQueryClient();
-  return useMutation<MoveTaskResponse, Error, { taskId: string; req: MoveTaskRequest }>({
-    mutationFn: ({ taskId, req }) =>
-      cleaningApi.post<MoveTaskResponse>(`/tasks/${taskId}/move`, req, headers()),
+  return useMutation<CompleteTaskResponse, Error, string>({
+    mutationFn: (taskId) =>
+      cleaningApi.post<CompleteTaskResponse>(`/tasks/${taskId}/complete`, {}, headers()),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cleaning'] });
     },

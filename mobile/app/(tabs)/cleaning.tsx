@@ -186,7 +186,7 @@ export default function CleaningScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>🧹 {t('cleaning.title', 'Cleaning Board')}</Text>
+        <Text style={styles.headerTitle}>🧹 {t('cleaning.title', 'Cleaning')}</Text>
         <TouchableOpacity
           style={styles.createButton}
           onPress={() => setCreateModalOpen(true)}

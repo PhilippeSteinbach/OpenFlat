@@ -39,10 +39,10 @@ public class LeaderboardServiceTests : IDisposable
     [Fact]
     public async Task GetLeaderboardAsync_DoneTask_CountsPoints()
     {
-        // Create task, assign to user 1, move to Done
+        // Create task, assign to user 1, mark done
         var task = await _taskService.CreateAsync("Clean kitchen", 15, 1);
         await _taskService.AssignAsync(task.Id, 1);
-        await _taskService.MoveAsync(task.Id, CleaningTaskStatus.Done, 0);
+        await _taskService.CompleteAsync(task.Id);
 
         var leaderboard = await _leaderboardService.GetLeaderboardAsync();
 
@@ -69,12 +69,12 @@ public class LeaderboardServiceTests : IDisposable
         // User 3 gets 20 points
         var t1 = await _taskService.CreateAsync("Task A", 20, 1);
         await _taskService.AssignAsync(t1.Id, 3);
-        await _taskService.MoveAsync(t1.Id, CleaningTaskStatus.Done, 0);
+        await _taskService.CompleteAsync(t1.Id);
 
         // User 1 gets 10 points
         var t2 = await _taskService.CreateAsync("Task B", 10, 1);
         await _taskService.AssignAsync(t2.Id, 1);
-        await _taskService.MoveAsync(t2.Id, CleaningTaskStatus.Done, 1);
+        await _taskService.CompleteAsync(t2.Id);
 
         var leaderboard = await _leaderboardService.GetLeaderboardAsync();
 
@@ -89,11 +89,11 @@ public class LeaderboardServiceTests : IDisposable
     {
         var t1 = await _taskService.CreateAsync("Task 1", 10, 1);
         await _taskService.AssignAsync(t1.Id, 2);
-        await _taskService.MoveAsync(t1.Id, CleaningTaskStatus.Done, 0);
+        await _taskService.CompleteAsync(t1.Id);
 
         var t2 = await _taskService.CreateAsync("Task 2", 25, 1);
         await _taskService.AssignAsync(t2.Id, 2);
-        await _taskService.MoveAsync(t2.Id, CleaningTaskStatus.Done, 1);
+        await _taskService.CompleteAsync(t2.Id);
 
         var leaderboard = await _leaderboardService.GetLeaderboardAsync();
 
@@ -104,9 +104,9 @@ public class LeaderboardServiceTests : IDisposable
     [Fact]
     public async Task GetLeaderboardAsync_UnassignedDoneTask_NotCounted()
     {
-        // Create task, move to Done without assigning
+        // Create task, mark done without assigning
         var task = await _taskService.CreateAsync("Unassigned", 10, 1);
-        await _taskService.MoveAsync(task.Id, CleaningTaskStatus.Done, 0);
+        await _taskService.CompleteAsync(task.Id);
 
         var leaderboard = await _leaderboardService.GetLeaderboardAsync();
 

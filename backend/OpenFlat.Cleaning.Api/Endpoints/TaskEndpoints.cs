@@ -17,7 +17,7 @@ public static class TaskEndpoints
         group.MapGet("/{taskId:guid}", GetTask);
         group.MapPut("/{taskId:guid}", UpdateTask);
         group.MapDelete("/{taskId:guid}", DeleteTask);
-        group.MapPost("/{taskId:guid}/move", MoveTask);
+        group.MapPost("/{taskId:guid}/complete", CompleteTask);
         group.MapPost("/{taskId:guid}/assign", AssignTask);
 
         // ── Comment endpoints ──────────────────────
@@ -45,33 +45,16 @@ public static class TaskEndpoints
             task.Id,
             task.Title,
             task.Points,
-            StatusToString(task.Status),
+            task.IsDone,
+            task.DueDate?.ToString("yyyy-MM-dd"),
+            task.CompletedAt,
             task.AssignedUserId,
             assignedUser?.Name,
-            task.SortOrder,
             task.CreatedByUserId,
             task.CreatedAt,
             task.UpdatedAt,
             task.Comments?.Count ?? 0);
     }
-
-    private static string StatusToString(CleaningTaskStatus status) => status switch
-    {
-        CleaningTaskStatus.Todo => "todo",
-        CleaningTaskStatus.InProgress => "in_progress",
-        CleaningTaskStatus.AwaitingReview => "awaiting_review",
-        CleaningTaskStatus.Done => "done",
-        _ => "todo",
-    };
-
-    internal static CleaningTaskStatus StatusFromString(string status) => status switch
-    {
-        "todo" => CleaningTaskStatus.Todo,
-        "in_progress" => CleaningTaskStatus.InProgress,
-        "awaiting_review" => CleaningTaskStatus.AwaitingReview,
-        "done" => CleaningTaskStatus.Done,
-        _ => throw new ValidationException($"Invalid status: {status}"),
-    };
 
     // GET /api/tasks
     private static async Task<IResult> ListTasks(
@@ -92,7 +75,8 @@ public static class TaskEndpoints
         LeaderboardService leaderboardSvc)
     {
         var userId = GetUserId(ctx);
-        var task = await svc.CreateAsync(req.Title, req.Points, userId);
+        DateOnly? dueDate = req.DueDate is not null ? DateOnly.Parse(req.DueDate) : null;
+        var task = await svc.CreateAsync(req.Title, req.Points, userId, dueDate, req.AssignedUserId);
         var dto = ToDto(task);
         await hub.Clients.All.SendAsync("TaskCreated", dto);
         return Results.Created($"/api/tasks/{task.Id}", dto);
@@ -131,12 +115,13 @@ public static class TaskEndpoints
         LeaderboardService leaderboardSvc)
     {
         GetUserId(ctx);
-        var task = await svc.UpdateAsync(taskId, req.Title, req.Points);
+        DateOnly? dueDate = req.DueDate is not null ? DateOnly.Parse(req.DueDate) : null;
+        var (task, pointsDelta) = await svc.UpdateAsync(taskId, req.Title, req.Points, dueDate);
         var dto = ToDto(task);
         await hub.Clients.All.SendAsync("TaskUpdated", dto);
 
-        // If task in Done, points may have changed — update leaderboard
-        if (task.Status == CleaningTaskStatus.Done)
+        // FR-014a: If points changed on a done task, update leaderboard
+        if (pointsDelta != 0)
         {
             var leaderboard = await leaderboardSvc.GetLeaderboardAsync();
             await hub.Clients.All.SendAsync("LeaderboardUpdated", leaderboard);
@@ -166,22 +151,21 @@ public static class TaskEndpoints
         return Results.NoContent();
     }
 
-    // POST /api/tasks/{taskId}/move
-    private static async Task<IResult> MoveTask(
+    // POST /api/tasks/{taskId}/complete
+    private static async Task<IResult> CompleteTask(
         HttpContext ctx,
         Guid taskId,
-        MoveTaskRequest req,
         CleaningTaskService svc,
         IHubContext<CleaningHub> hub,
         LeaderboardService leaderboardSvc)
     {
         GetUserId(ctx);
-        var targetStatus = StatusFromString(req.TargetStatus);
-        var result = await svc.MoveAsync(taskId, targetStatus, req.TargetSortOrder);
+        var result = await svc.CompleteAsync(taskId);
         var dto = ToDto(result.Task);
-        var response = new MoveTaskResponseDto(dto, result.PointsDelta, result.WarningNoAssignee);
+        var response = new CompleteTaskResponseDto(dto, result.PointsDelta, result.WarningNoAssignee);
 
-        await hub.Clients.All.SendAsync("TaskMoved", response);
+        var eventName = result.Task.IsDone ? "TaskCompleted" : "TaskUncompleted";
+        await hub.Clients.All.SendAsync(eventName, response);
 
         if (result.PointsDelta != 0)
         {
@@ -281,19 +265,19 @@ public static class TaskEndpoints
 }
 
 // Request/Response DTOs
-public record CreateTaskRequest(string Title, int Points);
-public record UpdateTaskRequest(string Title, int Points);
-public record MoveTaskRequest(string TargetStatus, int TargetSortOrder);
+public record CreateTaskRequest(string Title, int Points, string? DueDate = null, int? AssignedUserId = null);
+public record UpdateTaskRequest(string Title, int Points, string? DueDate = null);
 public record AssignTaskRequest(int? AssignedUserId);
 
 public record TaskDto(
     Guid Id,
     string Title,
     int Points,
-    string Status,
+    bool IsDone,
+    string? DueDate,
+    DateTimeOffset? CompletedAt,
     int? AssignedUserId,
     string? AssignedUserName,
-    int SortOrder,
     int CreatedByUserId,
     DateTimeOffset CreatedAt,
     DateTimeOffset UpdatedAt,
@@ -305,10 +289,11 @@ public record TaskDetailDto(TaskDto Task, List<CommentDto> Comments)
     public Guid Id => Task.Id;
     public string Title => Task.Title;
     public int Points => Task.Points;
-    public string Status => Task.Status;
+    public bool IsDone => Task.IsDone;
+    public string? DueDate => Task.DueDate;
+    public DateTimeOffset? CompletedAt => Task.CompletedAt;
     public int? AssignedUserId => Task.AssignedUserId;
     public string? AssignedUserName => Task.AssignedUserName;
-    public int SortOrder => Task.SortOrder;
     public int CreatedByUserId => Task.CreatedByUserId;
     public DateTimeOffset CreatedAt => Task.CreatedAt;
     public DateTimeOffset UpdatedAt => Task.UpdatedAt;
@@ -324,7 +309,7 @@ public record CommentDto(
     DateTimeOffset CreatedAt,
     DateTimeOffset UpdatedAt);
 
-public record MoveTaskResponseDto(TaskDto Task, int PointsDelta, bool WarningNoAssignee);
+public record CompleteTaskResponseDto(TaskDto Task, int PointsDelta, bool WarningNoAssignee);
 
 public record CreateCommentRequest(string Text);
 public record UpdateCommentRequest(string Text);

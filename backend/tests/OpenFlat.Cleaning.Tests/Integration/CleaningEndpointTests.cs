@@ -61,7 +61,7 @@ public class CleaningEndpointTests : IClassFixture<CleaningApiFactory>
         json.GetProperty("id").GetGuid().Should().NotBeEmpty();
         json.GetProperty("title").GetString().Should().Be("New Task");
         json.GetProperty("points").GetInt32().Should().Be(5);
-        json.GetProperty("status").GetString().Should().Be("todo");
+        json.GetProperty("isDone").GetBoolean().Should().BeFalse();
         json.GetProperty("commentCount").GetInt32().Should().Be(0);
     }
 
@@ -116,14 +116,13 @@ public class CleaningEndpointTests : IClassFixture<CleaningApiFactory>
     }
 
     [Fact]
-    public async Task MoveTask_ChangesStatus()
+    public async Task CompleteTask_TogglesDoneState()
     {
-        var taskId = await CreateTaskAsync("Movable");
-        var response = await _client.PostAsJsonAsync($"/api/tasks/{taskId}/move",
-            new { TargetStatus = "in_progress", TargetSortOrder = 0 });
+        var taskId = await CreateTaskAsync("Completable");
+        var response = await _client.PostAsJsonAsync($"/api/tasks/{taskId}/complete", new { });
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var json = await ReadJsonAsync(response);
-        json.GetProperty("task").GetProperty("status").GetString().Should().Be("in_progress");
+        json.GetProperty("task").GetProperty("isDone").GetBoolean().Should().BeTrue();
     }
 
     [Fact]

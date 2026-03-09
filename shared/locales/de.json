@@ -39,11 +39,20 @@
   },
   "cleaning": {
     "title": "Putzplan",
-    "columns": {
-      "todo": "Offen",
-      "inProgress": "In Arbeit",
-      "awaitingReview": "Wartet auf Prüfung",
-      "done": "Erledigt"
+    "sections": {
+      "active": "Aktiv",
+      "completed": "Erledigt"
+    },
+    "emptyState": {
+      "title": "Noch keine Aufgaben",
+      "description": "Erstelle deine erste Putzaufgabe, um loszulegen!"
+    },
+    "deadline": {
+      "overdue_one": "{{count}}T überfällig",
+      "overdue_other": "{{count}}T überfällig",
+      "today": "Heute",
+      "daysLeft_one": "noch {{count}}T",
+      "daysLeft_other": "noch {{count}}T"
     },
     "task": {
       "create": "Aufgabe erstellen",
@@ -53,10 +62,16 @@
       "title": "Titel",
       "titlePlaceholder": "z. B. Wohnzimmer staubsaugen",
       "points": "Punkte",
+      "dueDate": "Fälligkeitsdatum",
       "assignee": "Zugewiesen an",
+      "assign": "Zuweisen",
       "unassigned": "Nicht zugewiesen",
       "unassignedWarning": "Kein Benutzer zugewiesen — es werden keine Punkte vergeben",
-      "youSuffix": " (du)"
+      "youSuffix": " (du)",
+      "markDone": "Als erledigt markieren",
+      "markUndone": "Als nicht erledigt markieren",
+      "done": "Erledigt",
+      "open": "Offen"
     },
     "signalr": {
       "connected": "Echtzeit verbunden",

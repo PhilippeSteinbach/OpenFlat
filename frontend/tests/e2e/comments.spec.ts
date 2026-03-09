@@ -13,9 +13,9 @@ test.describe('Comments', () => {
       await page.getByText('Alex').click();
       await expect(page.getByText(/hey, alex/i)).toBeVisible({ timeout: 5000 });
 
-      // Navigate to Cleaning Board and create a task
-      await page.getByRole('button', { name: 'Cleaning Board' }).click();
-      await expect(page.getByText('🧹 Cleaning Board')).toBeVisible({ timeout: 5000 });
+      // Navigate to Cleaning and create a task
+      await page.getByRole('button', { name: /Cleaning/i }).click();
+      await expect(page.getByRole('heading', { level: 1 })).toBeVisible({ timeout: 5000 });
 
       await page.getByRole('button', { name: /Create Task/i }).click();
       await page.getByLabel('Title').fill('Comment Test Task');
@@ -23,9 +23,8 @@ test.describe('Comments', () => {
       await page.getByRole('dialog').getByRole('button', { name: 'Create Task' }).click();
       await expect(page.getByText('Comment Test Task')).toBeVisible({ timeout: 5000 });
 
-      // Open task detail panel
-      const taskCard = page.getByRole('article', { name: /Comment Test Task/ });
-      await taskCard.getByRole('button', { name: /comment/i }).click();
+      // Open task detail panel by clicking the task text
+      await page.getByText('Comment Test Task').click();
       await expect(page.getByRole('dialog', { name: /Comment Test Task/i })).toBeVisible({
         timeout: 3000,
       });

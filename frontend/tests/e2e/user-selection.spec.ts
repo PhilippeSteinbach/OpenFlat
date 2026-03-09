@@ -42,7 +42,7 @@ test.describe('User Selection & Dashboard', () => {
     await expect(page.getByText(/hey, alex/i)).toBeVisible({ timeout: 5000 });
 
     // Dashboard should have 3 module navigation tiles
-    const cleaningTile = page.getByText(/cleaning board/i).or(page.getByText(/putzplan/i));
+    const cleaningTile = page.getByText(/cleaning/i).or(page.getByText(/putzplan/i));
     const shoppingTile = page.getByText(/shopping list/i).or(page.getByText(/einkaufsliste/i));
     const financeTile = page.getByText(/finance tracker/i).or(page.getByText(/finanzen/i));
 

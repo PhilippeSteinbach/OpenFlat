@@ -18,16 +18,13 @@ public class CleaningDbContext(DbContextOptions<CleaningDbContext> options) : Db
             e.Property(t => t.Id).HasDefaultValueSql("gen_random_uuid()");
             e.Property(t => t.Title).HasMaxLength(200).IsRequired();
             e.Property(t => t.Points).IsRequired();
-            e.Property(t => t.Status)
-                .HasConversion<string>()
-                .HasMaxLength(20)
-                .HasDefaultValue(CleaningTaskStatus.Todo);
-            e.Property(t => t.SortOrder).HasDefaultValue(0);
+            e.Property(t => t.IsDone).HasDefaultValue(false);
+            e.Property(t => t.DueDate);
+            e.Property(t => t.CompletedAt);
             e.Property(t => t.CreatedAt).HasDefaultValueSql("now()");
             e.Property(t => t.UpdatedAt).HasDefaultValueSql("now()");
 
-            e.HasIndex(t => t.Status).HasDatabaseName("ix_tasks_status");
-            e.HasIndex(t => new { t.Status, t.SortOrder }).HasDatabaseName("ix_tasks_status_sort");
+            e.HasIndex(t => new { t.IsDone, t.DueDate }).HasDatabaseName("ix_tasks_is_done_due_date");
             e.HasIndex(t => t.AssignedUserId)
                 .HasDatabaseName("ix_tasks_assigned_user_id")
                 .HasFilter("\"AssignedUserId\" IS NOT NULL");

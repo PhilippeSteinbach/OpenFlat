@@ -14,7 +14,7 @@ public class LeaderboardService(CleaningDbContext db)
     {
         // Get points per user from Done tasks
         var pointsByUser = await db.Tasks
-            .Where(t => t.Status == CleaningTaskStatus.Done && t.AssignedUserId != null)
+            .Where(t => t.IsDone && t.AssignedUserId != null)
             .GroupBy(t => t.AssignedUserId!.Value)
             .Select(g => new { UserId = g.Key, TotalPoints = g.Sum(t => t.Points) })
             .ToDictionaryAsync(x => x.UserId, x => x.TotalPoints, ct);

@@ -3,7 +3,7 @@
 **Feature Branch**: `001-openflat-foundation`
 **Created**: 2026-03-09
 **Status**: Draft
-**Input**: User description: "Develop OpenFlat Foundation — the initial testing phase of the household management platform with predefined users, user selection screen, Main Dashboard, Cleaning Board (gamified Kanban), Shopping List, Finance Tracker, and cross-module commenting."
+**Input**: User description: "Develop OpenFlat Foundation — the initial testing phase of the household management platform with predefined users, user selection screen, Main Dashboard, Cleaning Checklist (gamified checklist with due dates), Shopping List, Finance Tracker, and cross-module commenting."
 
 ## Assumptions
 
@@ -14,7 +14,7 @@
 - "Mobile-first UI" means the interface is optimized for smartphone viewports (≤ 428px width) but remains usable on tablet and desktop screens.
 - Currency for the Finance Tracker defaults to EUR (€). Multi-currency support is out of scope.
 - Real-time collaboration (multiple users editing simultaneously on different devices) is not required in this phase; the app is designed for one person acting at a time. However, SignalR keeps any open clients in sync for demo and testing convenience.
-- Drag-and-drop on the Cleaning Board must work with touch gestures on mobile devices.
+- The Cleaning Checklist follows the same checklist pattern as the Shopping List — tasks are toggled done/undone rather than moved through columns.
 
 ## Clarifications
 
@@ -40,28 +40,30 @@ A person opens OpenFlat for the first time and sees a selection screen listing f
 
 1. **Given** the app is launched, **When** the selection screen loads, **Then** exactly five users are displayed — two labeled "Coordinator" and three labeled "Resident" — each with a name and a distinguishable avatar or icon.
 2. **Given** the selection screen is visible, **When** a user taps on a name, **Then** the app navigates to the Main Dashboard and the header displays the selected user's name.
-3. **Given** a user is on the Main Dashboard, **When** they view the dashboard, **Then** three module tiles are visible: "Cleaning Board", "Shopping List", and "Finance Tracker", each tappable.
+3. **Given** a user is on the Main Dashboard, **When** they view the dashboard, **Then** three module tiles are visible: "Cleaning", "Shopping List", and "Finance Tracker", each tappable.
 4. **Given** a user is on the Main Dashboard, **When** they wish to switch users, **Then** they can navigate back to the selection screen and pick a different user.
 
 ---
 
-### User Story 2 — Cleaning Board (Gamified Kanban) (Priority: P2)
+### User Story 2 — Cleaning Checklist (Gamified Checklist) (Priority: P2)
 
-A user navigates to the Cleaning Board and sees a Kanban-style board with four columns: "To Do", "In Progress", "Awaiting Review", and "Done". Each task card shows a title, a point value, and the assigned user (if any). Users can drag and drop cards between columns. Users can assign any of the five household members to a task. Cards assigned to the currently selected user are visually highlighted. When a card is moved to "Done", the point value is added to the assigned user's total points.
+A user navigates to the Cleaning Checklist and sees a list of cleaning tasks displayed as checklist items (similar to the Shopping List pattern). Each item shows a title, a point value, the name of the responsible person (if assigned), and deadline information: the number of days remaining until the due date, or the number of days overdue (highlighted in red). Users can tap a checkbox to mark a task as done. Users can assign any of the five household members to a task. When a task is marked done, the point value is added to the assigned user's total points. Active (undone) tasks are sorted by urgency: overdue first, then due soonest, then no deadline. Completed tasks appear below.
 
-**Why this priority**: The Cleaning Board is the most interaction-rich module (drag-and-drop, gamification, assignment). Building it early validates the core interaction model and the point-scoring system.
+**Why this priority**: The Cleaning Checklist validates the gamification system (points, leaderboard) and the assignment/deadline model that distinguishes it from the simpler Shopping List.
 
-**Independent Test**: Navigate to the Cleaning Board, verify columns render, create or view a task, drag it across columns, assign a user, confirm point crediting when moved to "Done".
+**Independent Test**: Navigate to the Cleaning Checklist, verify tasks render with assignee names and deadline badges, create a task with a due date, mark it done, confirm point crediting.
 
 **Acceptance Scenarios**:
 
-1. **Given** the user opens the Cleaning Board, **When** the board loads, **Then** four columns are visible: "To Do", "In Progress", "Awaiting Review", "Done".
-2. **Given** a task card exists in "To Do", **When** the user drags it to "In Progress", **Then** the card appears in the "In Progress" column and is removed from "To Do".
-3. **Given** a task card is visible, **When** the user opens the assignment control, **Then** all five household members are listed and one can be selected.
-4. **Given** a task is assigned to the currently selected user, **When** the board renders, **Then** that card is displayed with a distinct highlight color differentiating it from other cards.
-5. **Given** a task with 50 points is assigned to "User A" and sits in "Awaiting Review", **When** the task is moved to "Done", **Then** 50 points are added to User A's total score.
-6. **Given** a task has no user assigned, **When** it is moved to "Done", **Then** no points are awarded and the system shows a prompt or visual indicator that an assignee is needed before points can be credited.
-7. **Given** the user is on the Cleaning Board, **When** they want to create a new task, **Then** they can add a task with a title and point value, and the task appears in the "To Do" column.
+1. **Given** the user opens the Cleaning Checklist, **When** the list loads, **Then** active (undone) tasks are displayed first, sorted by urgency, followed by completed tasks.
+2. **Given** an active task has a due date 3 days from now, **When** the list renders, **Then** a badge shows "3d left" next to the task.
+3. **Given** an active task's due date was 2 days ago, **When** the list renders, **Then** a badge shows "2d overdue" in a warning/red style.
+4. **Given** a task is assigned to a user, **When** the list renders, **Then** the assigned person's name is displayed on the checklist item.
+5. **Given** a task with 50 points is assigned to "User A", **When** the user taps the checkbox to mark it done, **Then** 50 points are added to User A's total score.
+6. **Given** a task has no user assigned, **When** it is marked done, **Then** no points are awarded and the system shows a visual indicator that an assignee is needed before points can be credited.
+7. **Given** the user is on the Cleaning Checklist, **When** they want to create a new task, **Then** they can add a task with a title, point value, and optional due date, and the task appears in the active list.
+8. **Given** a completed task exists, **When** the user taps its checkbox to uncheck it, **Then** the task moves back to the active list and previously credited points are deducted.
+9. **Given** the user opens the Cleaning Checklist, **When** no tasks exist, **Then** an empty state message is displayed (e.g., "No cleaning tasks yet — add one!").
 
 ---
 
@@ -105,15 +107,15 @@ A user navigates to the Finance Tracker, logs an expense with an amount and desc
 
 ### User Story 5 — Comments on Tasks and Shopping Items (Priority: P5)
 
-From a Cleaning Board task card or a Shopping List item, a user can open a comment thread, view existing comments, and add a new comment. Users can edit or delete their own comments but cannot modify or remove comments left by others.
+From a Cleaning Checklist task or a Shopping List item, a user can open a comment thread, view existing comments, and add a new comment. Users can edit or delete their own comments but cannot modify or remove comments left by others.
 
-**Why this priority**: Comments are a cross-cutting enhancement that adds communication value to the two main modules. Since they depend on both the Cleaning Board and Shopping List existing first, they are lowest priority.
+**Why this priority**: Comments are a cross-cutting enhancement that adds communication value to the two main modules. Since they depend on both the Cleaning Checklist and Shopping List existing first, they are lowest priority.
 
 **Independent Test**: Open a task card, add a comment, verify it appears with the author name and timestamp. Verify the edit/delete controls appear only on the current user's own comments.
 
 **Acceptance Scenarios**:
 
-1. **Given** a Cleaning Board task card is open, **When** the user adds a comment "I'll handle this tomorrow", **Then** the comment appears in the thread with the user's name and a timestamp.
+1. **Given** a Cleaning Checklist task is open, **When** the user adds a comment "I'll handle this tomorrow", **Then** the comment appears in the thread with the user's name and a timestamp.
 2. **Given** a Shopping List item is selected, **When** the user adds a comment "Get the organic brand", **Then** the comment appears in the item's comment thread with the user's name and a timestamp.
 3. **Given** a comment thread has comments from multiple users, **When** the current user views the thread, **Then** edit and delete controls are visible only on comments authored by the current user.
 4. **Given** a user edits their own comment, **When** they save the change, **Then** the updated text is displayed and an "edited" indicator is shown.
@@ -124,13 +126,14 @@ From a Cleaning Board task card or a Shopping List item, a user can open a comme
 
 ### Edge Cases
 
-- What happens when a user tries to move a task to "Done" without an assignee? The system prevents point crediting and shows a visual indicator that an assignee is required.
+- What happens when a user marks a task as done without an assignee? No points are awarded and a visual indicator shows that an assignee is needed.
 - What happens when an expense amount of €0.00 or a negative value is entered? The system rejects non-positive amounts and shows a validation message.
 - What happens when a shopping item is added with an empty name? The system rejects the submission and highlights the required field.
 - What happens when all five users have identical total expenses? The Settlement View shows "All settled — no payments needed."
-- What happens when a user drags a card backward (e.g., from "Done" back to "In Progress")? The points previously credited are deducted from the assigned user's total.
+- What happens when a user unchecks a completed task? The points previously credited are deducted from the assigned user's total.
 - What happens when comment text is empty? The system prevents submission of blank comments.
-- What happens when a task card's point value is zero? The task can still move through columns, but zero points are awarded.
+- What happens when a task's point value is zero? The task can still be checked off, but zero points are awarded.
+- What happens when a task has no due date? It appears after tasks with deadlines in the active list, with no deadline badge.
 
 ## Requirements *(mandatory)*
 
@@ -145,24 +148,27 @@ From a Cleaning Board task card or a Shopping List item, a user can open a comme
 
 **Main Dashboard**
 
-- **FR-005**: System MUST display three module tiles on the dashboard: "Cleaning Board", "Shopping List", and "Finance Tracker".
+- **FR-005**: System MUST display three module tiles on the dashboard: "Cleaning", "Shopping List", and "Finance Tracker".
 - **FR-006**: Each module tile MUST be tappable and navigate to the corresponding module view.
 - **FR-006a**: The dashboard MUST display the current user's total points in the header area.
 - **FR-006b**: The dashboard MUST display a compact points ranking of all five users (e.g., a small leaderboard widget), visible without navigating away.
 
-**Cleaning Board**
+**Cleaning Checklist**
 
-- **FR-007**: System MUST display a Kanban board with four columns: "To Do", "In Progress", "Awaiting Review", "Done".
-- **FR-008**: Each task card MUST display a title and a point value.
-- **FR-009**: System MUST support drag-and-drop of task cards between any columns, including touch-based drag on mobile devices.
-- **FR-010**: System MUST allow any user to assign any of the five household members to a task card.
-- **FR-011**: Task cards assigned to the currently selected user MUST be highlighted with a visually distinct color or border.
-- **FR-012**: When a task card is moved to the "Done" column and has an assigned user, the system MUST credit the point value to that user's total score.
-- **FR-013**: When a task card is moved out of the "Done" column back to another column, the system MUST deduct the previously credited points from the assigned user's total score.
-- **FR-014**: System MUST allow any user to create a new task by providing a title and point value; the task appears in the "To Do" column.
-- **FR-014a**: System MUST allow any user to edit a task's title and point value. If the task is in the "Done" column and the point value changes, the assigned user's total score MUST be recalculated to reflect the updated value.
-- **FR-014b**: System MUST allow any user to delete a task. If the deleted task was in the "Done" column, the credited points MUST be deducted from the assigned user's total score.
-- **FR-015**: If a task with no assignee is moved to "Done", the system MUST show a visual indicator that no points were awarded and an assignee is needed.
+- **FR-007**: System MUST display a checklist of cleaning tasks with active (undone) tasks first, sorted by urgency (overdue → due soonest → no deadline), followed by completed tasks.
+- **FR-008**: Each checklist item MUST display a title, point value, assigned person's name (if any), and deadline badge (days remaining or days overdue).
+- **FR-008a**: Active tasks with a due date in the past MUST show a "Xd overdue" badge in a warning style (red).
+- **FR-008b**: Active tasks with a due date in the future MUST show a "Xd left" badge.
+- **FR-008c**: Active tasks with no due date MUST appear after deadline tasks with no deadline badge.
+- **FR-009**: System MUST allow any user to toggle a task's done/undone state by tapping a checkbox.
+- **FR-010**: System MUST allow any user to assign any of the five household members to a task.
+- **FR-011**: Checklist items assigned to the currently selected user MUST be highlighted with a visually distinct color or border.
+- **FR-012**: When a task is marked done and has an assigned user, the system MUST credit the point value to that user's total score.
+- **FR-013**: When a completed task is unchecked (marked undone), the system MUST deduct the previously credited points from the assigned user's total score.
+- **FR-014**: System MUST allow any user to create a new task by providing a title, point value, and optional due date; the task appears in the active list.
+- **FR-014a**: System MUST allow any user to edit a task's title, point value, and due date. If the task is done and the point value changes, the assigned user's total score MUST be recalculated.
+- **FR-014b**: System MUST allow any user to delete a task. If the deleted task was done, the credited points MUST be deducted from the assigned user's total score.
+- **FR-015**: If a task with no assignee is marked done, the system MUST show a visual indicator that no points were awarded and an assignee is needed.
 
 **Shopping List**
 
@@ -187,7 +193,7 @@ From a Cleaning Board task card or a Shopping List item, a user can open a comme
 
 **Comments**
 
-- **FR-025**: System MUST allow users to add comments on Cleaning Board task cards and Shopping List items.
+- **FR-025**: System MUST allow users to add comments on Cleaning Checklist tasks and Shopping List items.
 - **FR-026**: Each comment MUST display the author's name and a timestamp.
 - **FR-027**: A user MUST be able to edit or delete their own comments.
 - **FR-028**: A user MUST NOT be able to edit or delete comments authored by another user — controls for these actions MUST be hidden.
@@ -207,7 +213,7 @@ From a Cleaning Board task card or a Shopping List item, a user can open a comme
 ### Key Entities
 
 - **User**: Represents a household member. Attributes: unique identifier, display name, role label ("Coordinator" or "Resident"), avatar/icon, total points earned. The five predefined users are: Alex (Coordinator), Jordan (Coordinator), Sam (Resident), Taylor (Resident), Casey (Resident). All are immutable.
-- **Task (Cleaning Board)**: A household chore. Attributes: title, point value, current column (To Do / In Progress / Awaiting Review / Done), assigned user (optional), comments. Tasks can be created by any user and moved between columns.
+- **Task (Cleaning Checklist)**: A household chore. Attributes: title, point value, done/undone state, due date (optional), assigned user (optional), completed-at timestamp, comments. Tasks can be created by any user and toggled done/undone.
 - **Shopping Item**: An item needed for the household. Attributes: name, quantity, added-by user, status (active or recently bought), comments.
 - **Expense**: A financial entry. Attributes: amount (EUR), description, logged-by user, date.
 - **Comment**: A text message attached to a Task or Shopping Item. Attributes: text content, author (user), timestamp, edited flag.
@@ -218,8 +224,8 @@ From a Cleaning Board task card or a Shopping List item, a user can open a comme
 
 - **SC-001**: A new user can select their identity and reach the Main Dashboard in under 5 seconds (two taps maximum).
 - **SC-002**: A user can create a new cleaning task and see it appear on the board in under 10 seconds.
-- **SC-003**: A user can drag a task card from one column to another with a single continuous gesture (drag-and-drop), and the move completes visually within 1 second.
-- **SC-004**: Points are accurately credited (or deducted) within 1 second of a task moving to (or from) the "Done" column.
+- **SC-003**: A user can toggle a task's done state with a single tap on the checkbox, and the state change completes visually within 1 second.
+- **SC-004**: Points are accurately credited (or deducted) within 1 second of a task being marked done (or undone).
 - **SC-005**: A user can add a shopping item and see it in the list within 5 seconds.
 - **SC-006**: Checking off a shopping item moves it to "Recently Bought" within 1 second.
 - **SC-007**: A user can log an expense and see the Settlement View update within 5 seconds.

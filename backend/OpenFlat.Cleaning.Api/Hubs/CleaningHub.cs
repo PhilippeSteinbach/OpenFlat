@@ -3,14 +3,15 @@ using Microsoft.AspNetCore.SignalR;
 namespace OpenFlat.Cleaning.Api.Hubs;
 
 /// <summary>
-/// SignalR hub for real-time cleaning board updates.
+/// SignalR hub for real-time cleaning checklist updates.
 /// Hub URL: /hubs/cleaning
 ///
 /// Client methods:
 ///   TaskCreated(TaskDto task)
 ///   TaskUpdated(TaskDto task)
 ///   TaskDeleted(Guid taskId)
-///   TaskMoved(MoveTaskResponseDto response)
+///   TaskCompleted(CompleteTaskResponseDto response)
+///   TaskUncompleted(CompleteTaskResponseDto response)
 ///   TaskAssigned(TaskDto task)
 ///   CommentAdded(Guid taskId, CommentDto comment)
 ///   CommentUpdated(Guid taskId, CommentDto comment)

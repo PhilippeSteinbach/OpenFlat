@@ -20,8 +20,6 @@ export function TaskDetail({ task, onClose }: TaskDetailProps) {
   const updateComment = useUpdateTaskCommentMutation();
   const deleteComment = useDeleteTaskCommentMutation();
 
-  const statusLabel = t(`cleaning.columns.${task.status === 'in_progress' ? 'inProgress' : task.status === 'awaiting_review' ? 'awaitingReview' : task.status}`, task.status);
-
   return (
     <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-label={task.title}>
       {/* Backdrop */}
@@ -43,17 +41,29 @@ export function TaskDetail({ task, onClose }: TaskDetailProps) {
 
         {/* Task info */}
         <div className="px-6 py-4 border-b border-gray-100 space-y-2">
-          <div className="flex items-center gap-3 text-sm">
+          <div className="flex items-center gap-3 text-sm flex-wrap">
             <span className="bg-amber-100 text-amber-800 font-semibold px-2 py-0.5 rounded">
               {task.points} {t('common.points', 'pts')}
             </span>
-            <span className="text-gray-500">{statusLabel}</span>
+            <span className={task.isDone ? 'text-green-600 font-medium' : 'text-gray-500'}>
+              {task.isDone ? t('cleaning.task.done', 'Done') : t('cleaning.task.open', 'Open')}
+            </span>
             {task.assignedUserName && (
               <span className="text-gray-600">
                 → {task.assignedUserName}
               </span>
             )}
           </div>
+          {task.dueDate && (
+            <p className="text-xs text-gray-500">
+              {t('cleaning.task.dueDate', 'Due')}: {task.dueDate}
+            </p>
+          )}
+          {task.completedAt && (
+            <p className="text-xs text-gray-500">
+              {t('cleaning.task.completedAt', 'Completed')}: {new Date(task.completedAt).toLocaleString()}
+            </p>
+          )}
         </div>
 
         {/* Comments section */}

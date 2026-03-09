@@ -21,7 +21,8 @@ export function useCleaningHub() {
       'TaskCreated',
       'TaskUpdated',
       'TaskDeleted',
-      'TaskMoved',
+      'TaskCompleted',
+      'TaskUncompleted',
       'TaskAssigned',
     ];
 

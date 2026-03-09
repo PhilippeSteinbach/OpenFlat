@@ -49,7 +49,7 @@ dotnet run
 This single command orchestrates:
 - **PostgreSQL** container (port 5432, managed by Aspire)
 - **Migration Service** — runs EF Core migrations for all 3 schemas, seeds data, then stops
-- **Cleaning API** — with SignalR hub at `/hubs/cleaning`
+- **Cleaning API** — checklist tasks with due dates, gamification; SignalR hub at `/hubs/cleaning`
 - **Shopping API** — with SignalR hub at `/hubs/shopping`
 - **Finance API** — REST-only (no hub)
 - **React Frontend** — Vite dev server with HMR

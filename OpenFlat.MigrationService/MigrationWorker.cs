@@ -72,49 +72,63 @@ public class MigrationWorker(
         var jordan = PredefinedUsers.GetById(2)!;
         var sam = PredefinedUsers.GetById(3)!;
 
+        var now = DateTimeOffset.UtcNow;
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+
         db.Tasks.AddRange(
             new CleaningTask
             {
                 Title = "Vacuum living room",
                 Points = 30,
-                Status = CleaningTaskStatus.Todo,
-                SortOrder = 0,
-                CreatedByUserId = alex.Id
+                IsDone = false,
+                DueDate = today.AddDays(-2), // overdue
+                AssignedUserId = alex.Id,
+                CreatedByUserId = alex.Id,
+                CreatedAt = now.AddDays(-5),
+                UpdatedAt = now.AddDays(-5),
             },
             new CleaningTask
             {
                 Title = "Clean kitchen counters",
                 Points = 20,
-                Status = CleaningTaskStatus.Todo,
-                SortOrder = 1,
-                CreatedByUserId = jordan.Id
+                IsDone = false,
+                DueDate = today.AddDays(1), // due soon
+                AssignedUserId = jordan.Id,
+                CreatedByUserId = jordan.Id,
+                CreatedAt = now.AddDays(-3),
+                UpdatedAt = now.AddDays(-3),
             },
             new CleaningTask
             {
                 Title = "Take out trash",
                 Points = 10,
-                Status = CleaningTaskStatus.InProgress,
+                IsDone = false,
+                DueDate = today.AddDays(2), // due soon
                 AssignedUserId = sam.Id,
-                SortOrder = 0,
-                CreatedByUserId = sam.Id
+                CreatedByUserId = sam.Id,
+                CreatedAt = now.AddDays(-2),
+                UpdatedAt = now.AddDays(-2),
             },
             new CleaningTask
             {
                 Title = "Mop bathroom floor",
                 Points = 25,
-                Status = CleaningTaskStatus.AwaitingReview,
-                AssignedUserId = alex.Id,
-                SortOrder = 0,
-                CreatedByUserId = alex.Id
+                IsDone = false,
+                DueDate = null, // no deadline
+                CreatedByUserId = alex.Id,
+                CreatedAt = now.AddDays(-1),
+                UpdatedAt = now.AddDays(-1),
             },
             new CleaningTask
             {
                 Title = "Wash dishes",
                 Points = 15,
-                Status = CleaningTaskStatus.Done,
+                IsDone = true,
+                CompletedAt = now.AddHours(-6),
                 AssignedUserId = jordan.Id,
-                SortOrder = 0,
-                CreatedByUserId = jordan.Id
+                CreatedByUserId = jordan.Id,
+                CreatedAt = now.AddDays(-4),
+                UpdatedAt = now.AddHours(-6),
             }
         );
 

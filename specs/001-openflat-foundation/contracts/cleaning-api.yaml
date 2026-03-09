@@ -1,11 +1,14 @@
 openapi: 3.1.0
 info:
   title: OpenFlat Cleaning API
-  version: 1.0.0
+  version: 2.0.0
   description: |
-    REST API for the Cleaning Board module (gamified Kanban).
-    Manages tasks, task assignments, points, and task comments.
+    REST API for the Cleaning Checklist module (gamified checklist).
+    Manages tasks with due dates, done/undone toggle, points, and task comments.
     Real-time updates via SignalR hub at /hubs/cleaning.
+    
+    REDESIGNED (v2): Replaced 4-column Kanban board with simple checklist.
+    Tasks have a due date and done/undone state instead of status columns.
 
 servers:
   - url: https+http://cleaning-api
@@ -15,8 +18,10 @@ paths:
   /api/tasks:
     get:
       operationId: listTasks
-      summary: List all tasks grouped by status
-      description: Returns all cleaning tasks. Client groups by status for Kanban columns.
+      summary: List all cleaning tasks
+      description: |
+        Returns all cleaning tasks sorted by urgency:
+        active tasks first (overdue → due soon → no deadline), then completed tasks.
       parameters:
         - name: X-User-Id
           in: header
@@ -38,8 +43,8 @@ paths:
 
     post:
       operationId: createTask
-      summary: Create a new task
-      description: Creates a task in the "To Do" column (FR-014).
+      summary: Create a new cleaning task
+      description: Creates a task with title, points, optional due date, and optional assignee.
       parameters:
         - name: X-User-Id
           in: header
@@ -96,10 +101,10 @@ paths:
 
     put:
       operationId: updateTask
-      summary: Update task title and/or points
+      summary: Update task title, points, and/or due date
       description: |
-        Edit a task's title and point value (FR-014a).
-        If task is in "Done" and points change, assigned user's score is recalculated.
+        Edit a task's title, point value, and due date.
+        If task is done and points change, assigned user's score is recalculated.
       parameters:
         - name: X-User-Id
           in: header
@@ -132,7 +137,7 @@ paths:
       operationId: deleteTask
       summary: Delete a task
       description: |
-        Delete a task (FR-014b). If task was in "Done", deduct points from assigned user.
+        Delete a task. If task was done, deduct points from assigned user.
       parameters:
         - name: X-User-Id
           in: header
@@ -145,7 +150,7 @@ paths:
         '404':
           description: Task not found
 
-  /api/tasks/{taskId}/move:
+  /api/tasks/{taskId}/complete:
     parameters:
       - name: taskId
         in: path
@@ -155,31 +160,29 @@ paths:
           format: uuid
 
     post:
-      operationId: moveTask
-      summary: Move task to a different column
+      operationId: completeTask
+      summary: Toggle task done/undone
       description: |
-        Moves a task card between Kanban columns (FR-009, FR-012, FR-013, FR-015).
-        Handles point crediting/deducting and sort order updates.
-        Broadcasts via SignalR CleaningHub.
+        Toggles the task's completion state. When marking done:
+        - Sets isDone=true, completedAt=now
+        - If assignee exists, credits points
+        - If no assignee, returns warningNoAssignee=true
+        When marking undone:
+        - Sets isDone=false, completedAt=null
+        - If assignee exists, deducts points
       parameters:
         - name: X-User-Id
           in: header
           required: true
           schema:
             type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/MoveTaskRequest'
       responses:
         '200':
-          description: Task moved
+          description: Task completion toggled
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MoveTaskResponse'
+                $ref: '#/components/schemas/CompleteTaskResponse'
         '404':
           description: Task not found
 
@@ -195,7 +198,7 @@ paths:
     post:
       operationId: assignTask
       summary: Assign or unassign a user to a task
-      description: Assign one of the 5 predefined users or unassign (FR-010).
+      description: Assign one of the 5 predefined users or unassign.
       parameters:
         - name: X-User-Id
           in: header
@@ -253,7 +256,6 @@ paths:
     post:
       operationId: addTaskComment
       summary: Add a comment to a task
-      description: Creates a comment on a task card (FR-025).
       parameters:
         - name: X-User-Id
           in: header
@@ -274,7 +276,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/CommentDto'
         '400':
-          description: Empty comment text (FR-032)
+          description: Empty comment text
         '404':
           description: Task not found
 
@@ -296,7 +298,7 @@ paths:
     put:
       operationId: updateTaskComment
       summary: Edit own comment
-      description: Only the author can edit (FR-027, FR-028).
+      description: Only the author can edit.
       parameters:
         - name: X-User-Id
           in: header
@@ -311,7 +313,7 @@ paths:
               $ref: '#/components/schemas/UpdateCommentRequest'
       responses:
         '200':
-          description: Comment updated, isEdited set to true (FR-029)
+          description: Comment updated, isEdited set to true
           content:
             application/json:
               schema:
@@ -326,7 +328,7 @@ paths:
     delete:
       operationId: deleteTaskComment
       summary: Delete own comment
-      description: Only the author can delete (FR-027, FR-028).
+      description: Only the author can delete.
       parameters:
         - name: X-User-Id
           in: header
@@ -346,8 +348,8 @@ paths:
       operationId: getLeaderboard
       summary: Get points leaderboard
       description: |
-        Returns total points for each of the 5 users, sorted descending (FR-006a, FR-006b).
-        Points are calculated from tasks in the "Done" column with an assigned user.
+        Returns total points for each of the 5 users, sorted descending.
+        Points are calculated from completed tasks (isDone=true) with an assigned user.
       responses:
         '200':
           description: Leaderboard
@@ -362,7 +364,7 @@ components:
   schemas:
     TaskDto:
       type: object
-      required: [id, title, points, status, sortOrder, createdByUserId, createdAt, updatedAt]
+      required: [id, title, points, isDone, createdByUserId, createdAt, updatedAt, commentCount]
       properties:
         id:
           type: string
@@ -373,9 +375,19 @@ components:
         points:
           type: integer
           minimum: 0
-        status:
+        isDone:
+          type: boolean
+          description: Whether the task is completed
+        dueDate:
           type: string
-          enum: [todo, in_progress, awaiting_review, done]
+          format: date
+          nullable: true
+          description: Due date (YYYY-MM-DD) or null if no deadline
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: When the task was marked done
         assignedUserId:
           type: integer
           nullable: true
@@ -384,8 +396,7 @@ components:
         assignedUserName:
           type: string
           nullable: true
-        sortOrder:
-          type: integer
+          description: Display name of the responsible person
         createdByUserId:
           type: integer
         createdAt:
@@ -419,6 +430,17 @@ components:
         points:
           type: integer
           minimum: 0
+        dueDate:
+          type: string
+          format: date
+          nullable: true
+          description: Optional due date (YYYY-MM-DD)
+        assignedUserId:
+          type: integer
+          nullable: true
+          minimum: 1
+          maximum: 5
+          description: Optional initial assignee
 
     UpdateTaskRequest:
       type: object
@@ -431,20 +453,13 @@ components:
         points:
           type: integer
           minimum: 0
-
-    MoveTaskRequest:
-      type: object
-      required: [targetStatus, targetSortOrder]
-      properties:
-        targetStatus:
+        dueDate:
           type: string
-          enum: [todo, in_progress, awaiting_review, done]
-        targetSortOrder:
-          type: integer
-          minimum: 0
-          description: Position in the target column
+          format: date
+          nullable: true
+          description: Due date or null to remove deadline
 
-    MoveTaskResponse:
+    CompleteTaskResponse:
       type: object
       required: [task, pointsDelta]
       properties:
@@ -455,7 +470,7 @@ components:
           description: Points credited (+) or deducted (-). Zero if no assignee.
         warningNoAssignee:
           type: boolean
-          description: True if moved to Done without an assignee (FR-015)
+          description: True if completed without an assignee
 
     AssignTaskRequest:
       type: object
@@ -545,7 +560,8 @@ components:
   #   TaskCreated(TaskDto task)
   #   TaskUpdated(TaskDto task)
   #   TaskDeleted(Guid taskId)
-  #   TaskMoved(MoveTaskResponse response)
+  #   TaskCompleted(CompleteTaskResponse response)
+  #   TaskUncompleted(CompleteTaskResponse response)
   #   TaskAssigned(TaskDto task)
   #   CommentAdded(Guid taskId, CommentDto comment)
   #   CommentUpdated(Guid taskId, CommentDto comment)

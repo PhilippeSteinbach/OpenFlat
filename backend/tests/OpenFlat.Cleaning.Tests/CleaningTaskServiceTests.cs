@@ -33,8 +33,18 @@ public class CleaningTaskServiceTests : IDisposable
         task.Should().NotBeNull();
         task.Title.Should().Be("Vacuum living room");
         task.Points.Should().Be(10);
-        task.Status.Should().Be(CleaningTaskStatus.Todo);
+        task.IsDone.Should().BeFalse();
         task.CreatedByUserId.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task CreateAsync_WithDueDateAndAssignee_SetsFields()
+    {
+        var dueDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(3));
+        var task = await _service.CreateAsync("Test", 5, 1, dueDate, 2);
+
+        task.DueDate.Should().Be(dueDate);
+        task.AssignedUserId.Should().Be(2);
     }
 
     [Fact]
@@ -90,16 +100,30 @@ public class CleaningTaskServiceTests : IDisposable
     public async Task UpdateAsync_ValidInput_UpdatesTask()
     {
         var task = await _service.CreateAsync("Old Title", 5, 1);
-        var updated = await _service.UpdateAsync(task.Id, "New Title", 20);
+        var (updated, delta) = await _service.UpdateAsync(task.Id, "New Title", 20, null);
 
         updated.Title.Should().Be("New Title");
         updated.Points.Should().Be(20);
+        delta.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_DoneTaskPointsChange_ReturnsDelta()
+    {
+        // FR-014a: If task is done, changing points returns point delta
+        var task = await _service.CreateAsync("Test", 10, 1);
+        await _service.AssignAsync(task.Id, 1);
+        await _service.CompleteAsync(task.Id);
+
+        var (_, delta) = await _service.UpdateAsync(task.Id, "Test", 15, null);
+
+        delta.Should().Be(5); // 15 - 10
     }
 
     [Fact]
     public async Task UpdateAsync_NonExisting_ThrowsNotFound()
     {
-        var act = () => _service.UpdateAsync(Guid.NewGuid(), "X", 10);
+        var act = () => _service.UpdateAsync(Guid.NewGuid(), "X", 10, null);
         await act.Should().ThrowAsync<NotFoundException>();
     }
 
@@ -110,7 +134,7 @@ public class CleaningTaskServiceTests : IDisposable
         var (deleted, delta) = await _service.DeleteAsync(task.Id);
 
         deleted.Title.Should().Be("Delete me");
-        delta.Should().Be(0); // task was in Todo, no points deducted
+        delta.Should().Be(0); // task was not done, no points deducted
         (await _service.GetByIdAsync(task.Id)).Should().BeNull();
     }
 
@@ -119,7 +143,7 @@ public class CleaningTaskServiceTests : IDisposable
     {
         var task = await _service.CreateAsync("Done task", 15, 1);
         await _service.AssignAsync(task.Id, 2);
-        await _service.MoveAsync(task.Id, CleaningTaskStatus.Done, 0);
+        await _service.CompleteAsync(task.Id);
 
         var (_, delta) = await _service.DeleteAsync(task.Id);
 
@@ -134,46 +158,49 @@ public class CleaningTaskServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task MoveAsync_TodoToDone_CreditsPoints()
+    public async Task CompleteAsync_UndoneToggles_CreditsPoints()
     {
         var task = await _service.CreateAsync("Task", 10, 1);
         await _service.AssignAsync(task.Id, 1);
 
-        var result = await _service.MoveAsync(task.Id, CleaningTaskStatus.Done, 0);
+        var result = await _service.CompleteAsync(task.Id);
 
         result.PointsDelta.Should().Be(10); // FR-012
-        result.Task.Status.Should().Be(CleaningTaskStatus.Done);
+        result.Task.IsDone.Should().BeTrue();
+        result.Task.CompletedAt.Should().NotBeNull();
         result.WarningNoAssignee.Should().BeFalse();
     }
 
     [Fact]
-    public async Task MoveAsync_TodoToDone_NoAssignee_Warns()
+    public async Task CompleteAsync_UndoneNoAssignee_Warns()
     {
         var task = await _service.CreateAsync("Task", 10, 1);
 
-        var result = await _service.MoveAsync(task.Id, CleaningTaskStatus.Done, 0);
+        var result = await _service.CompleteAsync(task.Id);
 
         result.PointsDelta.Should().Be(0);
         result.WarningNoAssignee.Should().BeTrue(); // FR-015
+        result.Task.IsDone.Should().BeTrue();
     }
 
     [Fact]
-    public async Task MoveAsync_DoneToTodo_DeductsPoints()
+    public async Task CompleteAsync_DoneToggles_DeductsPoints()
     {
         var task = await _service.CreateAsync("Task", 10, 1);
         await _service.AssignAsync(task.Id, 1);
-        await _service.MoveAsync(task.Id, CleaningTaskStatus.Done, 0);
+        await _service.CompleteAsync(task.Id); // mark Done
 
-        var result = await _service.MoveAsync(task.Id, CleaningTaskStatus.Todo, 0);
+        var result = await _service.CompleteAsync(task.Id); // undo
 
         result.PointsDelta.Should().Be(-10); // FR-013
-        result.Task.Status.Should().Be(CleaningTaskStatus.Todo);
+        result.Task.IsDone.Should().BeFalse();
+        result.Task.CompletedAt.Should().BeNull();
     }
 
     [Fact]
-    public async Task MoveAsync_NonExisting_ThrowsNotFound()
+    public async Task CompleteAsync_NonExisting_ThrowsNotFound()
     {
-        var act = () => _service.MoveAsync(Guid.NewGuid(), CleaningTaskStatus.InProgress, 0);
+        var act = () => _service.CompleteAsync(Guid.NewGuid());
         await act.Should().ThrowAsync<NotFoundException>();
     }
 
@@ -209,14 +236,5 @@ public class CleaningTaskServiceTests : IDisposable
     {
         var act = () => _service.AssignAsync(Guid.NewGuid(), 1);
         await act.Should().ThrowAsync<NotFoundException>();
-    }
-
-    [Fact]
-    public async Task CreateAsync_IncrementsSortOrder()
-    {
-        var t1 = await _service.CreateAsync("First", 5, 1);
-        var t2 = await _service.CreateAsync("Second", 5, 1);
-
-        t2.SortOrder.Should().BeGreaterThan(t1.SortOrder);
     }
 }

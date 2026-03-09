@@ -1,20 +1,19 @@
-// Types matching the API contract DTOs
+// Types matching the API contract DTOs (v2 — checklist model)
 
 export interface TaskDto {
   id: string;
   title: string;
   points: number;
-  status: TaskStatus;
+  isDone: boolean;
+  dueDate: string | null;
+  completedAt: string | null;
   assignedUserId: number | null;
   assignedUserName: string | null;
-  sortOrder: number;
   createdByUserId: number;
   createdAt: string;
   updatedAt: string;
   commentCount: number;
 }
-
-export type TaskStatus = 'todo' | 'in_progress' | 'awaiting_review' | 'done';
 
 export interface TaskDetailDto extends TaskDto {
   comments: CommentDto[];
@@ -33,19 +32,17 @@ export interface CommentDto {
 export interface CreateTaskRequest {
   title: string;
   points: number;
+  dueDate?: string | null;
+  assignedUserId?: number | null;
 }
 
 export interface UpdateTaskRequest {
   title: string;
   points: number;
+  dueDate?: string | null;
 }
 
-export interface MoveTaskRequest {
-  targetStatus: TaskStatus;
-  targetSortOrder: number;
-}
-
-export interface MoveTaskResponse {
+export interface CompleteTaskResponse {
   task: TaskDto;
   pointsDelta: number;
   warningNoAssignee: boolean;
@@ -69,17 +66,3 @@ export interface CreateCommentRequest {
 export interface UpdateCommentRequest {
   text: string;
 }
-
-export const TASK_STATUSES: TaskStatus[] = [
-  'todo',
-  'in_progress',
-  'awaiting_review',
-  'done',
-];
-
-export const STATUS_LABELS: Record<TaskStatus, string> = {
-  todo: 'cleaning.columns.todo',
-  in_progress: 'cleaning.columns.inProgress',
-  awaiting_review: 'cleaning.columns.awaitingReview',
-  done: 'cleaning.columns.done',
-};

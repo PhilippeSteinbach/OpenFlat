@@ -14,8 +14,8 @@ public class CleaningContractTests
     [Fact]
     public void TaskDto_HasAllContractProperties()
     {
-        // OpenAPI: TaskDto — id, title, points, status, assignedUserId, assignedUserName,
-        //          sortOrder, createdByUserId, createdAt, updatedAt, commentCount
+        // OpenAPI v2: TaskDto — id, title, points, isDone, dueDate, completedAt,
+        //             assignedUserId, assignedUserName, createdByUserId, createdAt, updatedAt, commentCount
         var props = typeof(TaskDto).GetProperties(BindingFlags.Public | BindingFlags.Instance)
             .Select(p => p.Name)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
@@ -23,10 +23,11 @@ public class CleaningContractTests
         props.Should().Contain("Id");
         props.Should().Contain("Title");
         props.Should().Contain("Points");
-        props.Should().Contain("Status");
+        props.Should().Contain("IsDone");
+        props.Should().Contain("DueDate");
+        props.Should().Contain("CompletedAt");
         props.Should().Contain("AssignedUserId");
         props.Should().Contain("AssignedUserName");
-        props.Should().Contain("SortOrder");
         props.Should().Contain("CreatedByUserId");
         props.Should().Contain("CreatedAt");
         props.Should().Contain("UpdatedAt");
@@ -41,10 +42,11 @@ public class CleaningContractTests
         type.GetProperty("Id")!.PropertyType.Should().Be(typeof(Guid));
         type.GetProperty("Title")!.PropertyType.Should().Be(typeof(string));
         type.GetProperty("Points")!.PropertyType.Should().Be(typeof(int));
-        type.GetProperty("Status")!.PropertyType.Should().Be(typeof(string));
+        type.GetProperty("IsDone")!.PropertyType.Should().Be(typeof(bool));
+        type.GetProperty("DueDate")!.PropertyType.Should().Be(typeof(string));
+        type.GetProperty("CompletedAt")!.PropertyType.Should().Be(typeof(DateTimeOffset?));
         type.GetProperty("AssignedUserId")!.PropertyType.Should().Be(typeof(int?));
         type.GetProperty("AssignedUserName")!.PropertyType.Should().Be(typeof(string));
-        type.GetProperty("SortOrder")!.PropertyType.Should().Be(typeof(int));
         type.GetProperty("CreatedByUserId")!.PropertyType.Should().Be(typeof(int));
         type.GetProperty("CommentCount")!.PropertyType.Should().Be(typeof(int));
     }
@@ -119,10 +121,10 @@ public class CleaningContractTests
     }
 
     [Fact]
-    public void MoveTaskResponseDto_HasContractFields()
+    public void CompleteTaskResponseDto_HasContractFields()
     {
-        // OpenAPI: MoveTaskResponse — task, pointsDelta, warningNoAssignee
-        var props = typeof(MoveTaskResponseDto).GetProperties(BindingFlags.Public | BindingFlags.Instance)
+        // OpenAPI v2: CompleteTaskResponse — task, pointsDelta, warningNoAssignee
+        var props = typeof(CompleteTaskResponseDto).GetProperties(BindingFlags.Public | BindingFlags.Instance)
             .Select(p => p.Name)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
@@ -140,6 +142,8 @@ public class CleaningContractTests
 
         props.Should().Contain("Title");
         props.Should().Contain("Points");
+        props.Should().Contain("DueDate");
+        props.Should().Contain("AssignedUserId");
     }
 
     [Fact]

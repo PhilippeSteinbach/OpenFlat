@@ -50,21 +50,27 @@ All `UserId` foreign keys in database tables reference these predefined IDs (1�
 
 ### `cleaning.tasks`
 
+> **REDESIGNED** (2026-03-09): Converted from Kanban board (4-column status + sort order) to checklist (done/not-done + due date).
+
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
 | `id` | `uuid` | PK, default `gen_random_uuid()` | Task unique identifier |
-| `title` | `varchar(200)` | NOT NULL | Task title (FR-008, FR-014) |
-| `points` | `integer` | NOT NULL, CHECK >= 0 | Point value (FR-008, FR-012) |
-| `status` | `varchar(20)` | NOT NULL, default `'todo'` | Column: `todo`, `in_progress`, `awaiting_review`, `done` (FR-007) |
-| `assigned_user_id` | `integer` | NULL | Predefined user ID (1–5) if assigned (FR-010) |
-| `sort_order` | `integer` | NOT NULL, default 0 | Position within column for drag-and-drop ordering (FR-009) |
+| `title` | `varchar(200)` | NOT NULL | Task title |
+| `points` | `integer` | NOT NULL, CHECK >= 0 | Point value for gamification |
+| `is_done` | `boolean` | NOT NULL, default `false` | Whether the task is completed |
+| `due_date` | `date` | NULL | When the task is due (nullable = no deadline) |
+| `completed_at` | `timestamptz` | NULL | When the task was marked done |
+| `assigned_user_id` | `integer` | NULL | Predefined user ID (1–5) — the responsible person |
 | `created_by_user_id` | `integer` | NOT NULL | User who created the task |
 | `created_at` | `timestamptz` | NOT NULL, default `now()` | Creation timestamp |
 | `updated_at` | `timestamptz` | NOT NULL, default `now()` | Last modification timestamp |
 
+**Removed columns** (from Kanban design):
+- ~~`status`~~ → replaced by `is_done` boolean
+- ~~`sort_order`~~ → replaced by natural sort (overdue → due soon → no deadline → creation date)
+
 **Indexes**:
-- `ix_tasks_status` on `(status)` — filter by column
-- `ix_tasks_status_sort` on `(status, sort_order)` — column rendering order
+- `ix_tasks_is_done_due_date` on `(is_done, due_date)` — checklist rendering order (active first, sorted by urgency)
 - `ix_tasks_assigned_user_id` on `(assigned_user_id)` WHERE `assigned_user_id IS NOT NULL` — leaderboard queries
 
 **EF Core Entity**:
@@ -75,32 +81,25 @@ public class CleaningTask
     public Guid Id { get; set; }
     public string Title { get; set; } = string.Empty;
     public int Points { get; set; }
-    public TaskStatus Status { get; set; } = TaskStatus.Todo;
+    public bool IsDone { get; set; }
+    public DateOnly? DueDate { get; set; }
+    public DateTimeOffset? CompletedAt { get; set; }
     public int? AssignedUserId { get; set; }
-    public int SortOrder { get; set; }
     public int CreatedByUserId { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
 
     public ICollection<CleaningComment> Comments { get; set; } = new List<CleaningComment>();
 }
-
-public enum TaskStatus
-{
-    Todo,
-    InProgress,
-    AwaitingReview,
-    Done
-}
 ```
 
 **Business Rules**:
-- Moving to `Done` with `AssignedUserId != null` → credit `Points` to that user (FR-012)
-- Moving out of `Done` → deduct `Points` from assigned user (FR-013)
-- Moving to `Done` with `AssignedUserId == null` → no points, visual warning (FR-015)
-- Editing `Points` while in `Done` → recalculate delta for assigned user (FR-014a)
-- Deleting a `Done` task → deduct `Points` from assigned user (FR-014b)
-- `Status` values map to Kanban columns: `todo` → "To Do", `in_progress` → "In Progress", `awaiting_review` → "Awaiting Review", `done` → "Done"
+- Marking as done (`IsDone = true`) with `AssignedUserId != null` → credit `Points` to that user
+- Marking as undone (`IsDone = false`) → deduct `Points` from assigned user
+- Marking as done with `AssignedUserId == null` → no points, visual warning
+- Display: days remaining = `DueDate - today` (green >3, yellow 1–3, orange 0, red <0)
+- Editing `Points` while `IsDone = true` → recalculate delta for assigned user (FR-014a)
+- Deleting a task with `IsDone = true` → deduct `Points` from assigned user (FR-014b)
 
 ### `cleaning.comments`
 
@@ -293,16 +292,13 @@ public class CleaningDbContext : DbContext
             e.HasKey(t => t.Id);
             e.Property(t => t.Title).HasMaxLength(200).IsRequired();
             e.Property(t => t.Points).IsRequired();
-            e.Property(t => t.Status)
-                .HasConversion<string>()
-                .HasMaxLength(20)
-                .HasDefaultValue(TaskStatus.Todo);
-            e.Property(t => t.SortOrder).HasDefaultValue(0);
+            e.Property(t => t.IsDone).HasDefaultValue(false);
+            e.Property(t => t.DueDate);
+            e.Property(t => t.CompletedAt);
             e.Property(t => t.CreatedAt).HasDefaultValueSql("now()");
             e.Property(t => t.UpdatedAt).HasDefaultValueSql("now()");
 
-            e.HasIndex(t => t.Status).HasDatabaseName("ix_tasks_status");
-            e.HasIndex(t => new { t.Status, t.SortOrder }).HasDatabaseName("ix_tasks_status_sort");
+            e.HasIndex(t => new { t.IsDone, t.DueDate }).HasDatabaseName("ix_tasks_is_done_due_date");
             e.HasIndex(t => t.AssignedUserId)
                 .HasDatabaseName("ix_tasks_assigned_user_id")
                 .HasFilter("assigned_user_id IS NOT NULL");
@@ -415,13 +411,13 @@ Seeded by the `OpenFlat.MigrationService` after running all migrations.
 
 ### Cleaning Tasks (sample)
 
-| Title | Points | Status | Assigned To |
-|-------|--------|--------|-------------|
-| Vacuum living room | 30 | `todo` | — |
-| Clean kitchen counters | 20 | `todo` | — |
-| Take out trash | 10 | `in_progress` | Sam |
-| Mop bathroom floor | 25 | `awaiting_review` | Alex |
-| Wash dishes | 15 | `done` | Jordan |
+| Title | Points | IsDone | DueDate | Assigned To |
+|-------|--------|--------|---------|-------------|
+| Vacuum living room | 30 | `false` | `2026-03-07` (overdue) | — |
+| Clean kitchen counters | 20 | `false` | `2026-03-11` (2d left) | Sam |
+| Take out trash | 10 | `false` | `null` (no deadline) | — |
+| Mop bathroom floor | 25 | `false` | `2026-03-10` (1d left) | Alex |
+| Wash dishes | 15 | `true` | `2026-03-08` | Jordan |
 
 ### Shopping Items (sample)
 
@@ -455,11 +451,12 @@ Seeded by the `OpenFlat.MigrationService` after running all migrations.
 │  │ id (PK)      │                 │ id (PK)          │         │
 │  │ title        │                 │ task_id (FK)     │         │
 │  │ points       │                 │ user_id          │         │
-│  │ status       │                 │ text             │         │
-│  │ assigned_    │                 │ is_edited        │         │
-│  │   user_id    │                 │ created_at       │         │
-│  │ sort_order   │                 │ updated_at       │         │
-│  │ created_by_  │                 └──────────────────┘         │
+│  │ is_done      │                 │ text             │         │
+│  │ due_date     │                 │ is_edited        │         │
+│  │ completed_at │                 │ created_at       │         │
+│  │ assigned_    │                 │ updated_at       │         │
+│  │   user_id    │                 └──────────────────┘         │
+│  │ created_by_  │                                               │
 │  │   user_id    │                                               │
 │  │ created_at   │                                               │
 │  │ updated_at   │                                               │

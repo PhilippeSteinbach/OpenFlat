@@ -1496,3 +1496,106 @@ Users: Alex, Jordan, Sam, Taylor, Casey. Total expenses: €250.
 | **i18n sharing** | Shared `shared/locales/` directory. Both platforms use `i18next` + `react-i18next`. Platform-specific: language detector, loading strategy. |
 | **Styling** | NativeWind v4 (`nativewind@^4.1`) + `tailwindcss` v3.4.x. Shared `tailwind.config.ts`. Metro CSS transformer. |
 | **Mobile packages** | `expo-router`, `react-native-gesture-handler`, `react-native-reanimated`, `nativewind` ^4.1, `@microsoft/signalr` ^10.0.0, `expo-localization`, `i18next`, `react-i18next` |
+
+---
+
+# Phase 0 Research: Cleaning Board Redesign (Kanban → Checklist)
+
+**Date**: 2026-03-09  
+**Context**: User requested the Cleaning Board be changed from a 4-column Kanban board to a checklist (like Shopping List), showing responsible person name, days remaining, and days overdue.
+
+---
+
+## 1. Deadline/Due Date Model
+
+**Decision**: Add `DueDate` (DateOnly, nullable) to `CleaningTask`
+
+**Rationale**: A cleaning task needs a deadline to compute "days remaining" and "days overdue." The formula is simply `DueDate - DateOnly.FromDateTime(DateTime.UtcNow.Date)`. A nullable DueDate allows tasks without deadlines (they sort last).
+
+**Alternatives considered**:
+- **IntervalDays + LastCompletedAt** (recurring schedule): More powerful for recurring chores but adds state machine complexity. Deferred to future iteration.
+- **No DueDate**: Doesn't satisfy the user's requirement for days remaining/overdue.
+
+## 2. Checklist UX Model
+
+**Decision**: Simple done/not-done checklist with checkbox toggle (like Shopping List)
+
+**Rationale**: The user explicitly said "like a checklist, like shopping list." The Shopping List uses:
+- Active items (not bought)  
+- Recently bought items (auto-clear after 7 days)
+
+For cleaning, the analogous pattern:
+- **Active tasks** — sorted by urgency: overdue first (red), then due soon (yellow/green), then no deadline
+- **Completed tasks** — section below active, can be undone
+
+The `CleaningTaskStatus` enum (Todo/InProgress/AwaitingReview/Done) is replaced by `IsDone` boolean + `CompletedAt` timestamp.
+
+**Alternatives considered**:
+- **Keep Status enum with 2 states**: No value over a boolean.
+- **Three-state (Todo/InProgress/Done)**: User explicitly rejected Kanban workflow.
+
+## 3. Sorting Strategy
+
+**Decision**: Natural sort by urgency, no manual SortOrder
+
+Tasks sort by:
+1. `IsDone` ascending (active tasks first)
+2. `DueDate` ascending with nulls last (most urgent first)
+3. `CreatedAt` ascending (oldest first as tiebreaker)
+
+The `SortOrder` column is removed. No drag-and-drop reordering.
+
+## 4. Display: Responsible Person + Deadline Badges
+
+Each checklist item shows:
+- **Checkbox** (toggle done/undone)
+- **Title**
+- **Responsible person name** (from `AssignedUserId` → `PredefinedUsers.GetById()`)
+- **Points badge** (retained for gamification)
+- **Deadline badge**:
+  - No DueDate → no badge
+  - Days remaining > 3 → green badge "X days"
+  - Days remaining 1-3 → yellow badge "X days"
+  - Due today → orange badge "Today"
+  - Overdue → red badge "X days overdue"
+
+## 5. Migration Strategy
+
+**Decision**: New EF migration modifying `cleaning.tasks` in-place
+
+Schema changes:
+- **Add** `DueDate` (date, nullable)
+- **Add** `IsDone` (boolean, default false)
+- **Add** `CompletedAt` (timestamptz, nullable)
+- **Remove** `Status` column
+- **Remove** `SortOrder` column
+- **Update indexes**: Remove `ix_tasks_status`, `ix_tasks_status_sort`; add `ix_tasks_is_done_due_date`
+
+Prototype phase with ~5 seed rows — destructive migration is acceptable.
+
+## 6. API Changes
+
+| Endpoint | Action |
+|----------|--------|
+| `POST /api/tasks/{id}/move` | **REMOVED** |
+| `POST /api/tasks/{id}/complete` | **NEW** — toggles `IsDone`; awards/deducts points |
+| `POST /api/tasks` | **MODIFIED** — accepts optional `dueDate` field |
+| `PUT /api/tasks/{id}` | **MODIFIED** — accepts optional `dueDate` field |
+| `GET /api/tasks` | **MODIFIED** — returns `isDone`, `dueDate`, `completedAt`; no `status`/`sortOrder` |
+
+## 7. SignalR Event Changes
+
+| Old Event | New Event |
+|-----------|-----------|
+| `TaskMoved` | **REMOVED** |
+| N/A | `TaskCompleted` (new) |
+| N/A | `TaskUncompleted` (new) |
+| `TaskCreated/Updated/Deleted/Assigned` | Unchanged |
+| Comment events | Unchanged |
+| `LeaderboardUpdated` | Unchanged |
+
+## 8. Frontend Dependency Changes
+
+- **Remove**: `@dnd-kit/react` (Kanban drag-and-drop) — no longer used anywhere
+- **Remove**: `KanbanBoard.tsx`, `TaskCard.tsx` — replaced by `CleaningChecklist.tsx`, `ChecklistItem.tsx`
+- **Add**: Date picker input in `TaskDialogs.tsx` for `dueDate` field

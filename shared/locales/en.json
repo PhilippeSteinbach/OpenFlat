@@ -27,7 +27,7 @@
     "title": "Dashboard",
     "greeting": "Hey, {{name}}!",
     "modules": {
-      "cleaning": "Cleaning Board",
+      "cleaning": "Cleaning",
       "shopping": "Shopping List",
       "finance": "Finance Tracker"
     },
@@ -38,12 +38,21 @@
     "switchUser": "Switch User"
   },
   "cleaning": {
-    "title": "Cleaning Board",
-    "columns": {
-      "todo": "To Do",
-      "inProgress": "In Progress",
-      "awaitingReview": "Awaiting Review",
-      "done": "Done"
+    "title": "Cleaning",
+    "sections": {
+      "active": "Active",
+      "completed": "Completed"
+    },
+    "emptyState": {
+      "title": "No tasks yet",
+      "description": "Create your first cleaning task to get started!"
+    },
+    "deadline": {
+      "overdue_one": "{{count}}d overdue",
+      "overdue_other": "{{count}}d overdue",
+      "today": "Today",
+      "daysLeft_one": "{{count}}d left",
+      "daysLeft_other": "{{count}}d left"
     },
     "task": {
       "create": "Create Task",
@@ -53,10 +62,16 @@
       "title": "Title",
       "titlePlaceholder": "e.g. Vacuum living room",
       "points": "Points",
+      "dueDate": "Due Date",
       "assignee": "Assigned to",
+      "assign": "Assign",
       "unassigned": "Unassigned",
       "unassignedWarning": "No user assigned — no points will be credited",
-      "youSuffix": " (you)"
+      "youSuffix": " (you)",
+      "markDone": "Mark as done",
+      "markUndone": "Mark as not done",
+      "done": "Done",
+      "open": "Open"
     },
     "signalr": {
       "connected": "Real-time connected",

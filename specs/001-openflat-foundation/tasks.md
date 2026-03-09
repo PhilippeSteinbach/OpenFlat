@@ -1,195 +1,130 @@
-# Tasks: OpenFlat Foundation
+# Tasks: Cleaning Board Redesign (Kanban → Checklist)
 
 **Input**: Design documents from `/specs/001-openflat-foundation/`
-**Prerequisites**: plan.md, spec.md, research.md, data-model.md, contracts/
+**Prerequisites**: plan.md ✅, spec.md ✅, research.md ✅, data-model.md ✅, contracts/cleaning-api.yaml ✅
 
-**Tests**: Constitution Principle II (NON-NEGOTIABLE) — test tasks are integrated into each phase.
+**Tests**: Existing test suites will be updated to match the new checklist model (unit, integration, contract, E2E).
 
-**Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
+**Organization**: Tasks organized by implementation phase. This is a redesign of User Story 2 (Cleaning Checklist) — other user stories are already implemented and unaffected.
 
 ## Format: `[ID] [P?] [Story] Description`
 
-- **[P]**: Can run in parallel (different files, no dependencies on incomplete tasks)
-- **[Story]**: Which user story this task belongs to (e.g., US1, US2, US3)
+- **[P]**: Can run in parallel (different files, no dependencies)
+- **[US2]**: Cleaning Checklist (the redesigned user story)
 - Include exact file paths in descriptions
 
 ---
 
-## Phase 1: Setup (Shared Infrastructure)
+## Phase 1: Setup
 
-**Purpose**: Create solution structure, Aspire orchestration projects, and initialize web + mobile app scaffolding
+**Purpose**: Prepare the codebase for the Kanban → Checklist migration
 
-- [X] T001 Create .NET solution file with all project directories per plan.md structure in OpenFlat.sln
-- [X] T002 [P] Create OpenFlat.AppHost project with Aspire SDK 13.1 in OpenFlat.AppHost/OpenFlat.AppHost.csproj
-- [X] T003 [P] Create OpenFlat.ServiceDefaults project with health checks and telemetry extensions in OpenFlat.ServiceDefaults/Extensions.cs
-- [X] T004 [P] Create OpenFlat.Shared project with PredefinedUsers constants and UserInfo record in backend/OpenFlat.Shared/Users/PredefinedUsers.cs
-- [X] T005 [P] Initialize React 19 frontend with Vite, TypeScript, Tailwind CSS 3.4, ESLint, and Prettier in frontend/
-- [X] T006 [P] Initialize Expo SDK 52+ app with TypeScript, Expo Router v4, and NativeWind v4 in mobile/
+- [x] T001 Remove `@dnd-kit/react` and `@dnd-kit/dom` dependencies from frontend/package.json and run `npm install`
+- [x] T002 [P] Delete Kanban-specific frontend files: frontend/src/features/cleaning/KanbanBoard.tsx and frontend/src/features/cleaning/TaskCard.tsx
 
 ---
 
-## Phase 2: Foundational (Blocking Prerequisites)
+## Phase 2: Foundational (Backend Model & Migration)
 
-**Purpose**: Backend API skeletons with EF Core, database migrations, AppHost orchestration, and frontend/mobile infrastructure
+**Purpose**: Update the data model, EF entity, DbContext, and generate the database migration. MUST be complete before any service/endpoint/frontend work.
 
-**⚠️ CRITICAL**: No user story work can begin until this phase is complete
+**⚠️ CRITICAL**: No US2 implementation work can begin until this phase is complete.
 
-- [X] T007 [P] Create OpenFlat.Cleaning.Api project with CleaningDbContext, CleaningTask + CleaningComment entities, and Program.cs in backend/OpenFlat.Cleaning.Api/
-- [X] T008 [P] Create OpenFlat.Shopping.Api project with ShoppingDbContext, ShoppingItem + ShoppingComment entities, and Program.cs in backend/OpenFlat.Shopping.Api/
-- [X] T009 [P] Create OpenFlat.Finance.Api project with FinanceDbContext, Expense entity, and Program.cs in backend/OpenFlat.Finance.Api/
-- [X] T010 Create OpenFlat.MigrationService with MigrationWorker that runs all 3 DbContext migrations and seeds sample data in OpenFlat.MigrationService/
-- [X] T011 Configure AppHost to orchestrate PostgreSQL, MigrationService, 3 APIs, and Vite frontend in OpenFlat.AppHost/Program.cs
-- [X] T011a [P] Create test projects (OpenFlat.Cleaning.Tests, OpenFlat.Shopping.Tests, OpenFlat.Finance.Tests, OpenFlat.Integration.Tests) with xUnit, FluentAssertions, Testcontainers, and WebApplicationFactory in backend/tests/
-- [X] T011b [P] Configure Vitest + React Testing Library in frontend/tests/unit/ and Playwright in frontend/tests/e2e/
-- [X] T011c [P] Configure Jest + React Native Testing Library in mobile/__tests__/
-- [X] T011d [P] Create CI pipeline (GitHub Actions) with lint, format, unit tests, integration tests, contract tests, build, bundle size check, and code coverage gates per constitution Quality Gates table in .github/workflows/ci.yml
-- [X] T012 [P] Create shared locale files with common UI strings (en.json, de.json) in shared/locales/
-- [X] T013 [P] Create shared UI primitives (Button, Card, Input, Modal, EmptyState) in frontend/src/shared/components/
-- [X] T014 [P] Setup React Router app shell with root layout and route definitions in frontend/src/app/
-- [X] T015 [P] Configure TanStack Query v5 provider and API client wrappers per service in frontend/src/shared/api/
-- [X] T016 [P] Create Zustand v5 current-user store, useSignalR hook, and i18next config in frontend/src/shared/
-- [X] T017 [P] Setup Expo root layout with stack navigator, tab navigator scaffold, and i18n config in mobile/app/ and mobile/shared/i18n/
-- [X] T018 [P] Configure mobile API client wrappers, Zustand user store, and SignalR hook in mobile/shared/
+- [x] T003 [US2] Update `CleaningTask` entity in backend/OpenFlat.Cleaning.Api/Data/CleaningTask.cs: remove `Status` enum and `SortOrder` property, add `bool IsDone` (default false), `DateOnly? DueDate`, `DateTimeOffset? CompletedAt`
+- [x] T004 [US2] Update entity configuration in backend/OpenFlat.Cleaning.Api/Data/CleaningDbContext.cs: remove Status conversion and sort indexes (`ix_tasks_status`, `ix_tasks_status_sort`), add `IsDone` default value, configure `DueDate` as nullable date, add composite index `ix_tasks_is_done_due_date` on `(IsDone, DueDate)`
+- [x] T005 [US2] Generate EF Core migration: run `dotnet ef migrations add KanbanToChecklist --project backend/OpenFlat.Cleaning.Api` and verify the migration drops `status`/`sort_order` columns and adds `is_done`/`due_date`/`completed_at` columns
+- [x] T006 [US2] Update seed data in OpenFlat.MigrationService/MigrationWorker.cs: replace `Status`/`SortOrder` fields with `IsDone`/`DueDate`/`CompletedAt` on sample cleaning tasks (e.g., "Wash dishes" → `IsDone = true, CompletedAt = now`, others → `IsDone = false, DueDate = <various>`)
 
-**Checkpoint**: All services start via `dotnet run` in AppHost. Frontend and mobile render empty shells. Database migrated with seed data.
+**Checkpoint**: Database schema updated. Run `dotnet build` on the solution and verify the migration service applies cleanly against a fresh database.
 
 ---
 
-## Phase 3: User Story 1 — User Selection & Dashboard (Priority: P1) 🎯 MVP
+## Phase 3: User Story 2 — Cleaning Checklist Backend (Priority: P2)
 
-**Goal**: Users can select their identity from 5 predefined users and land on a dashboard with 3 module tiles and a points leaderboard.
+**Goal**: Replace the Kanban move-between-columns API with a checklist toggle-done API. Tasks are listed sorted by urgency (overdue → due soon → no deadline → completed).
 
-**Independent Test**: Open the app, verify 5 users displayed with names and roles, tap a user, confirm dashboard loads with 3 module tiles and header showing selected user's name. Leaderboard shows all users at 0 points initially.
+**Independent Test**: `curl -H "X-User-Id: 1" https://localhost:5101/api/tasks` returns tasks with `isDone`, `dueDate`, `completedAt` fields. `POST /api/tasks/{id}/complete` toggles done state and returns points delta.
 
-### Implementation for User Story 1
+### Backend Service Layer
 
-- [X] T019 [US1] Implement user selection screen showing 5 users with names, roles, and avatars in frontend/src/features/user-selection/
-- [X] T020 [P] [US1] Implement mobile user selection screen in mobile/app/user-selection.tsx
-- [X] T021 [US1] Implement main dashboard with 3 module tiles (Cleaning Board, Shopping List, Finance Tracker) and user header in frontend/src/features/dashboard/
-- [X] T022 [P] [US1] Implement mobile dashboard with 3 module tiles and user header in mobile/app/(tabs)/index.tsx
-- [X] T023 [US1] Add current user's points in dashboard header and compact leaderboard widget in frontend/src/features/dashboard/
-- [X] T024 [P] [US1] Add points display and leaderboard widget to mobile dashboard in mobile/app/(tabs)/index.tsx
-- [X] T025 [US1] Implement user switching navigation (back to selection screen) in frontend/src/app/ routes
-- [X] T026 [P] [US1] Implement mobile user switching in mobile/app/_layout.tsx
+- [x] T007 [US2] Refactor `CleaningTaskService` in backend/OpenFlat.Cleaning.Api/Services/CleaningTaskService.cs: remove `MoveAsync` method, add `CompleteAsync(Guid taskId)` that toggles `IsDone`, sets/clears `CompletedAt`, and returns `(task, pointsDelta, warningNoAssignee)`
+- [x] T008 [US2] Update `GetAllAsync` in backend/OpenFlat.Cleaning.Api/Services/CleaningTaskService.cs: replace status-based ordering with urgency sort — `OrderBy(IsDone).ThenBy(DueDate == null).ThenBy(DueDate).ThenByDescending(CreatedAt)`
+- [x] T009 [US2] Update `CreateAsync` in backend/OpenFlat.Cleaning.Api/Services/CleaningTaskService.cs: accept optional `DueDate` and `AssignedUserId` parameters, remove `Status = Todo` and `SortOrder` initialization
+- [x] T010 [US2] Update `UpdateAsync` in backend/OpenFlat.Cleaning.Api/Services/CleaningTaskService.cs: accept `DueDate` parameter, handle point recalculation when `IsDone` and points change (FR-014a)
+- [x] T011 [P] [US2] Update `LeaderboardService` in backend/OpenFlat.Cleaning.Api/Services/LeaderboardService.cs: change leaderboard query to filter by `IsDone == true` instead of `Status == Done`
 
-**Checkpoint**: User selection → dashboard flow works on web and mobile. 3 module tiles visible, leaderboard shows 5 users at 0 points.
+### Backend Endpoints & DTOs
 
----
+- [x] T012 [US2] Update DTOs in backend/OpenFlat.Cleaning.Api/Endpoints/TaskEndpoints.cs: replace `TaskResponse` fields (`status`, `sortOrder`) with `isDone`, `dueDate`, `completedAt`, `assignedUserName`; update `CreateTaskRequest`/`UpdateTaskRequest` to include optional `dueDate`; add `CompleteTaskResponse` record with `task`, `pointsDelta`, `warningNoAssignee`
+- [x] T013 [US2] Update endpoint mappings in backend/OpenFlat.Cleaning.Api/Endpoints/TaskEndpoints.cs: remove `POST /api/tasks/{taskId}/move` endpoint, add `POST /api/tasks/{taskId}/complete` endpoint that calls `CompleteAsync` and broadcasts via SignalR
+- [x] T014 [US2] Update SignalR broadcast calls in backend/OpenFlat.Cleaning.Api/Endpoints/TaskEndpoints.cs: replace `TaskMoved` event with `TaskCompleted`/`TaskUncompleted` events using `CompleteTaskResponse` payload; keep `TaskCreated`, `TaskUpdated`, `TaskDeleted`, `TaskAssigned`, `LeaderboardUpdated`
 
-## Phase 4: User Story 2 — Cleaning Board (Priority: P2)
-
-**Goal**: Kanban board with 4 columns, drag-and-drop task movement, user assignment, gamified point crediting/deducting, and real-time updates via SignalR.
-
-**Independent Test**: Navigate to Cleaning Board, verify 4 columns render with seed tasks, drag a task between columns, assign a user, move to Done and confirm points credited, move back and confirm points deducted.
-
-### Implementation for User Story 2
-
-- [X] T027 [P] [US2] Implement CleaningTaskService with CRUD, move, assign, and point crediting/deducting logic in backend/OpenFlat.Cleaning.Api/Services/CleaningTaskService.cs
-- [X] T028 [P] [US2] Implement LeaderboardService for point aggregation across all users in backend/OpenFlat.Cleaning.Api/Services/LeaderboardService.cs
-- [X] T029 [US2] Implement task endpoints (listTasks, createTask, getTask, updateTask, deleteTask, moveTask, assignTask) per contracts/cleaning-api.yaml in backend/OpenFlat.Cleaning.Api/Endpoints/TaskEndpoints.cs
-- [X] T030 [US2] Implement leaderboard endpoint (getLeaderboard) per contracts/cleaning-api.yaml in backend/OpenFlat.Cleaning.Api/Endpoints/LeaderboardEndpoints.cs
-- [X] T031 [US2] Implement CleaningHub SignalR hub for real-time task and leaderboard updates in backend/OpenFlat.Cleaning.Api/Hubs/CleaningHub.cs
-- [X] T032 [US2] Create Kanban board component with 4 columns and @dnd-kit/react drag-and-drop in frontend/src/features/cleaning/KanbanBoard.tsx
-- [X] T033 [US2] Implement TaskCard component with title, points, assignee display, and current-user highlight in frontend/src/features/cleaning/TaskCard.tsx
-- [X] T034 [US2] Implement create/edit/delete task dialogs and user assignment dropdown in frontend/src/features/cleaning/
-- [X] T035 [US2] Connect cleaning board to SignalR CleaningHub via useSignalR hook in frontend/src/features/cleaning/
-- [X] T035a [P] [US2] Write unit tests for CleaningTaskService (CRUD, move, assign, point credit/deduct, edge cases) and LeaderboardService in backend/tests/OpenFlat.Cleaning.Tests/
-- [X] T035b [P] [US2] Write integration tests for all 12 Cleaning API endpoints using WebApplicationFactory + Testcontainers in backend/tests/OpenFlat.Cleaning.Tests/Integration/
-- [X] T035c [US2] Write Playwright E2E test for Kanban board user journey (create task → drag to Done → verify points) in frontend/tests/e2e/cleaning.spec.ts
-- [X] T036 [US2] Create mobile cleaning board with status tabs, task cards, move actions, and create/assign modals in mobile/app/(tabs)/cleaning.tsx
-- [X] T037 [US2] Implement mobile task cards, create/edit/delete forms, and assignment control in mobile/app/(tabs)/cleaning.tsx
-- [X] T038 [US2] Wire leaderboard API data to dashboard leaderboard widgets on web and mobile
-
-**Checkpoint**: Cleaning Board fully functional with drag-and-drop, point system, real-time sync. Dashboard leaderboard reflects task completions.
+**Checkpoint**: Backend API compiles and serves the new contract. Verify with curl: `GET /api/tasks` returns `isDone`/`dueDate`/`completedAt` fields; `POST /complete` toggles state.
 
 ---
 
-## Phase 5: User Story 3 — Shopping List (Priority: P3)
+## Phase 4: User Story 2 — Cleaning Checklist Frontend (Priority: P2)
 
-**Goal**: Shopping list with add/edit items, check-off to Recently Bought, undo, 7-day auto-clear, and real-time updates via SignalR.
+**Goal**: Replace the Kanban board UI with a checklist view showing responsible person names and deadline badges. Active tasks sorted by urgency, completed tasks below.
 
-**Independent Test**: Navigate to Shopping List, add an item with name and quantity, verify it appears with adder's name, check it off, confirm it moves to Recently Bought, tap to undo, confirm it returns to active list.
+**Independent Test**: Navigate to `/cleaning`, verify tasks display as a checklist with checkboxes, assignee names, deadline badges ("3d left" / "2d overdue"), and checkbox toggle works.
 
-### Implementation for User Story 3
+### Types & API Layer
 
-- [X] T039 [P] [US3] Implement ShoppingItemService with CRUD, buy, undo, and validation logic in backend/OpenFlat.Shopping.Api/Services/ShoppingItemService.cs
-- [X] T040 [P] [US3] Implement AutoClearService as hosted background service for 7-day expiry in backend/OpenFlat.Shopping.Api/Services/AutoClearService.cs
-- [X] T041 [US3] Implement item endpoints (listItems, createItem, getItem, updateItem, buyItem, undoBuyItem) per contracts/shopping-api.yaml in backend/OpenFlat.Shopping.Api/Endpoints/ItemEndpoints.cs
-- [X] T042 [US3] Implement ShoppingHub SignalR hub for real-time item updates in backend/OpenFlat.Shopping.Api/Hubs/ShoppingHub.cs
-- [X] T043 [US3] Create shopping list view with active items list and Recently Bought section in frontend/src/features/shopping/ShoppingList.tsx
-- [X] T044 [US3] Implement add/edit item form and check-off/undo interactions in frontend/src/features/shopping/
-- [X] T045 [US3] Connect shopping list to SignalR ShoppingHub via useSignalR hook in frontend/src/features/shopping/
-- [X] T046 [US3] Create mobile shopping list with active and Recently Bought sections in mobile/app/(tabs)/shopping/index.tsx
-- [X] T047 [US3] Implement mobile add/edit item form, check-off/undo gestures in mobile/features/shopping/
-- [X] T048 [US3] Connect mobile shopping list to SignalR ShoppingHub in mobile/features/shopping/
-- [X] T048a [P] [US3] Write unit tests for ShoppingItemService (CRUD, buy, undo, validation) and AutoClearService (7-day expiry) in backend/tests/OpenFlat.Shopping.Tests/Unit/
-- [X] T048b [P] [US3] Write integration tests for all 10 Shopping API endpoints using WebApplicationFactory + Testcontainers in backend/tests/OpenFlat.Shopping.Tests/Integration/
-- [X] T048c [US3] Write Playwright E2E test for shopping user journey (add item → check off → undo → verify Recently Bought) in frontend/tests/e2e/shopping.spec.ts
+- [x] T015 [P] [US2] Update types in frontend/src/features/cleaning/types.ts: remove `TaskStatus` enum, `TASK_STATUSES`, `STATUS_LABELS`; update `CleaningTask` interface with `isDone: boolean`, `dueDate: string | null`, `completedAt: string | null`, `assignedUserName: string | null`; remove `status` and `sortOrder` fields
+- [x] T016 [P] [US2] Update API functions in frontend/src/features/cleaning/api.ts: remove `moveTask` mutation, add `completeTask(taskId: string)` mutation that POSTs to `/api/tasks/{taskId}/complete`; update `createTask`/`updateTask` to include optional `dueDate` field; ensure response mapping matches new `TaskDto` shape
 
-**Checkpoint**: Shopping List fully functional with add, edit, buy, undo, auto-clear, real-time sync on web and mobile.
+### New Components
 
----
+- [x] T017 [US2] Create frontend/src/features/cleaning/CleaningChecklist.tsx: main checklist view that fetches tasks via `useQuery`, splits into active (undone, sorted by urgency) and completed sections, renders `ChecklistItem` for each task, includes "Add Task" button opening create dialog
+- [x] T018 [US2] Create frontend/src/features/cleaning/ChecklistItem.tsx: single checklist row with checkbox (toggle done), task title, point badge, assigned person's name, deadline badge (compute days from `dueDate` — "Xd left" green/yellow or "Xd overdue" red), highlight if assigned to current user (FR-011), tap to open detail view
 
-## Phase 6: User Story 4 — Finance Tracker & Settlement (Priority: P4)
+### Updated Components
 
-**Goal**: Expense logging with own-only edit/delete, chronological list, and Settlement View with minimized debt transactions using greedy net-balance matching.
+- [x] T019 [US2] Update frontend/src/features/cleaning/TaskDetail.tsx: remove status display and move-between-columns controls; show `isDone` checkbox, due date display, `completedAt` timestamp, assigned person name; keep comment thread and assign/edit/delete actions
+- [x] T020 [US2] Update frontend/src/features/cleaning/TaskDialogs.tsx: add date picker for `dueDate` in create and edit dialogs; add optional `assignedUserId` selector in create dialog; remove any status-related form fields
+- [x] T021 [US2] Update frontend/src/features/cleaning/useCleaningHub.ts: replace `TaskMoved` event handler with `TaskCompleted` and `TaskUncompleted` handlers that invalidate tasks query and update leaderboard; ensure `CompleteTaskResponse` payload is correctly typed
 
-**Independent Test**: Navigate to Finance Tracker, log 2 expenses from different users, verify expense list shows both entries with amounts and dates, check Settlement View for correct 5-way split and minimized transactions.
+### Route Integration
 
-### Implementation for User Story 4
+- [x] T022 [US2] Update cleaning route entry point to render `CleaningChecklist` instead of `KanbanBoard` — update the import in the route file under frontend/src/app/ that references the cleaning feature
 
-- [X] T049 [P] [US4] Implement ExpenseService with CRUD and amount validation (positive cents only) in backend/OpenFlat.Finance.Api/Services/ExpenseService.cs
-- [X] T050 [P] [US4] Implement SettlementService with greedy net-balance matching algorithm (max N-1 transactions) in backend/OpenFlat.Finance.Api/Services/SettlementService.cs
-- [X] T051 [US4] Implement expense and settlement endpoints (listExpenses, createExpense, getExpense, updateExpense, deleteExpense, getSettlement) per contracts/finance-api.yaml in backend/OpenFlat.Finance.Api/Endpoints/
-- [X] T052 [US4] Create expense list view with chronological display and own-only edit/delete controls in frontend/src/features/finance/ExpenseList.tsx
-- [X] T053 [US4] Implement log/edit/delete expense forms with EUR validation in frontend/src/features/finance/
-- [X] T054 [US4] Implement Settlement View with debt transactions list and settled-up state in frontend/src/features/finance/SettlementView.tsx
-- [X] T055 [US4] Create mobile expense list and log/edit/delete forms with own-only controls in mobile/app/(tabs)/finance/index.tsx
-- [X] T056 [US4] Implement mobile settlement view with transactions and settled-up state in mobile/features/finance/
-- [X] T056a [P] [US4] Write unit tests for ExpenseService (CRUD, own-only validation) and SettlementService (greedy net-balance, all-settled, single-payer, zero-amount edge cases) in backend/tests/OpenFlat.Finance.Tests/Unit/
-- [X] T056b [P] [US4] Write integration tests for all 6 Finance API endpoints using WebApplicationFactory + Testcontainers in backend/tests/OpenFlat.Finance.Tests/Integration/
-- [X] T056c [US4] Write Playwright E2E test for finance user journey (log expense → verify settlement calculation) in frontend/tests/e2e/finance.spec.ts
-
-**Checkpoint**: Finance Tracker fully functional. Expenses logged, own-only edit/delete works, Settlement View shows correct minimized debts.
+**Checkpoint**: Full checklist UI functional. Navigate to Cleaning, see tasks as checklist items with checkboxes, assignee names, deadline badges. Toggle done state, verify points update on leaderboard.
 
 ---
 
-## Phase 7: User Story 5 — Comments on Tasks and Shopping Items (Priority: P5)
+## Phase 5: Test Updates
 
-**Goal**: Comment threads on cleaning tasks and shopping items with add, edit own, delete own, and edited indicator. Real-time updates via existing SignalR hubs.
+**Purpose**: Update all existing test suites to match the new checklist model and API shape
 
-**Independent Test**: Open a task card, add a comment, verify it appears with author name and timestamp. Verify edit/delete controls only on own comments. Open a shopping item, repeat same test.
+### Backend Unit Tests
 
-### Implementation for User Story 5
+- [x] T023 [P] [US2] Update backend/tests/OpenFlat.Cleaning.Tests/CleaningTaskServiceTests.cs: replace `MoveAsync` tests with `CompleteAsync` tests — verify toggle done/undone, point crediting/deducting, `warningNoAssignee` when no assignee, `CompletedAt` set/cleared
+- [x] T024 [P] [US2] Update backend/tests/OpenFlat.Cleaning.Tests/LeaderboardServiceTests.cs: update test data to use `IsDone = true` instead of `Status = Done` for completed tasks in leaderboard calculations
 
-- [X] T057 [P] [US5] Implement task comment endpoints (listTaskComments, addTaskComment, updateTaskComment, deleteTaskComment) per contracts/cleaning-api.yaml in backend/OpenFlat.Cleaning.Api/Endpoints/CommentEndpoints.cs
-- [X] T058 [P] [US5] Implement item comment endpoints (listItemComments, addItemComment, updateItemComment, deleteItemComment) per contracts/shopping-api.yaml in backend/OpenFlat.Shopping.Api/Endpoints/CommentEndpoints.cs
-- [X] T059 [US5] Create shared CommentThread component with add, edit, delete, edited indicator, and own-only controls in frontend/src/features/comments/CommentThread.tsx
-- [X] T060 [US5] Integrate CommentThread into cleaning task detail view in frontend/src/features/cleaning/TaskDetail.tsx
-- [X] T061 [P] [US5] Integrate CommentThread into shopping item detail view in frontend/src/features/shopping/ItemDetail.tsx
-- [X] T062 [US5] Create mobile shared CommentThread component in mobile/features/comments/CommentThread.tsx
-- [X] T063 [US5] Integrate comments into mobile task detail screen in mobile/app/(tabs)/cleaning/[taskId].tsx
-- [X] T064 [P] [US5] Integrate comments into mobile shopping item detail screen in mobile/features/shopping/
-- [X] T064a [P] [US5] Write integration tests for comment endpoints (Cleaning + Shopping) covering add, edit own, delete own, reject other's in backend/tests/OpenFlat.Cleaning.Tests/ and backend/tests/OpenFlat.Shopping.Tests/
-- [X] T064b [US5] Write Playwright E2E test for comments user journey (add comment → edit → delete → verify permission enforcement) in frontend/tests/e2e/comments.spec.ts
+### Backend Integration Tests
 
-**Checkpoint**: Comments work on both cleaning tasks and shopping items, both web and mobile. Own-only edit/delete enforced. Edited indicator shown.
+- [x] T025 [P] [US2] Update backend/tests/OpenFlat.Cleaning.Tests/Integration/CleaningEndpointTests.cs: replace `/move` endpoint tests with `/complete` endpoint tests; update response assertions for new `TaskDto` shape (`isDone`, `dueDate`, `completedAt` instead of `status`, `sortOrder`); verify urgency sort order in `GET /api/tasks`
+- [x] T026 [P] [US2] Update backend/tests/OpenFlat.Integration.Tests/CleaningContractTests.cs: update contract test assertions to match new API schema (v2.0.0) — verify `TaskDto` contains `isDone`/`dueDate`/`completedAt`, `CompleteTaskResponse` shape, absence of `/move` endpoint
+
+### Frontend E2E Tests
+
+- [x] T027 [US2] Update frontend/tests/e2e/cleaning.spec.ts: replace Kanban board tests (column rendering, drag-and-drop between columns) with checklist tests — verify checklist rendering, checkbox toggle, deadline badges ("Xd left" / "Xd overdue"), assignee name display, point crediting on completion
+
+**Checkpoint**: All tests pass. Run `dotnet test` for backend and `npx playwright test` for E2E.
 
 ---
 
-## Phase 8: Polish & Cross-Cutting Concerns
+## Phase 6: Polish & Cross-Cutting Concerns
 
-**Purpose**: i18n completion, responsive validation, error/empty/loading states, and quickstart validation
+**Purpose**: Cleanup, documentation, and final validation
 
-- [X] T065 [P] Complete EN + DE translations for all user-facing strings in shared/locales/en.json and shared/locales/de.json
-- [X] T066 [P] Validate all views on 375px viewport (iPhone SE) — no horizontal scroll or overlapping (FR-033, FR-034, SC-009)
-- [X] T067 [P] Add empty states, loading states, and error states to all views across web and mobile
-- [X] T068 Add validation error messages for all forms: expense amount (FR-030), item name (FR-031), comment text (FR-032)
-- [X] T069 Run quickstart.md validation — clean clone, install, dotnet run AppHost, verify all services start and seed data loads
-- [X] T069a [P] Write contract tests validating all 3 API responses against OpenAPI specs (cleaning-api.yaml, shopping-api.yaml, finance-api.yaml) in backend/tests/OpenFlat.Integration.Tests/
-- [X] T069b [P] Write Playwright E2E test for US1 user journey (select user → verify dashboard → switch user) in frontend/tests/e2e/user-selection.spec.ts
-- [X] T069c [P] Write Jest + RNTL component tests for mobile user selection, dashboard, and core feature screens in mobile/__tests__/
-- [X] T069d [P] Audit and add ARIA labels to all interactive web elements, accessibility traits to all mobile interactive elements, and verify WCAG 2.1 AA color contrast (4.5:1 for text) across all views
+- [x] T028 [P] Remove any remaining Kanban-related imports, CSS classes, or i18n keys across frontend/src/ (search for "kanban", "KanbanBoard", "TaskCard", "drag", "dnd", "column" references)
+- [x] T029 [P] Update the dashboard module tile label from "Cleaning Board" to "Cleaning" in the dashboard component under frontend/src/features/dashboard/ or frontend/src/app/
+- [x] T029a [P] Add i18n resource keys (English + German) for all new Cleaning Checklist strings: deadline badges ("Xd left" / "Xd overdue"), no-assignee warning, empty state message, component labels in CleaningChecklist.tsx and ChecklistItem.tsx. Update both `en.json` and `de.json` resource files.
+- [x] T029b [P] Update data-model.md documentation: fix seed data table, ERD, and remaining references to match the checklist redesign
+- [x] T030 Verify the full workflow end-to-end: start Aspire AppHost, navigate to the app, select a user, open Cleaning, create a task with due date, assign a user, mark done, verify points on leaderboard, verify SignalR real-time update in a second browser tab
+- [x] T031 Run quickstart.md validation: follow all steps from scratch on a clean database and verify the cleaning checklist works as documented
 
 ---
 
@@ -198,110 +133,88 @@
 ### Phase Dependencies
 
 - **Setup (Phase 1)**: No dependencies — can start immediately
-- **Foundational (Phase 2)**: Depends on Phase 1 completion — **BLOCKS all user stories**
-- **US1 (Phase 3)**: Depends on Phase 2 — no dependencies on other stories
-- **US2 (Phase 4)**: Depends on Phase 2 — no dependencies on other stories
-- **US3 (Phase 5)**: Depends on Phase 2 — no dependencies on other stories
-- **US4 (Phase 6)**: Depends on Phase 2 — no dependencies on other stories
-- **US5 (Phase 7)**: Depends on **US2 + US3** (needs task detail and item detail views to integrate comments into)
-- **Polish (Phase 8)**: Depends on all desired user stories being complete
+- **Foundational (Phase 2)**: Depends on Phase 1 — BLOCKS all implementation work
+- **Backend (Phase 3)**: Depends on Phase 2 completion
+- **Frontend (Phase 4)**: Depends on Phase 3 completion (needs working API)
+- **Tests (Phase 5)**: Backend tests (T023–T026) can start after Phase 3; E2E test (T027) needs Phase 4
+- **Polish (Phase 6)**: Depends on Phase 4 completion
 
-### User Story Dependencies
+### Within Each Phase
 
-- **US1 (P1)** → Independent after Phase 2. Dashboard leaderboard shows 0 points until US2 provides data.
-- **US2 (P2)** → Independent after Phase 2. T038 (wire leaderboard to dashboard) requires US1 dashboard widgets to exist.
-- **US3 (P3)** → Fully independent after Phase 2.
-- **US4 (P4)** → Fully independent after Phase 2.
-- **US5 (P5)** → Requires US2 (cleaning task detail view) and US3 (shopping item detail view).
-
-### Within Each User Story
-
-- Backend services before endpoints
-- Endpoints before frontend integration
-- Web frontend before mobile (mirrors same logic)
-- SignalR hub before real-time client connection
-- Core implementation before cross-story integration
+```
+Phase 1:  T001 ──┐
+          T002 ──┤ (parallel — different concerns)
+                 ▼
+Phase 2:  T003 → T004 → T005 → T006  (sequential — model → config → migration → seed)
+                 ▼
+Phase 3:  T007 → T008 → T009 → T010  (sequential — service methods)
+          T011 ─────────────────────  (parallel — different service file)
+                 ▼
+          T012 → T013 → T014         (sequential — DTOs → endpoints → SignalR)
+                 ▼
+Phase 4:  T015 ──┐
+          T016 ──┤ (parallel — types & api layer)
+                 ▼
+          T017 → T018                (sequential — parent component → child)
+                 ▼
+          T019 ──┐
+          T020 ──┤
+          T021 ──┤ (parallel — independent component updates)
+                 ▼
+          T022                       (route integration — last)
+                 ▼
+Phase 5:  T023 ──┐
+          T024 ──┤
+          T025 ──┤ (parallel — independent test files)
+          T026 ──┤
+                 ▼
+          T027                       (E2E — needs full stack running)
+                 ▼
+Phase 6:  T028 ──┐
+          T029 ──┤ (parallel — independent cleanup)
+                 ▼
+          T030 → T031               (sequential — validate then quickstart)
+```
 
 ### Parallel Opportunities
 
-**Phase 1**: T002–T006 all run in parallel (different projects/directories)
-
-**Phase 2**: T007–T009 in parallel (3 independent API projects), then T010–T011 sequentially (depend on all 3 DbContexts + AppHost). T012–T018 all in parallel (different frontend/mobile directories).
-
-**Phase 3+**: Once Phase 2 complete, US1–US4 can proceed in parallel if team capacity allows. US5 must wait for US2 + US3.
-
-**Within stories**: Backend tasks marked [P] run in parallel. Web and mobile implementations of the same screen can run in parallel (e.g., T019 ∥ T020, T021 ∥ T022).
-
----
-
-## Parallel Example: User Story 2
-
-```text
-# Step 1: Backend services (parallel)
-T027: CleaningTaskService       ─┐
-T028: LeaderboardService        ─┤── parallel (different files)
-                                 │
-# Step 2: Backend endpoints (after services)
-T029: Task endpoints             ─┐
-T030: Leaderboard endpoint       ─┤── sequential within endpoints
-T031: CleaningHub SignalR         ─┘
-
-# Step 3: Frontend (after endpoints)
-T032: Kanban board               ─┐
-T033: Task card component        ─┤── sequential (board → cards → dialogs → SignalR)
-T034: Task dialogs + assignment  ─┤
-T035: SignalR connection         ─┘
-
-# Step 4: Mobile (parallel with web frontend)
-T036: Mobile Kanban board        ─┐
-T037: Mobile task cards + forms  ─┤── can run parallel with T032–T035
-                                 │
-# Step 5: Integration
-T038: Wire leaderboard to dashboard (after T030 + T023/T024)
-```
+Within each phase, tasks marked `[P]` can run in parallel:
+- **Phase 1**: T001 ∥ T002
+- **Phase 2**: None (sequential dependency chain)
+- **Phase 3**: T011 ∥ T007–T010 (different files)
+- **Phase 4**: T015 ∥ T016, then T019 ∥ T020 ∥ T021
+- **Phase 5**: T023 ∥ T024 ∥ T025 ∥ T026
+- **Phase 6**: T028 ∥ T029
 
 ---
 
 ## Implementation Strategy
 
-### MVP First (User Story 1 Only)
+### MVP First (Working Checklist)
 
-1. Complete Phase 1: Setup
-2. Complete Phase 2: Foundational (**CRITICAL — blocks all stories**)
-3. Complete Phase 3: User Story 1 (User Selection + Dashboard)
-4. **STOP and VALIDATE**: Tap a user → dashboard loads → 3 tiles visible → leaderboard at 0
-5. Deploy/demo if ready — app is navigable end-to-end
+1. Complete Phase 1: Setup (remove dead dependencies)
+2. Complete Phase 2: Foundational (model + migration)
+3. Complete Phase 3: Backend API (new endpoints working)
+4. Complete Phase 4: Frontend UI (checklist renders)
+5. **STOP and VALIDATE**: Full checklist workflow works end-to-end
+6. Complete Phase 5: Tests pass
+7. Complete Phase 6: Polish and cleanup
 
 ### Incremental Delivery
 
-1. Setup + Foundational → Foundation ready
-2. Add US1 → MVP! Selection + Dashboard working
-3. Add US2 → Cleaning Board with gamified Kanban → leaderboard comes alive
-4. Add US3 → Shopping List with buy/undo cycle
-5. Add US4 → Finance Tracker with settlement
-6. Add US5 → Comments on tasks and items
-7. Polish → i18n, responsive validation, error states
-
-### Suggested MVP Scope
-
-**User Story 1 only** (8 tasks: T019–T026). Delivers:
-- User selection screen with 5 users
-- Dashboard with 3 module tiles
-- Points header + leaderboard (initially empty)
-- User switching
-
-This validates the navigation shell and user context flow before investing in module implementation.
+1. Phase 1–2 → Database ready with new schema
+2. Phase 3 → API ready, testable with curl
+3. Phase 4 → UI ready, full user-facing feature complete
+4. Phase 5 → Quality confirmed, all tests green
+5. Phase 6 → Production-ready, documented and validated
 
 ---
 
 ## Notes
 
-- [P] tasks = different files, no dependencies on incomplete tasks in the same phase
-- [Story] label maps each task to its user story for traceability
-- Each user story is independently completable and testable after Phase 2
-- Test tasks are included per constitution Principle II (NON-NEGOTIABLE). Coverage: unit, integration, contract, E2E.
-- All backend entities and DbContexts follow data-model.md exactly
-- All API endpoints follow contracts/*.yaml specifications
-- SignalR hubs: CleaningHub (/hubs/cleaning), ShoppingHub (/hubs/shopping). No Finance hub.
-- Commit after each task or logical group
-- Stop at any checkpoint to validate story independently
+- This is a **redesign** of existing code, not greenfield — all files listed already exist (except CleaningChecklist.tsx and ChecklistItem.tsx which are new)
+- The `@dnd-kit/react` removal (T001) may trigger linter errors in other files that import it — T002 (delete files) resolves this
+- EF migration (T005) must be generated AFTER T003+T004 are complete — the migration is derived from the entity/DbContext changes
+- SignalR hub class (CleaningHub.cs) needs no changes — it's a marker hub; events are broadcast from endpoints
+- The `CleaningComment` entity and comment endpoints are unchanged — they still reference `CleaningTask` via FK
+- All `user_id` references continue to use compile-time `PredefinedUsers.All` (1–5), no DB foreign key

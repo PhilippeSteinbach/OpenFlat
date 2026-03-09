@@ -4,7 +4,7 @@ import { queryClient } from '@/shared/api/queryClient';
 import { useCurrentUserStore } from '@/shared/hooks/useCurrentUser';
 import { UserSelectionPage } from '@/features/user-selection/UserSelectionPage';
 import { DashboardPage } from '@/features/dashboard/DashboardPage';
-import { KanbanBoard } from '@/features/cleaning/KanbanBoard';
+import { CleaningChecklist } from '@/features/cleaning/CleaningChecklist';
 import { ShoppingList } from '@/features/shopping/ShoppingList';
 import { FinanceTracker } from '@/features/finance/FinanceTracker';
 
@@ -34,7 +34,7 @@ export function AppRoutes() {
             path="/cleaning"
             element={
               <RequireUser>
-                <KanbanBoard />
+                <CleaningChecklist />
               </RequireUser>
             }
           />
