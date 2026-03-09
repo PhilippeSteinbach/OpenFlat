@@ -138,15 +138,15 @@
 
 ### Implementation for User Story 4
 
-- [ ] T049 [P] [US4] Implement ExpenseService with CRUD and amount validation (positive cents only) in backend/OpenFlat.Finance.Api/Services/ExpenseService.cs
-- [ ] T050 [P] [US4] Implement SettlementService with greedy net-balance matching algorithm (max N-1 transactions) in backend/OpenFlat.Finance.Api/Services/SettlementService.cs
-- [ ] T051 [US4] Implement expense and settlement endpoints (listExpenses, createExpense, getExpense, updateExpense, deleteExpense, getSettlement) per contracts/finance-api.yaml in backend/OpenFlat.Finance.Api/Endpoints/
-- [ ] T052 [US4] Create expense list view with chronological display and own-only edit/delete controls in frontend/src/features/finance/ExpenseList.tsx
-- [ ] T053 [US4] Implement log/edit/delete expense forms with EUR validation in frontend/src/features/finance/
-- [ ] T054 [US4] Implement Settlement View with debt transactions list and settled-up state in frontend/src/features/finance/SettlementView.tsx
-- [ ] T055 [US4] Create mobile expense list and log/edit/delete forms with own-only controls in mobile/app/(tabs)/finance/index.tsx
-- [ ] T056 [US4] Implement mobile settlement view with transactions and settled-up state in mobile/features/finance/
-- [ ] T056a [P] [US4] Write unit tests for ExpenseService (CRUD, own-only validation) and SettlementService (greedy net-balance, all-settled, single-payer, zero-amount edge cases) in backend/tests/OpenFlat.Finance.Tests/Unit/
+- [X] T049 [P] [US4] Implement ExpenseService with CRUD and amount validation (positive cents only) in backend/OpenFlat.Finance.Api/Services/ExpenseService.cs
+- [X] T050 [P] [US4] Implement SettlementService with greedy net-balance matching algorithm (max N-1 transactions) in backend/OpenFlat.Finance.Api/Services/SettlementService.cs
+- [X] T051 [US4] Implement expense and settlement endpoints (listExpenses, createExpense, getExpense, updateExpense, deleteExpense, getSettlement) per contracts/finance-api.yaml in backend/OpenFlat.Finance.Api/Endpoints/
+- [X] T052 [US4] Create expense list view with chronological display and own-only edit/delete controls in frontend/src/features/finance/ExpenseList.tsx
+- [X] T053 [US4] Implement log/edit/delete expense forms with EUR validation in frontend/src/features/finance/
+- [X] T054 [US4] Implement Settlement View with debt transactions list and settled-up state in frontend/src/features/finance/SettlementView.tsx
+- [X] T055 [US4] Create mobile expense list and log/edit/delete forms with own-only controls in mobile/app/(tabs)/finance/index.tsx
+- [X] T056 [US4] Implement mobile settlement view with transactions and settled-up state in mobile/features/finance/
+- [X] T056a [P] [US4] Write unit tests for ExpenseService (CRUD, own-only validation) and SettlementService (greedy net-balance, all-settled, single-payer, zero-amount edge cases) in backend/tests/OpenFlat.Finance.Tests/Unit/
 - [ ] T056b [P] [US4] Write integration tests for all 6 Finance API endpoints using WebApplicationFactory + Testcontainers in backend/tests/OpenFlat.Finance.Tests/Integration/
 - [ ] T056c [US4] Write Playwright E2E test for finance user journey (log expense → verify settlement calculation) in frontend/tests/e2e/finance.spec.ts
 

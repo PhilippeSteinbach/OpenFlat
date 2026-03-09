@@ -6,6 +6,7 @@ import { UserSelectionPage } from '@/features/user-selection/UserSelectionPage';
 import { DashboardPage } from '@/features/dashboard/DashboardPage';
 import { KanbanBoard } from '@/features/cleaning/KanbanBoard';
 import { ShoppingList } from '@/features/shopping/ShoppingList';
+import { FinanceTracker } from '@/features/finance/FinanceTracker';
 
 function RequireUser({ children }: { children: React.ReactNode }) {
   const currentUser = useCurrentUserStore((s) => s.currentUser);
@@ -49,7 +50,7 @@ export function AppRoutes() {
             path="/finance"
             element={
               <RequireUser>
-                <div>Finance Tracker (coming soon)</div>
+                <FinanceTracker />
               </RequireUser>
             }
           />
