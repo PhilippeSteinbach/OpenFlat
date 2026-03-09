@@ -53,7 +53,7 @@ Build the OpenFlat Foundation — a household management platform with user sele
 | III. User Experience Consistency | ✅ PASS | Shared locales (en.json, de.json) in shared/locales/. NativeWind + Tailwind for consistent design tokens. Comment DTOs identical across Cleaning and Shopping APIs. User names resolved in DTOs (not raw IDs). Empty/error states specified in spec. |
 | IV. Performance & Responsiveness | ✅ PASS | DB indexes defined for all query patterns (status filtering, chronological ordering, leaderboard). Integer cents for financial amounts (no float precision issues). Settlement algorithm is O(N log N) with N=5. Minimal joins needed. |
 | V. Modular & Extensible Architecture | ✅ PASS | 3 independent schemas with independent migration histories. Each API is self-contained with Endpoints → Services → Data layering. Shared library contains only constants/DTOs. MigrationService is separate from API projects. |
-| Technology Standards | ✅ PASS | .NET 10 ≥ constitution's ".NET 8+". React Native (Expo) matches constitution v1.0.1. Node 22 ≥ 20+. All standards met. |
+| Technology Standards | ✅ PASS | .NET 10 ≥ constitution's ".NET 8+". React Native (Expo) matches constitution v1.0.2. Docker / .NET Aspire matches constitution v1.0.2. Node 22 ≥ 20+. All standards met. |
 
 **POST-DESIGN GATE RESULT**: PASS — All principles satisfied. Design artifacts are constitution-compliant.
 
@@ -113,7 +113,6 @@ backend/
 │   ├── Endpoints/
 │   ├── Services/
 │   ├── Data/
-│   ├── Hubs/
 │   └── OpenFlat.Finance.Api.csproj
 │
 ├── OpenFlat.Shared/                 # Shared DTOs, constants, user definitions

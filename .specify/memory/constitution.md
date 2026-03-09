@@ -1,12 +1,19 @@
 <!--
   Sync Impact Report
   ==================
-  Version change: 1.0.0 → 1.0.1 (patch — clarification)
+  Version change: 1.0.1 → 1.0.2 (patch — clarification)
   Modified principles: None
   Modified sections:
-    - Technology Standards: Mobile Apps row updated from
-      "React Native" to "React Native (Expo)" to reflect
-      that Expo is the chosen React Native framework.
+    - Principle V (Modular & Extensible Architecture):
+      Docker Compose bullet broadened to "Local orchestration
+      (Docker Compose or .NET Aspire AppHost)" since Aspire
+      replaces Compose for this project's local dev workflow.
+    - Technology Standards: Containerization row updated from
+      "Docker / Docker Compose" to "Docker / .NET Aspire" to
+      reflect that Aspire AppHost is the orchestration tool.
+  Previous amendments:
+    - 1.0.0 → 1.0.1: Mobile Apps row updated from
+      "React Native" to "React Native (Expo)".
   Removed sections: None
   Templates requiring updates:
     - .specify/templates/plan-template.md ✅ compatible (no changes needed)
@@ -140,9 +147,10 @@ without destabilizing existing functionality.
   module code (Open/Closed Principle). Integration points
   (e.g., notification triggers, gamification hooks) MUST
   use event-based or plugin-style contracts.
-- Docker Compose configuration MUST allow each service to
-  start independently for development. A developer working
-  on the frontend MUST NOT need to build the mobile app.
+- Local orchestration (Docker Compose or .NET Aspire AppHost)
+  MUST allow each service to start independently for
+  development. A developer working on the frontend MUST NOT
+  need to build the mobile app.
 - Database migrations MUST be forward-compatible and
   reversible. Breaking schema changes MUST include a
   migration path documented in the PR description.
@@ -160,7 +168,7 @@ amendment.
 | Mobile Apps | React Native (Expo) | Latest stable (iOS + Android) |
 | Database | PostgreSQL | 16+ |
 | Real-time | SignalR (WebSockets) | Bundled with .NET |
-| Containerization | Docker / Docker Compose | Latest stable |
+| Containerization & Orchestration | Docker / .NET Aspire | Latest stable |
 | i18n | Standard resource files | English default, German included |
 
 - All runtime dependencies MUST be pinned to specific
@@ -250,4 +258,4 @@ individual preferences, and ad-hoc decisions.
   be either enforced or formally removed via amendment. Stale
   principles erode trust in the constitution.
 
-**Version**: 1.0.1 | **Ratified**: 2026-03-09 | **Last Amended**: 2026-03-09
+**Version**: 1.0.2 | **Ratified**: 2026-03-09 | **Last Amended**: 2026-03-09

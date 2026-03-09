@@ -3,7 +3,7 @@
 **Input**: Design documents from `/specs/001-openflat-foundation/`
 **Prerequisites**: plan.md, spec.md, research.md, data-model.md, contracts/
 
-**Tests**: Not requested — test tasks are omitted. Test frameworks are defined in plan.md for future use.
+**Tests**: Constitution Principle II (NON-NEGOTIABLE) — test tasks are integrated into each phase.
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
@@ -39,6 +39,10 @@
 - [ ] T009 [P] Create OpenFlat.Finance.Api project with FinanceDbContext, Expense entity, and Program.cs in backend/OpenFlat.Finance.Api/
 - [ ] T010 Create OpenFlat.MigrationService with MigrationWorker that runs all 3 DbContext migrations and seeds sample data in OpenFlat.MigrationService/
 - [ ] T011 Configure AppHost to orchestrate PostgreSQL, MigrationService, 3 APIs, and Vite frontend in OpenFlat.AppHost/Program.cs
+- [ ] T011a [P] Create test projects (OpenFlat.Cleaning.Tests, OpenFlat.Shopping.Tests, OpenFlat.Finance.Tests, OpenFlat.Integration.Tests) with xUnit, FluentAssertions, Testcontainers, and WebApplicationFactory in backend/tests/
+- [ ] T011b [P] Configure Vitest + React Testing Library in frontend/tests/unit/ and Playwright in frontend/tests/e2e/
+- [ ] T011c [P] Configure Jest + React Native Testing Library in mobile/__tests__/
+- [ ] T011d [P] Create CI pipeline (GitHub Actions) with lint, format, unit tests, integration tests, contract tests, build, bundle size check, and code coverage gates per constitution Quality Gates table in .github/workflows/ci.yml
 - [ ] T012 [P] Create shared locale files with common UI strings (en.json, de.json) in shared/locales/
 - [ ] T013 [P] Create shared UI primitives (Button, Card, Input, Modal, EmptyState) in frontend/src/shared/components/
 - [ ] T014 [P] Setup React Router app shell with root layout and route definitions in frontend/src/app/
@@ -89,6 +93,9 @@
 - [ ] T033 [US2] Implement TaskCard component with title, points, assignee display, and current-user highlight in frontend/src/features/cleaning/TaskCard.tsx
 - [ ] T034 [US2] Implement create/edit/delete task dialogs and user assignment dropdown in frontend/src/features/cleaning/
 - [ ] T035 [US2] Connect cleaning board to SignalR CleaningHub via useSignalR hook in frontend/src/features/cleaning/
+- [ ] T035a [P] [US2] Write unit tests for CleaningTaskService (CRUD, move, assign, point credit/deduct, edge cases) and LeaderboardService in backend/tests/OpenFlat.Cleaning.Tests/Unit/
+- [ ] T035b [P] [US2] Write integration tests for all 12 Cleaning API endpoints using WebApplicationFactory + Testcontainers in backend/tests/OpenFlat.Cleaning.Tests/Integration/
+- [ ] T035c [US2] Write Playwright E2E test for Kanban board user journey (create task → drag to Done → verify points) in frontend/tests/e2e/cleaning.spec.ts
 - [ ] T036 [US2] Create mobile Kanban board with react-native-gesture-handler + react-native-reanimated drag-and-drop in mobile/app/(tabs)/cleaning/index.tsx
 - [ ] T037 [US2] Implement mobile task cards, create/edit/delete forms, and assignment control in mobile/features/cleaning/
 - [ ] T038 [US2] Wire leaderboard API data to dashboard leaderboard widgets on web and mobile
@@ -115,6 +122,9 @@
 - [ ] T046 [US3] Create mobile shopping list with active and Recently Bought sections in mobile/app/(tabs)/shopping/index.tsx
 - [ ] T047 [US3] Implement mobile add/edit item form, check-off/undo gestures in mobile/features/shopping/
 - [ ] T048 [US3] Connect mobile shopping list to SignalR ShoppingHub in mobile/features/shopping/
+- [ ] T048a [P] [US3] Write unit tests for ShoppingItemService (CRUD, buy, undo, validation) and AutoClearService (7-day expiry) in backend/tests/OpenFlat.Shopping.Tests/Unit/
+- [ ] T048b [P] [US3] Write integration tests for all 10 Shopping API endpoints using WebApplicationFactory + Testcontainers in backend/tests/OpenFlat.Shopping.Tests/Integration/
+- [ ] T048c [US3] Write Playwright E2E test for shopping user journey (add item → check off → undo → verify Recently Bought) in frontend/tests/e2e/shopping.spec.ts
 
 **Checkpoint**: Shopping List fully functional with add, edit, buy, undo, auto-clear, real-time sync on web and mobile.
 
@@ -136,6 +146,9 @@
 - [ ] T054 [US4] Implement Settlement View with debt transactions list and settled-up state in frontend/src/features/finance/SettlementView.tsx
 - [ ] T055 [US4] Create mobile expense list and log/edit/delete forms with own-only controls in mobile/app/(tabs)/finance/index.tsx
 - [ ] T056 [US4] Implement mobile settlement view with transactions and settled-up state in mobile/features/finance/
+- [ ] T056a [P] [US4] Write unit tests for ExpenseService (CRUD, own-only validation) and SettlementService (greedy net-balance, all-settled, single-payer, zero-amount edge cases) in backend/tests/OpenFlat.Finance.Tests/Unit/
+- [ ] T056b [P] [US4] Write integration tests for all 6 Finance API endpoints using WebApplicationFactory + Testcontainers in backend/tests/OpenFlat.Finance.Tests/Integration/
+- [ ] T056c [US4] Write Playwright E2E test for finance user journey (log expense → verify settlement calculation) in frontend/tests/e2e/finance.spec.ts
 
 **Checkpoint**: Finance Tracker fully functional. Expenses logged, own-only edit/delete works, Settlement View shows correct minimized debts.
 
@@ -157,6 +170,8 @@
 - [ ] T062 [US5] Create mobile shared CommentThread component in mobile/features/comments/CommentThread.tsx
 - [ ] T063 [US5] Integrate comments into mobile task detail screen in mobile/app/(tabs)/cleaning/[taskId].tsx
 - [ ] T064 [P] [US5] Integrate comments into mobile shopping item detail screen in mobile/features/shopping/
+- [ ] T064a [P] [US5] Write integration tests for comment endpoints (Cleaning + Shopping) covering add, edit own, delete own, reject other's in backend/tests/OpenFlat.Cleaning.Tests/ and backend/tests/OpenFlat.Shopping.Tests/
+- [ ] T064b [US5] Write Playwright E2E test for comments user journey (add comment → edit → delete → verify permission enforcement) in frontend/tests/e2e/comments.spec.ts
 
 **Checkpoint**: Comments work on both cleaning tasks and shopping items, both web and mobile. Own-only edit/delete enforced. Edited indicator shown.
 
@@ -171,6 +186,10 @@
 - [ ] T067 [P] Add empty states, loading states, and error states to all views across web and mobile
 - [ ] T068 Add validation error messages for all forms: expense amount (FR-030), item name (FR-031), comment text (FR-032)
 - [ ] T069 Run quickstart.md validation — clean clone, install, dotnet run AppHost, verify all services start and seed data loads
+- [ ] T069a [P] Write contract tests validating all 3 API responses against OpenAPI specs (cleaning-api.yaml, shopping-api.yaml, finance-api.yaml) in backend/tests/OpenFlat.Integration.Tests/
+- [ ] T069b [P] Write Playwright E2E test for US1 user journey (select user → verify dashboard → switch user) in frontend/tests/e2e/user-selection.spec.ts
+- [ ] T069c [P] Write Jest + RNTL component tests for mobile user selection, dashboard, and core feature screens in mobile/__tests__/
+- [ ] T069d [P] Audit and add ARIA labels to all interactive web elements, accessibility traits to all mobile interactive elements, and verify WCAG 2.1 AA color contrast (4.5:1 for text) across all views
 
 ---
 
@@ -280,7 +299,7 @@ This validates the navigation shell and user context flow before investing in mo
 - [P] tasks = different files, no dependencies on incomplete tasks in the same phase
 - [Story] label maps each task to its user story for traceability
 - Each user story is independently completable and testable after Phase 2
-- No test tasks included — spec does not request TDD. Test frameworks are ready in plan.md.
+- Test tasks are included per constitution Principle II (NON-NEGOTIABLE). Coverage: unit, integration, contract, E2E.
 - All backend entities and DbContexts follow data-model.md exactly
 - All API endpoints follow contracts/*.yaml specifications
 - SignalR hubs: CleaningHub (/hubs/cleaning), ShoppingHub (/hubs/shopping). No Finance hub.

@@ -40,6 +40,8 @@ public static class PredefinedUsers
 public record UserInfo(int Id, string Name, string Role);
 ```
 
+> **Avatar Strategy**: Avatars are derived at the UI layer from the user's name (initials + deterministic color). No avatar field is stored — each platform renders a consistent avatar component using the user's `Id` as seed.
+
 All `UserId` foreign keys in database tables reference these predefined IDs (1–5). No FK constraint to a users table — validated at the application layer.
 
 ---

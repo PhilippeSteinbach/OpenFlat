@@ -7,7 +7,7 @@
 
 ## Assumptions
 
-- This is a testing/prototype phase; data does not need to persist across browser sessions (in-memory or local storage is acceptable). Persistence strategy will be decided at planning time.
+- This is a testing/prototype phase. Persistence uses PostgreSQL (decided during planning) to support multi-service architecture and realistic testing.
 - The five predefined users are hardcoded and cannot be created, edited, or deleted by any user.
 - The predefined users are: **Alex** (Coordinator), **Jordan** (Coordinator), **Sam** (Resident), **Taylor** (Resident), **Casey** (Resident).
 - "Coordinator" and "Resident" are display labels only; both roles have identical permissions in this phase. Role-based access control is deferred to a future phase.
@@ -81,7 +81,7 @@ A user navigates to the Shopping List and sees all current items needed for the 
 4. **Given** the "Recently Bought" section has items, **When** the user views it, **Then** each item still shows its name, quantity, and who added it.
 5. **Given** an item exists in "Recently Bought", **When** a user taps it, **Then** the item moves back to the active list (undo).
 6. **Given** an item was checked off 7 days ago, **When** the "Recently Bought" section is viewed, **Then** that item has been automatically removed.
-5. **Given** multiple users have added items, **When** the list is viewed, **Then** items from all users are visible in one shared list.
+7. **Given** multiple users have added items, **When** the list is viewed, **Then** items from all users are visible in one shared list.
 
 ---
 
