@@ -181,15 +181,15 @@
 
 **Purpose**: i18n completion, responsive validation, error/empty/loading states, and quickstart validation
 
-- [ ] T065 [P] Complete EN + DE translations for all user-facing strings in shared/locales/en.json and shared/locales/de.json
-- [ ] T066 [P] Validate all views on 375px viewport (iPhone SE) — no horizontal scroll or overlapping (FR-033, FR-034, SC-009)
-- [ ] T067 [P] Add empty states, loading states, and error states to all views across web and mobile
-- [ ] T068 Add validation error messages for all forms: expense amount (FR-030), item name (FR-031), comment text (FR-032)
-- [ ] T069 Run quickstart.md validation — clean clone, install, dotnet run AppHost, verify all services start and seed data loads
-- [ ] T069a [P] Write contract tests validating all 3 API responses against OpenAPI specs (cleaning-api.yaml, shopping-api.yaml, finance-api.yaml) in backend/tests/OpenFlat.Integration.Tests/
-- [ ] T069b [P] Write Playwright E2E test for US1 user journey (select user → verify dashboard → switch user) in frontend/tests/e2e/user-selection.spec.ts
-- [ ] T069c [P] Write Jest + RNTL component tests for mobile user selection, dashboard, and core feature screens in mobile/__tests__/
-- [ ] T069d [P] Audit and add ARIA labels to all interactive web elements, accessibility traits to all mobile interactive elements, and verify WCAG 2.1 AA color contrast (4.5:1 for text) across all views
+- [X] T065 [P] Complete EN + DE translations for all user-facing strings in shared/locales/en.json and shared/locales/de.json
+- [X] T066 [P] Validate all views on 375px viewport (iPhone SE) — no horizontal scroll or overlapping (FR-033, FR-034, SC-009)
+- [X] T067 [P] Add empty states, loading states, and error states to all views across web and mobile
+- [X] T068 Add validation error messages for all forms: expense amount (FR-030), item name (FR-031), comment text (FR-032)
+- [X] T069 Run quickstart.md validation — clean clone, install, dotnet run AppHost, verify all services start and seed data loads
+- [X] T069a [P] Write contract tests validating all 3 API responses against OpenAPI specs (cleaning-api.yaml, shopping-api.yaml, finance-api.yaml) in backend/tests/OpenFlat.Integration.Tests/
+- [X] T069b [P] Write Playwright E2E test for US1 user journey (select user → verify dashboard → switch user) in frontend/tests/e2e/user-selection.spec.ts
+- [X] T069c [P] Write Jest + RNTL component tests for mobile user selection, dashboard, and core feature screens in mobile/__tests__/
+- [X] T069d [P] Audit and add ARIA labels to all interactive web elements, accessibility traits to all mobile interactive elements, and verify WCAG 2.1 AA color contrast (4.5:1 for text) across all views
 
 ---
 

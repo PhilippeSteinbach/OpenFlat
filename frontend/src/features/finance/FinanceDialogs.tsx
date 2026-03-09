@@ -27,6 +27,7 @@ export function ExpenseFormDialog({
   const [amount, setAmount] = useState(initialAmount);
   const [description, setDescription] = useState(initialDescription);
   const [amountError, setAmountError] = useState('');
+  const [descriptionError, setDescriptionError] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,8 +36,12 @@ export function ExpenseFormDialog({
       setAmountError(t('finance.validation.amountPositive'));
       return;
     }
-    if (!description.trim()) return;
+    if (!description.trim()) {
+      setDescriptionError(t('validation.descriptionRequired', 'Description is required'));
+      return;
+    }
     setAmountError('');
+    setDescriptionError('');
     onSubmit(parsed, description.trim());
   };
 
@@ -44,6 +49,7 @@ export function ExpenseFormDialog({
     setAmount(initialAmount);
     setDescription(initialDescription);
     setAmountError('');
+    setDescriptionError('');
     onClose();
   };
 
@@ -66,7 +72,8 @@ export function ExpenseFormDialog({
           label={t('finance.expense.description')}
           placeholder={t('finance.expense.descriptionPlaceholder')}
           value={description}
-          onChange={(e) => setDescription(e.target.value)}
+          onChange={(e) => { setDescription(e.target.value); setDescriptionError(''); }}
+          error={descriptionError}
           required
         />
         <div className="flex justify-end gap-2 pt-2">

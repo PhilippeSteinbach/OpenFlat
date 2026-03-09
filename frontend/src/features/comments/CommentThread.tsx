@@ -26,14 +26,18 @@ export function CommentThread({ comments, onAdd, onUpdate, onDelete }: CommentTh
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [mutationError, setMutationError] = useState('');
 
   const handleAdd = async () => {
     const trimmed = newText.trim();
     if (!trimmed) return;
     setSubmitting(true);
+    setMutationError('');
     try {
       await onAdd(trimmed);
       setNewText('');
+    } catch {
+      setMutationError(t('comments.postError', 'Failed to post comment'));
     } finally {
       setSubmitting(false);
     }
@@ -43,10 +47,13 @@ export function CommentThread({ comments, onAdd, onUpdate, onDelete }: CommentTh
     const trimmed = editText.trim();
     if (!trimmed) return;
     setSubmitting(true);
+    setMutationError('');
     try {
       await onUpdate(commentId, trimmed);
       setEditingId(null);
       setEditText('');
+    } catch {
+      setMutationError(t('comments.updateError', 'Failed to update comment'));
     } finally {
       setSubmitting(false);
     }
@@ -103,6 +110,7 @@ export function CommentThread({ comments, onAdd, onUpdate, onDelete }: CommentTh
                         onClick={() => startEditing(comment)}
                         className="text-xs text-blue-600 hover:text-blue-800 px-1"
                         title={t('comments.edit', 'Edit')}
+                        aria-label={t('comments.edit', 'Edit')}
                       >
                         ✏️
                       </button>
@@ -110,6 +118,7 @@ export function CommentThread({ comments, onAdd, onUpdate, onDelete }: CommentTh
                         onClick={() => onDelete(comment.id)}
                         className="text-xs text-red-500 hover:text-red-700 px-1"
                         title={t('comments.delete', 'Delete')}
+                        aria-label={t('comments.delete', 'Delete')}
                       >
                         🗑️
                       </button>
@@ -125,6 +134,7 @@ export function CommentThread({ comments, onAdd, onUpdate, onDelete }: CommentTh
                       onChange={(e) => setEditText(e.target.value)}
                       className="flex-1 text-sm border border-gray-300 rounded-md px-3 py-1.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                       maxLength={2000}
+                      aria-label={t('comments.editInput', 'Edit comment')}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') handleUpdate(comment.id);
                         if (e.key === 'Escape') {
@@ -159,6 +169,11 @@ export function CommentThread({ comments, onAdd, onUpdate, onDelete }: CommentTh
         </div>
       )}
 
+      {/* Mutation error */}
+      {mutationError && (
+        <p className="text-sm text-red-600" role="alert">{mutationError}</p>
+      )}
+
       {/* Add comment input */}
       <div className="flex gap-2">
         <input
@@ -168,6 +183,7 @@ export function CommentThread({ comments, onAdd, onUpdate, onDelete }: CommentTh
           placeholder={t('comments.add', 'Add a comment...')}
           className="flex-1 text-sm border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
           maxLength={2000}
+          aria-label={t('comments.add', 'Add a comment...')}
           onKeyDown={(e) => {
             if (e.key === 'Enter') handleAdd();
           }}

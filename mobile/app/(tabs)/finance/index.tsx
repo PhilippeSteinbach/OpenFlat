@@ -63,6 +63,7 @@ export default function FinanceTrackerScreen() {
   const [expenses, setExpenses] = useState<ExpenseDto[]>([]);
   const [settlement, setSettlement] = useState<SettlementResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [logModalOpen, setLogModalOpen] = useState(false);
   const [editExpense, setEditExpense] = useState<ExpenseDto | null>(null);
@@ -80,8 +81,10 @@ export default function FinanceTrackerScreen() {
       ]);
       setExpenses(expenseData);
       setSettlement(settlementData);
+      setError(false);
     } catch (err) {
       console.error('Failed to fetch finance data:', err);
+      setError(true);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -107,7 +110,7 @@ export default function FinanceTrackerScreen() {
                 await financeApi.delete(`/expenses/${expenseId}`, headers());
                 fetchData();
               } catch {
-                Alert.alert(t('common.error', 'Error'), 'Failed to delete expense');
+                Alert.alert(t('common.error', 'Error'), t('finance.expense.failedDelete'));
               }
             },
           },
@@ -125,13 +128,24 @@ export default function FinanceTrackerScreen() {
     );
   }
 
+  if (error) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Text style={{ color: 'red', fontSize: 16, marginBottom: 12 }}>{t('common.error', 'Something went wrong')}</Text>
+        <TouchableOpacity onPress={() => { setLoading(true); fetchData(); }} accessibilityRole="button" accessibilityLabel={t('common.retry', 'Retry')}>
+          <Text style={{ color: '#2563EB', fontSize: 14 }}>{t('common.retry', 'Retry')}</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>💰 {t('finance.title', 'Finance Tracker')}</Text>
         {activeTab === 'expenses' && (
-          <TouchableOpacity style={styles.createButton} onPress={() => setLogModalOpen(true)}>
+          <TouchableOpacity style={styles.createButton} onPress={() => setLogModalOpen(true)} accessibilityRole="button" accessibilityLabel={t('finance.expense.log', 'Log')}>
             <Text style={styles.createButtonText}>+ {t('finance.expense.log', 'Log')}</Text>
           </TouchableOpacity>
         )}
@@ -144,6 +158,9 @@ export default function FinanceTrackerScreen() {
             key={tab}
             style={[styles.tab, activeTab === tab && styles.tabActive]}
             onPress={() => setActiveTab(tab)}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: activeTab === tab }}
+            accessibilityLabel={t(`finance.tabs.${tab}`, tab)}
           >
             <Text style={[styles.tabText, activeTab === tab && styles.tabTextActive]}>
               {t(`finance.tabs.${tab}`, tab)}
@@ -187,10 +204,10 @@ export default function FinanceTrackerScreen() {
                   </View>
                   {expense.isOwn && (
                     <View style={styles.cardActions}>
-                      <TouchableOpacity onPress={() => setEditExpense(expense)}>
+                      <TouchableOpacity onPress={() => setEditExpense(expense)} accessibilityRole="button" accessibilityLabel={t('common.edit', 'Edit')}>
                         <Text style={styles.actionIcon}>✏️</Text>
                       </TouchableOpacity>
-                      <TouchableOpacity onPress={() => handleDelete(expense.id)}>
+                      <TouchableOpacity onPress={() => handleDelete(expense.id)} accessibilityRole="button" accessibilityLabel={t('common.delete', 'Delete')}>
                         <Text style={styles.actionIcon}>🗑️</Text>
                       </TouchableOpacity>
                     </View>
@@ -239,12 +256,12 @@ export default function FinanceTrackerScreen() {
               )}
 
               {/* Balances */}
-              <Text style={styles.balancesHeader}>Balances</Text>
+              <Text style={styles.balancesHeader}>{t('finance.settlement.balances')}</Text>
               {settlement.balances.map((b) => (
                 <View key={b.userId} style={styles.balanceRow}>
                   <View>
                     <Text style={styles.balanceName}>{b.userName}</Text>
-                    <Text style={styles.balancePaid}>paid €{b.totalPaidEur.toFixed(2)}</Text>
+                    <Text style={styles.balancePaid}>{t('finance.settlement.paid', { amount: `€${b.totalPaidEur.toFixed(2)}` })}</Text>
                   </View>
                   <Text
                     style={[
@@ -272,7 +289,7 @@ export default function FinanceTrackerScreen() {
             setLogModalOpen(false);
             fetchData();
           } catch {
-            Alert.alert(t('common.error', 'Error'), 'Failed to log expense');
+            Alert.alert(t('common.error', 'Error'), t('finance.expense.failedLog'));
           }
         }}
         title={t('finance.expense.log', 'Log Expense')}
@@ -289,7 +306,7 @@ export default function FinanceTrackerScreen() {
               setEditExpense(null);
               fetchData();
             } catch {
-              Alert.alert(t('common.error', 'Error'), 'Failed to update expense');
+              Alert.alert(t('common.error', 'Error'), t('finance.expense.failedUpdate'));
             }
           }}
           title={t('finance.expense.edit', 'Edit Expense')}
@@ -356,6 +373,7 @@ function ExpenseFormModal({
             placeholder={t('finance.expense.amountPlaceholder', '0.00')}
             keyboardType="decimal-pad"
             autoFocus
+            accessibilityLabel={t('finance.expense.amount', 'Amount (€)')}
           />
 
           <Text style={styles.inputLabel}>{t('finance.expense.description', 'Description')}</Text>
@@ -365,13 +383,14 @@ function ExpenseFormModal({
             onChangeText={setDescription}
             placeholder={t('finance.expense.descriptionPlaceholder', 'e.g. Weekly groceries')}
             maxLength={500}
+            accessibilityLabel={t('finance.expense.description', 'Description')}
           />
 
           <View style={styles.modalActions}>
-            <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
+            <TouchableOpacity style={styles.cancelButton} onPress={onClose} accessibilityRole="button" accessibilityLabel={t('common.cancel', 'Cancel')}>
               <Text style={styles.cancelButtonText}>{t('common.cancel', 'Cancel')}</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+            <TouchableOpacity style={styles.submitButton} onPress={handleSubmit} accessibilityRole="button" accessibilityLabel={t('common.save', 'Save')}>
               <Text style={styles.submitButtonText}>{t('common.save', 'Save')}</Text>
             </TouchableOpacity>
           </View>

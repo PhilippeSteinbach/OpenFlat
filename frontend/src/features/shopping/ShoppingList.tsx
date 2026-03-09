@@ -16,7 +16,7 @@ import type { ItemDto } from './types';
 
 export function ShoppingList() {
   const { t } = useTranslation();
-  const { data, isLoading, error } = useShoppingListQuery();
+  const { data, isLoading, error, refetch } = useShoppingListQuery();
   const createMutation = useCreateItemMutation();
   const updateMutation = useUpdateItemMutation();
   const deleteMutation = useDeleteItemMutation();
@@ -75,8 +75,14 @@ export function ShoppingList() {
 
   if (error) {
     return (
-      <div className="p-6 text-center text-red-600">
-        {t('common.error', 'Failed to load shopping list')}
+      <div className="p-6 text-center">
+        <p className="text-center text-red-600">{t('common.error', 'Failed to load shopping list')}</p>
+        <button
+          onClick={() => refetch()}
+          className="mt-2 text-sm text-blue-600 hover:text-blue-800 underline"
+        >
+          {t('common.retry', 'Retry')}
+        </button>
       </div>
     );
   }
@@ -225,7 +231,8 @@ function ItemCard({ item, onBuy, onEdit, onDelete, onViewDetail }: ItemCardProps
             <button
               onClick={() => onViewDetail(item)}
               className="flex-shrink-0 text-xs text-gray-400 hover:text-blue-500"
-              title="Comments"
+              title={t('comments.title')}
+              aria-label={t('comments.countTooltip', { count: item.commentCount })}
             >
               💬 {item.commentCount}
             </button>
@@ -234,7 +241,8 @@ function ItemCard({ item, onBuy, onEdit, onDelete, onViewDetail }: ItemCardProps
             <button
               onClick={() => onViewDetail(item)}
               className="flex-shrink-0 text-xs text-gray-300 hover:text-blue-400"
-              title="Add comment"
+              title={t('comments.addTooltip')}
+              aria-label={t('comments.addTooltip')}
             >
               💬
             </button>
@@ -247,10 +255,10 @@ function ItemCard({ item, onBuy, onEdit, onDelete, onViewDetail }: ItemCardProps
 
       {/* Actions */}
       <div className="flex items-center gap-1">
-        <Button variant="ghost" size="sm" onClick={() => onEdit(item)}>
+        <Button variant="ghost" size="sm" onClick={() => onEdit(item)} aria-label={t('common.edit')}>
           ✏️
         </Button>
-        <Button variant="ghost" size="sm" onClick={() => onDelete(item.id)}>
+        <Button variant="ghost" size="sm" onClick={() => onDelete(item.id)} aria-label={t('common.delete')}>
           🗑️
         </Button>
       </div>
@@ -293,11 +301,12 @@ function BoughtItemCard({ item, onUndo, onViewDetail }: BoughtItemCardProps) {
       <button
         onClick={() => onViewDetail(item)}
         className="text-xs text-gray-400 hover:text-blue-500 px-1"
-        title="Comments"
+        title={t('comments.title')}
+        aria-label={t('comments.title')}
       >
         💬
       </button>
-      <Button variant="ghost" size="sm" onClick={() => onUndo(item.id)} title={t('shopping.item.undoBuy')}>
+      <Button variant="ghost" size="sm" onClick={() => onUndo(item.id)} title={t('shopping.item.undoBuy')} aria-label={t('shopping.item.undoBuy')}>
         ↩️
       </Button>
     </Card>

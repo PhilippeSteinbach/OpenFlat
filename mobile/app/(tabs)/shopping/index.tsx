@@ -45,6 +45,7 @@ export default function ShoppingListScreen() {
   const currentUser = useCurrentUserStore((s) => s.currentUser);
   const [data, setData] = useState<ShoppingListResponse>({ active: [], recentlyBought: [] });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [editItem, setEditItem] = useState<ItemDto | null>(null);
@@ -58,8 +59,10 @@ export default function ShoppingListScreen() {
     try {
       const result = await shoppingApi.get<ShoppingListResponse>('/items', headers());
       setData(result);
+      setError(false);
     } catch (err) {
       console.error('Failed to fetch shopping items:', err);
+      setError(true);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -127,6 +130,17 @@ export default function ShoppingListScreen() {
     );
   }
 
+  if (error) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Text style={{ color: 'red', fontSize: 16, marginBottom: 12 }}>{t('common.error', 'Something went wrong')}</Text>
+        <TouchableOpacity onPress={() => { setLoading(true); fetchItems(); }} accessibilityRole="button" accessibilityLabel={t('common.retry', 'Retry')}>
+          <Text style={{ color: '#2563EB', fontSize: 14 }}>{t('common.retry', 'Retry')}</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   const sections = [
     ...(data.active.length > 0
       ? [{ title: t('shopping.sections.active', 'Active Items'), data: data.active, type: 'active' as const }]
@@ -144,6 +158,8 @@ export default function ShoppingListScreen() {
         <TouchableOpacity
           style={styles.createButton}
           onPress={() => setCreateModalOpen(true)}
+          accessibilityRole="button"
+          accessibilityLabel={t('shopping.item.add', 'Add')}
         >
           <Text style={styles.createButtonText}>+ {t('shopping.item.add', 'Add')}</Text>
         </TouchableOpacity>
@@ -153,7 +169,7 @@ export default function ShoppingListScreen() {
         <View style={styles.emptyState}>
           <Text style={styles.emptyEmoji}>🛒</Text>
           <Text style={styles.emptyText}>{t('shopping.empty.active', 'No items — add something!')}</Text>
-          <TouchableOpacity style={styles.emptyButton} onPress={() => setCreateModalOpen(true)}>
+          <TouchableOpacity style={styles.emptyButton} onPress={() => setCreateModalOpen(true)} accessibilityRole="button" accessibilityLabel={t('shopping.item.add', 'Add Item')}>
             <Text style={styles.emptyButtonText}>{t('shopping.item.add', 'Add Item')}</Text>
           </TouchableOpacity>
         </View>
@@ -194,6 +210,8 @@ export default function ShoppingListScreen() {
                     <TouchableOpacity
                       style={styles.undoButton}
                       onPress={() => handleUndo(item.id)}
+                      accessibilityRole="button"
+                      accessibilityLabel={t('shopping.item.undoBuy', 'Undo')}
                     >
                       <Text style={styles.undoButtonText}>↩️</Text>
                     </TouchableOpacity>
@@ -208,6 +226,8 @@ export default function ShoppingListScreen() {
                   <TouchableOpacity
                     style={styles.checkCircle}
                     onPress={() => handleBuy(item.id)}
+                    accessibilityRole="button"
+                    accessibilityLabel={t('shopping.item.markBought', 'Mark as bought')}
                   >
                     <View style={styles.checkCircleInner} />
                   </TouchableOpacity>
@@ -228,10 +248,10 @@ export default function ShoppingListScreen() {
                     </Text>
                   </View>
                   <View style={styles.cardActions}>
-                    <TouchableOpacity onPress={() => setEditItem(item)}>
+                    <TouchableOpacity onPress={() => setEditItem(item)} accessibilityRole="button" accessibilityLabel={t('common.edit', 'Edit')}>
                       <Text style={styles.actionIcon}>✏️</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => handleDelete(item.id)}>
+                    <TouchableOpacity onPress={() => handleDelete(item.id)} accessibilityRole="button" accessibilityLabel={t('common.delete', 'Delete')}>
                       <Text style={styles.actionIcon}>🗑️</Text>
                     </TouchableOpacity>
                   </View>
@@ -333,6 +353,7 @@ function ItemFormModal({
             placeholder={t('shopping.item.namePlaceholder', 'e.g. Milk')}
             maxLength={200}
             autoFocus
+            accessibilityLabel={t('shopping.item.name', 'Item name')}
           />
 
           <Text style={styles.inputLabel}>{t('shopping.item.quantity', 'Quantity')}</Text>
@@ -341,13 +362,14 @@ function ItemFormModal({
             value={quantity}
             onChangeText={setQuantity}
             keyboardType="numeric"
+            accessibilityLabel={t('shopping.item.quantity', 'Quantity')}
           />
 
           <View style={styles.modalActions}>
-            <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
+            <TouchableOpacity style={styles.cancelButton} onPress={onClose} accessibilityRole="button" accessibilityLabel={t('common.cancel', 'Cancel')}>
               <Text style={styles.cancelButtonText}>{t('common.cancel', 'Cancel')}</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+            <TouchableOpacity style={styles.submitButton} onPress={handleSubmit} accessibilityRole="button" accessibilityLabel={t('common.save', 'Save')}>
               <Text style={styles.submitButtonText}>{t('common.save', 'Save')}</Text>
             </TouchableOpacity>
           </View>

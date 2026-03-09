@@ -29,10 +29,10 @@ interface TaskDetailData {
 }
 
 const STATUS_LABELS: Record<string, string> = {
-  todo: 'To Do',
-  in_progress: 'In Progress',
-  awaiting_review: 'Awaiting Review',
-  done: 'Done',
+  todo: 'cleaning.columns.todo',
+  in_progress: 'cleaning.columns.inProgress',
+  awaiting_review: 'cleaning.columns.awaitingReview',
+  done: 'cleaning.columns.done',
 };
 
 export default function TaskDetailScreen() {
@@ -94,9 +94,9 @@ export default function TaskDetailScreen() {
         <Text style={styles.taskTitle}>{task.title}</Text>
         <View style={styles.taskMeta}>
           <View style={styles.pointsBadge}>
-            <Text style={styles.pointsText}>{task.points} pts</Text>
+            <Text style={styles.pointsText}>{task.points} {t('common.points')}</Text>
           </View>
-          <Text style={styles.statusText}>{STATUS_LABELS[task.status] ?? task.status}</Text>
+          <Text style={styles.statusText}>{STATUS_LABELS[task.status] ? t(STATUS_LABELS[task.status]) : task.status}</Text>
           {task.assignedUserName && (
             <Text style={styles.assigneeText}>→ {task.assignedUserName}</Text>
           )}

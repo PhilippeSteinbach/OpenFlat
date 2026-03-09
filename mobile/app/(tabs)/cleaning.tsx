@@ -37,10 +37,10 @@ type TaskStatus = 'todo' | 'in_progress' | 'awaiting_review' | 'done';
 const STATUSES: TaskStatus[] = ['todo', 'in_progress', 'awaiting_review', 'done'];
 
 const STATUS_LABELS: Record<TaskStatus, string> = {
-  todo: 'To Do',
-  in_progress: 'In Progress',
-  awaiting_review: 'Review',
-  done: 'Done',
+  todo: 'cleaning.columns.todo',
+  in_progress: 'cleaning.columns.inProgress',
+  awaiting_review: 'cleaning.columns.awaitingReview',
+  done: 'cleaning.columns.done',
 };
 
 const STATUS_COLORS: Record<TaskStatus, string> = {
@@ -67,6 +67,7 @@ export default function CleaningScreen() {
   const currentUser = useCurrentUserStore((s) => s.currentUser);
   const [tasks, setTasks] = useState<TaskDto[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<TaskStatus>('todo');
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -81,8 +82,10 @@ export default function CleaningScreen() {
     try {
       const data = await cleaningApi.get<TaskDto[]>('/tasks', headers());
       setTasks(data);
+      setError(false);
     } catch (err) {
       console.error('Failed to fetch tasks:', err);
+      setError(true);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -168,6 +171,17 @@ export default function CleaningScreen() {
     );
   }
 
+  if (error) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Text style={{ color: 'red', fontSize: 16, marginBottom: 12 }}>{t('common.error', 'Something went wrong')}</Text>
+        <TouchableOpacity onPress={() => { setLoading(true); fetchTasks(); }} accessibilityRole="button" accessibilityLabel={t('common.retry', 'Retry')}>
+          <Text style={{ color: '#2563EB', fontSize: 14 }}>{t('common.retry', 'Retry')}</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -176,6 +190,8 @@ export default function CleaningScreen() {
         <TouchableOpacity
           style={styles.createButton}
           onPress={() => setCreateModalOpen(true)}
+          accessibilityRole="button"
+          accessibilityLabel={t('cleaning.task.create', 'New')}
         >
           <Text style={styles.createButtonText}>+ {t('cleaning.task.create', 'New')}</Text>
         </TouchableOpacity>
@@ -199,9 +215,12 @@ export default function CleaningScreen() {
                 styles.statusTab,
                 isActive && { backgroundColor: STATUS_COLORS[status], borderColor: STATUS_COLORS[status] },
               ]}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: isActive }}
+              accessibilityLabel={`${t(STATUS_LABELS[status])} (${count})`}
             >
               <Text style={[styles.statusTabText, isActive && styles.statusTabTextActive]}>
-                {STATUS_LABELS[status]} ({count})
+                {t(STATUS_LABELS[status])} ({count})
               </Text>
             </TouchableOpacity>
           );
@@ -246,6 +265,8 @@ export default function CleaningScreen() {
               <TouchableOpacity
                 onPress={() => setAssignTask(task)}
                 style={styles.assigneeRow}
+                accessibilityRole="button"
+                accessibilityLabel={task.assignedUserName ? t('cleaning.task.reassign', { name: task.assignedUserName }) : t('cleaning.task.assign', 'Assign')}
               >
                 {task.assignedUserId ? (
                   <View style={styles.assigneeInfo}>
@@ -260,7 +281,7 @@ export default function CleaningScreen() {
                       </Text>
                     </View>
                     <Text style={[styles.assigneeName, isOwn && styles.assigneeNameOwn]}>
-                      {task.assignedUserName}{isOwn ? ' (you)' : ''}
+                      {task.assignedUserName}{isOwn ? t('cleaning.task.youSuffix') : ''}
                     </Text>
                   </View>
                 ) : (
@@ -274,23 +295,29 @@ export default function CleaningScreen() {
                   <TouchableOpacity
                     style={styles.moveButton}
                     onPress={() => handleMoveTask(task, prevStatus)}
+                    accessibilityRole="button"
+                    accessibilityLabel={t('cleaning.task.moveTo', { status: t(STATUS_LABELS[prevStatus]) })}
                   >
-                    <Text style={styles.moveButtonText}>← {STATUS_LABELS[prevStatus]}</Text>
+                    <Text style={styles.moveButtonText}>← {t(STATUS_LABELS[prevStatus])}</Text>
                   </TouchableOpacity>
                 )}
                 {nextStatus && (
                   <TouchableOpacity
                     style={[styles.moveButton, styles.moveButtonForward]}
                     onPress={() => handleMoveTask(task, nextStatus)}
+                    accessibilityRole="button"
+                    accessibilityLabel={t('cleaning.task.moveTo', { status: t(STATUS_LABELS[nextStatus]) })}
                   >
                     <Text style={[styles.moveButtonText, styles.moveButtonTextForward]}>
-                      {STATUS_LABELS[nextStatus]} →
+                      {t(STATUS_LABELS[nextStatus])} →
                     </Text>
                   </TouchableOpacity>
                 )}
                 <TouchableOpacity
                   style={styles.deleteButton}
                   onPress={() => handleDeleteTask(task.id)}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('common.delete', 'Delete')}
                 >
                   <Text style={styles.deleteButtonText}>🗑️</Text>
                 </TouchableOpacity>
@@ -323,6 +350,8 @@ export default function CleaningScreen() {
             <TouchableOpacity
               style={styles.assignOption}
               onPress={() => handleAssign(null)}
+              accessibilityRole="button"
+              accessibilityLabel={t('cleaning.task.unassigned', 'Unassigned')}
             >
               <Text style={styles.assignOptionUnassigned}>
                 {t('cleaning.task.unassigned', 'Unassigned')}
@@ -336,6 +365,8 @@ export default function CleaningScreen() {
                   assignTask?.assignedUserId === user.id && styles.assignOptionActive,
                 ]}
                 onPress={() => handleAssign(user.id)}
+                accessibilityRole="button"
+                accessibilityLabel={t('cleaning.task.assignTo', { name: user.name })}
               >
                 <View style={styles.assigneeInfo}>
                   <View
@@ -353,6 +384,8 @@ export default function CleaningScreen() {
             <TouchableOpacity
               style={styles.cancelButton}
               onPress={() => setAssignTask(null)}
+              accessibilityRole="button"
+              accessibilityLabel={t('common.cancel', 'Cancel')}
             >
               <Text style={styles.cancelButtonText}>{t('common.cancel', 'Cancel')}</Text>
             </TouchableOpacity>
@@ -408,6 +441,7 @@ function CreateTaskModal({
             placeholder={t('cleaning.task.titlePlaceholder', 'Enter task title...')}
             maxLength={200}
             autoFocus
+            accessibilityLabel={t('cleaning.task.titleLabel', 'Title')}
           />
 
           <Text style={styles.inputLabel}>{t('cleaning.task.pointsLabel', 'Points')}</Text>
@@ -416,13 +450,14 @@ function CreateTaskModal({
             value={points}
             onChangeText={setPoints}
             keyboardType="numeric"
+            accessibilityLabel={t('cleaning.task.pointsLabel', 'Points')}
           />
 
           <View style={styles.modalActions}>
-            <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
+            <TouchableOpacity style={styles.cancelButton} onPress={onClose} accessibilityRole="button" accessibilityLabel={t('common.cancel', 'Cancel')}>
               <Text style={styles.cancelButtonText}>{t('common.cancel', 'Cancel')}</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.submitButton} onPress={handleCreate}>
+            <TouchableOpacity style={styles.submitButton} onPress={handleCreate} accessibilityRole="button" accessibilityLabel={t('cleaning.task.create', 'Create')}>
               <Text style={styles.submitButtonText}>{t('cleaning.task.create', 'Create')}</Text>
             </TouchableOpacity>
           </View>

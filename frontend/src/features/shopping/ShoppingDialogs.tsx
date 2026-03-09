@@ -26,10 +26,15 @@ export function ItemFormDialog({
   const { t } = useTranslation();
   const [name, setName] = useState(initialName);
   const [quantity, setQuantity] = useState(initialQuantity);
+  const [nameError, setNameError] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) return;
+    if (!name.trim()) {
+      setNameError(t('validation.itemNameRequired', 'Item name is required'));
+      return;
+    }
+    setNameError('');
     onSubmit(name.trim(), Math.max(1, quantity));
   };
 
@@ -37,6 +42,7 @@ export function ItemFormDialog({
   const handleClose = () => {
     setName(initialName);
     setQuantity(initialQuantity);
+    setNameError('');
     onClose();
   };
 
@@ -47,7 +53,8 @@ export function ItemFormDialog({
           label={t('shopping.item.name')}
           placeholder={t('shopping.item.namePlaceholder')}
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => { setName(e.target.value); setNameError(''); }}
+          error={nameError}
           autoFocus
           required
         />

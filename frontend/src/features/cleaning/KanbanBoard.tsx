@@ -190,7 +190,7 @@ export function KanbanBoard() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600" role="status" aria-label={t('common.loading', 'Loading')} />
       </div>
     );
   }
@@ -214,7 +214,10 @@ export function KanbanBoard() {
           </h1>
           <span
             className={`w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-500' : 'bg-gray-300'}`}
-            title={isConnected ? 'Real-time connected' : 'Connecting...'}
+            title={isConnected ? t('cleaning.signalr.connected') : t('cleaning.signalr.connecting')}
+            role="status"
+            aria-live="polite"
+            aria-label={isConnected ? t('cleaning.signalr.connected') : t('cleaning.signalr.connecting')}
           />
         </div>
         <Button size="sm" onClick={() => setCreateOpen(true)}>

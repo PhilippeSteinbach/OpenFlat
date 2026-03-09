@@ -41,7 +41,7 @@ export function DashboardPage() {
   };
 
   // Use real leaderboard data from API, fallback to static users with 0 points
-  const { data: leaderboardApi } = useLeaderboardQuery();
+  const { data: leaderboardApi, isLoading: leaderboardLoading, isError: leaderboardError, refetch: refetchLeaderboard } = useLeaderboardQuery();
   const leaderboardData = leaderboardApi
     ? leaderboardApi.map((entry) => ({
         id: entry.userId,
@@ -82,6 +82,8 @@ export function DashboardPage() {
                 key={mod.key}
                 onClick={() => navigate(mod.path)}
                 className="text-center py-8"
+                role="button"
+                aria-label={t(`dashboard.modules.${mod.key}`)}
               >
                 <span className="text-4xl mb-2 block" aria-hidden="true">
                   {mod.icon}
@@ -99,6 +101,21 @@ export function DashboardPage() {
           <h2 className="text-lg font-semibold text-gray-900 mb-3">
             {t('dashboard.leaderboard.title')}
           </h2>
+          {leaderboardLoading ? (
+            <div className="flex justify-center p-8">
+              <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full" />
+            </div>
+          ) : leaderboardError ? (
+            <div className="text-center py-6">
+              <p className="text-center text-red-600">{t('common.error')}</p>
+              <button
+                onClick={() => refetchLeaderboard()}
+                className="mt-2 text-sm text-blue-600 hover:text-blue-800 underline"
+              >
+                {t('common.retry', 'Retry')}
+              </button>
+            </div>
+          ) : (
           <Card>
             <ul className="divide-y divide-gray-100">
               {leaderboardData
@@ -136,6 +153,7 @@ export function DashboardPage() {
                 ))}
             </ul>
           </Card>
+          )}
         </section>
       </div>
     </main>

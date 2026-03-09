@@ -48,6 +48,7 @@ export function TaskCard({ task, onEdit, onDelete, onAssign, onViewDetail }: Tas
           onClick={(e) => { e.stopPropagation(); onAssign(task); }}
           className="text-xs text-gray-500 hover:text-gray-700 truncate max-w-[120px]"
           title={task.assignedUserName ?? t('cleaning.task.assign')}
+          aria-label={task.assignedUserName ? t('cleaning.task.reassign', { name: task.assignedUserName }) : t('cleaning.task.assign')}
         >
           {task.assignedUserName ? (
             <span className="flex items-center gap-1">
@@ -70,7 +71,8 @@ export function TaskCard({ task, onEdit, onDelete, onAssign, onViewDetail }: Tas
             <button
               onClick={(e) => { e.stopPropagation(); onViewDetail(task); }}
               className="text-xs text-gray-400 hover:text-blue-500 p-0.5"
-              title={`${task.commentCount} comments`}
+              title={t('comments.countTooltip', { count: task.commentCount })}
+              aria-label={t('comments.countTooltip', { count: task.commentCount })}
             >
               💬 {task.commentCount}
             </button>
@@ -79,7 +81,8 @@ export function TaskCard({ task, onEdit, onDelete, onAssign, onViewDetail }: Tas
             <button
               onClick={(e) => { e.stopPropagation(); onViewDetail(task); }}
               className="text-xs text-gray-300 hover:text-blue-400 p-0.5"
-              title="Add comment"
+              title={t('comments.addTooltip')}
+              aria-label={t('comments.addTooltip')}
             >
               💬
             </button>

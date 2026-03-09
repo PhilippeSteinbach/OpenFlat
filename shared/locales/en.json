@@ -55,7 +55,12 @@
       "points": "Points",
       "assignee": "Assigned to",
       "unassigned": "Unassigned",
-      "unassignedWarning": "No user assigned — no points will be credited"
+      "unassignedWarning": "No user assigned — no points will be credited",
+      "youSuffix": " (you)"
+    },
+    "signalr": {
+      "connected": "Real-time connected",
+      "connecting": "Connecting..."
     },
     "notifications": {
       "taskCreated": "Task created",
@@ -109,12 +114,17 @@
       "description": "Description",
       "descriptionPlaceholder": "e.g. Weekly groceries",
       "loggedBy": "Logged by {{name}}",
-      "ownOnly": "You can only edit/delete your own expenses"
+      "ownOnly": "You can only edit/delete your own expenses",
+      "failedDelete": "Failed to delete expense",
+      "failedLog": "Failed to log expense",
+      "failedUpdate": "Failed to update expense"
     },
     "settlement": {
       "title": "Settlement",
+      "balances": "Balances",
       "allSettled": "All settled up! 🎉",
       "owes": "{{from}} owes {{to}}",
+      "paid": "paid {{amount}}",
       "totalExpenses": "Total expenses",
       "perPerson": "Per person"
     },
@@ -131,6 +141,7 @@
   },
   "comments": {
     "title": "Comments",
+    "loading": "Loading comments...",
     "add": "Add a comment...",
     "addButton": "Post",
     "edit": "Edit",
@@ -139,6 +150,11 @@
     "edited": "(edited)",
     "empty": "No comments yet — start the conversation!",
     "ownOnly": "You can only edit/delete your own comments",
+    "countTooltip": "{{count}} comments",
+    "addTooltip": "Add comment",
+    "failedAdd": "Failed to add comment",
+    "failedUpdate": "Failed to update comment",
+    "failedDelete": "Failed to delete comment",
     "validation": {
       "required": "Comment cannot be empty",
       "maxLength": "Comment must be less than 2000 characters"
@@ -148,7 +164,9 @@
     "required": "This field is required",
     "maxLength": "Maximum {{max}} characters",
     "minValue": "Must be at least {{min}}",
+    "positiveNumber": "Must be a non-negative number",
     "itemNameRequired": "Item name is required",
+    "descriptionRequired": "Description is required",
     "commentRequired": "Comment text is required"
   }
 }

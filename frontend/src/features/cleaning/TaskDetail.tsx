@@ -23,9 +23,9 @@ export function TaskDetail({ task, onClose }: TaskDetailProps) {
   const statusLabel = t(`cleaning.columns.${task.status === 'in_progress' ? 'inProgress' : task.status === 'awaiting_review' ? 'awaitingReview' : task.status}`, task.status);
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end">
+    <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-label={task.title}>
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/30" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/30" onClick={onClose} aria-hidden="true" />
 
       {/* Panel */}
       <div className="relative bg-white w-full max-w-lg shadow-xl flex flex-col animate-in slide-in-from-right">
@@ -59,7 +59,7 @@ export function TaskDetail({ task, onClose }: TaskDetailProps) {
         {/* Comments section */}
         <div className="flex-1 overflow-y-auto px-6 py-4">
           {isLoading ? (
-            <p className="text-sm text-gray-400 text-center py-8">Loading comments...</p>
+            <p className="text-sm text-gray-400 text-center py-8">{t('comments.loading')}</p>
           ) : (
             <CommentThread
               comments={detail?.comments ?? []}

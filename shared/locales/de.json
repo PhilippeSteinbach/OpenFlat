@@ -55,7 +55,12 @@
       "points": "Punkte",
       "assignee": "Zugewiesen an",
       "unassigned": "Nicht zugewiesen",
-      "unassignedWarning": "Kein Benutzer zugewiesen — es werden keine Punkte vergeben"
+      "unassignedWarning": "Kein Benutzer zugewiesen — es werden keine Punkte vergeben",
+      "youSuffix": " (du)"
+    },
+    "signalr": {
+      "connected": "Echtzeit verbunden",
+      "connecting": "Verbinden..."
     },
     "notifications": {
       "taskCreated": "Aufgabe erstellt",
@@ -109,12 +114,17 @@
       "description": "Beschreibung",
       "descriptionPlaceholder": "z. B. Wocheneinkauf",
       "loggedBy": "Erfasst von {{name}}",
-      "ownOnly": "Du kannst nur eigene Ausgaben bearbeiten/löschen"
+      "ownOnly": "Du kannst nur eigene Ausgaben bearbeiten/löschen",
+      "failedDelete": "Ausgabe konnte nicht gelöscht werden",
+      "failedLog": "Ausgabe konnte nicht erfasst werden",
+      "failedUpdate": "Ausgabe konnte nicht aktualisiert werden"
     },
     "settlement": {
       "title": "Abrechnung",
+      "balances": "Kontostände",
       "allSettled": "Alles ausgeglichen! 🎉",
       "owes": "{{from}} schuldet {{to}}",
+      "paid": "bezahlt {{amount}}",
       "totalExpenses": "Gesamtausgaben",
       "perPerson": "Pro Person"
     },
@@ -131,6 +141,7 @@
   },
   "comments": {
     "title": "Kommentare",
+    "loading": "Kommentare laden...",
     "add": "Kommentar schreiben...",
     "addButton": "Absenden",
     "edit": "Bearbeiten",
@@ -139,6 +150,11 @@
     "edited": "(bearbeitet)",
     "empty": "Noch keine Kommentare — starte die Unterhaltung!",
     "ownOnly": "Du kannst nur eigene Kommentare bearbeiten/löschen",
+    "countTooltip": "{{count}} Kommentare",
+    "addTooltip": "Kommentar hinzufügen",
+    "failedAdd": "Kommentar konnte nicht hinzugefügt werden",
+    "failedUpdate": "Kommentar konnte nicht aktualisiert werden",
+    "failedDelete": "Kommentar konnte nicht gelöscht werden",
     "validation": {
       "required": "Kommentar darf nicht leer sein",
       "maxLength": "Kommentar darf maximal 2000 Zeichen lang sein"
@@ -148,7 +164,9 @@
     "required": "Dieses Feld ist erforderlich",
     "maxLength": "Maximal {{max}} Zeichen",
     "minValue": "Muss mindestens {{min}} sein",
+    "positiveNumber": "Muss eine nicht-negative Zahl sein",
     "itemNameRequired": "Artikelname ist erforderlich",
+    "descriptionRequired": "Beschreibung ist erforderlich",
     "commentRequired": "Kommentartext ist erforderlich"
   }
 }

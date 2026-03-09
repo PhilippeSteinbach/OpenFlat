@@ -46,7 +46,7 @@ export function CommentThread({ comments, onAdd, onUpdate, onDelete }: CommentTh
       await onAdd(trimmed);
       setNewText('');
     } catch {
-      Alert.alert(t('common.error', 'Error'), 'Failed to add comment');
+      Alert.alert(t('common.error', 'Error'), t('comments.failedAdd'));
     } finally {
       setSubmitting(false);
     }
@@ -61,7 +61,7 @@ export function CommentThread({ comments, onAdd, onUpdate, onDelete }: CommentTh
       setEditingId(null);
       setEditText('');
     } catch {
-      Alert.alert(t('common.error', 'Error'), 'Failed to update comment');
+      Alert.alert(t('common.error', 'Error'), t('comments.failedUpdate'));
     } finally {
       setSubmitting(false);
     }
@@ -109,10 +109,10 @@ export function CommentThread({ comments, onAdd, onUpdate, onDelete }: CommentTh
           </View>
           {isOwn && !isEditing && (
             <View style={styles.commentActions}>
-              <TouchableOpacity onPress={() => startEditing(comment)}>
+              <TouchableOpacity onPress={() => startEditing(comment)} accessibilityRole="button" accessibilityLabel={t('comments.edit', 'Edit')}>
                 <Text style={styles.actionIcon}>✏️</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => handleDelete(comment.id)}>
+              <TouchableOpacity onPress={() => handleDelete(comment.id)} accessibilityRole="button" accessibilityLabel={t('comments.delete', 'Delete')}>
                 <Text style={styles.actionIcon}>🗑️</Text>
               </TouchableOpacity>
             </View>
@@ -127,11 +127,14 @@ export function CommentThread({ comments, onAdd, onUpdate, onDelete }: CommentTh
               onChangeText={setEditText}
               maxLength={2000}
               autoFocus
+              accessibilityLabel={t('comments.editInput', 'Edit comment')}
             />
             <TouchableOpacity
               style={styles.saveButton}
               onPress={() => handleUpdate(comment.id)}
               disabled={submitting || !editText.trim()}
+              accessibilityRole="button"
+              accessibilityLabel={t('common.save', 'Save')}
             >
               <Text style={styles.saveButtonText}>{t('common.save', 'Save')}</Text>
             </TouchableOpacity>
@@ -140,6 +143,8 @@ export function CommentThread({ comments, onAdd, onUpdate, onDelete }: CommentTh
                 setEditingId(null);
                 setEditText('');
               }}
+              accessibilityRole="button"
+              accessibilityLabel={t('common.cancel', 'Cancel')}
             >
               <Text style={styles.cancelText}>{t('common.cancel', 'Cancel')}</Text>
             </TouchableOpacity>
@@ -185,11 +190,14 @@ export function CommentThread({ comments, onAdd, onUpdate, onDelete }: CommentTh
           maxLength={2000}
           returnKeyType="send"
           onSubmitEditing={handleAdd}
+          accessibilityLabel={t('comments.add', 'Add a comment...')}
         />
         <TouchableOpacity
           style={[styles.postButton, (!newText.trim() || submitting) && styles.postButtonDisabled]}
           onPress={handleAdd}
           disabled={!newText.trim() || submitting}
+          accessibilityRole="button"
+          accessibilityLabel={t('comments.addButton', 'Post')}
         >
           <Text style={styles.postButtonText}>{t('comments.addButton', 'Post')}</Text>
         </TouchableOpacity>

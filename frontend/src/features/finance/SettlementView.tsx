@@ -53,7 +53,7 @@ export function SettlementView() {
       {/* Balances */}
       <section>
         <h3 className="text-sm font-medium text-gray-500 mb-2 uppercase tracking-wider">
-          Balances
+          {t('finance.settlement.balances')}
         </h3>
         <div className="space-y-1">
           {data.balances.map((b) => (
@@ -79,6 +79,7 @@ function TransactionCard({ tx }: { tx: SettlementTransaction }) {
 }
 
 function BalanceRow({ balance }: { balance: UserBalance }) {
+  const { t } = useTranslation();
   const isPositive = balance.netBalanceEur > 0;
   const isNegative = balance.netBalanceEur < 0;
 
@@ -87,7 +88,7 @@ function BalanceRow({ balance }: { balance: UserBalance }) {
       <div>
         <span className="font-medium text-gray-800">{balance.userName}</span>
         <span className="ml-2 text-xs text-gray-400">
-          paid €{balance.totalPaidEur.toFixed(2)}
+          {t('finance.settlement.paid', { amount: `€${balance.totalPaidEur.toFixed(2)}` })}
         </span>
       </div>
       <span
