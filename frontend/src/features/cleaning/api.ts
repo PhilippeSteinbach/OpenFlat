@@ -1,0 +1,108 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { cleaningApi } from '@/shared/api/client';
+import type {
+  TaskDto,
+  TaskDetailDto,
+  CreateTaskRequest,
+  UpdateTaskRequest,
+  MoveTaskRequest,
+  MoveTaskResponse,
+  AssignTaskRequest,
+  LeaderboardEntry,
+} from './types';
+
+const userId = () => {
+  // Current user from persisted store
+  const stored = localStorage.getItem('openflat-current-user');
+  if (stored) {
+    try {
+      const parsed = JSON.parse(stored);
+      return parsed?.state?.currentUser?.id ?? 1;
+    } catch {
+      return 1;
+    }
+  }
+  return 1;
+};
+
+const headers = () => ({ 'X-User-Id': String(userId()) });
+
+export function useTasksQuery() {
+  return useQuery<TaskDto[]>({
+    queryKey: ['cleaning', 'tasks'],
+    queryFn: () =>
+      cleaningApi.get<TaskDto[]>('/tasks', headers()),
+  });
+}
+
+export function useTaskDetailQuery(taskId: string | undefined) {
+  return useQuery<TaskDetailDto>({
+    queryKey: ['cleaning', 'tasks', taskId],
+    queryFn: () =>
+      cleaningApi.get<TaskDetailDto>(`/tasks/${taskId}`, headers()),
+    enabled: !!taskId,
+  });
+}
+
+export function useLeaderboardQuery() {
+  return useQuery<LeaderboardEntry[]>({
+    queryKey: ['cleaning', 'leaderboard'],
+    queryFn: () =>
+      cleaningApi.get<LeaderboardEntry[]>('/leaderboard', headers()),
+  });
+}
+
+export function useCreateTaskMutation() {
+  const queryClient = useQueryClient();
+  return useMutation<TaskDto, Error, CreateTaskRequest>({
+    mutationFn: (req) =>
+      cleaningApi.post<TaskDto>('/tasks', req, headers()),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cleaning', 'tasks'] });
+    },
+  });
+}
+
+export function useUpdateTaskMutation() {
+  const queryClient = useQueryClient();
+  return useMutation<TaskDto, Error, { taskId: string; req: UpdateTaskRequest }>({
+    mutationFn: ({ taskId, req }) =>
+      cleaningApi.put<TaskDto>(`/tasks/${taskId}`, req, headers()),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cleaning'] });
+    },
+  });
+}
+
+export function useDeleteTaskMutation() {
+  const queryClient = useQueryClient();
+  return useMutation<void, Error, string>({
+    mutationFn: (taskId) =>
+      cleaningApi.delete<void>(`/tasks/${taskId}`, headers()),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cleaning'] });
+    },
+  });
+}
+
+export function useMoveTaskMutation() {
+  const queryClient = useQueryClient();
+  return useMutation<MoveTaskResponse, Error, { taskId: string; req: MoveTaskRequest }>({
+    mutationFn: ({ taskId, req }) =>
+      cleaningApi.post<MoveTaskResponse>(`/tasks/${taskId}/move`, req, headers()),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cleaning'] });
+    },
+  });
+}
+
+export function useAssignTaskMutation() {
+  const queryClient = useQueryClient();
+  return useMutation<TaskDto, Error, { taskId: string; req: AssignTaskRequest }>({
+    mutationFn: ({ taskId, req }) =>
+      cleaningApi.post<TaskDto>(`/tasks/${taskId}/assign`, req, headers()),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cleaning'] });
+    },
+  });
+}

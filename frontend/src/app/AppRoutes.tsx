@@ -4,6 +4,7 @@ import { queryClient } from '@/shared/api/queryClient';
 import { useCurrentUserStore } from '@/shared/hooks/useCurrentUser';
 import { UserSelectionPage } from '@/features/user-selection/UserSelectionPage';
 import { DashboardPage } from '@/features/dashboard/DashboardPage';
+import { KanbanBoard } from '@/features/cleaning/KanbanBoard';
 
 function RequireUser({ children }: { children: React.ReactNode }) {
   const currentUser = useCurrentUserStore((s) => s.currentUser);
@@ -31,7 +32,7 @@ export function AppRoutes() {
             path="/cleaning"
             element={
               <RequireUser>
-                <div>Cleaning Board (coming soon)</div>
+                <KanbanBoard />
               </RequireUser>
             }
           />

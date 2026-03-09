@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { useCurrentUserStore } from '@/shared/hooks/useCurrentUser';
 import { Card, Button } from '@/shared/components';
+import { useLeaderboardQuery } from '@/features/cleaning/api';
 
 const MODULE_TILES = [
   { key: 'cleaning', path: '/cleaning', icon: '🧹' },
@@ -39,11 +40,16 @@ export function DashboardPage() {
     navigate('/');
   };
 
-  // TODO: Replace with real points from Cleaning API leaderboard endpoint
-  const leaderboardData = PREDEFINED_USERS.map((user) => ({
-    ...user,
-    points: 0,
-  }));
+  // Use real leaderboard data from API, fallback to static users with 0 points
+  const { data: leaderboardApi } = useLeaderboardQuery();
+  const leaderboardData = leaderboardApi
+    ? leaderboardApi.map((entry) => ({
+        id: entry.userId,
+        name: entry.userName,
+        role: entry.role,
+        points: entry.totalPoints,
+      }))
+    : PREDEFINED_USERS.map((user) => ({ ...user, points: 0 }));
 
   const currentUserPoints =
     leaderboardData.find((u) => u.id === currentUser?.id)?.points ?? 0;

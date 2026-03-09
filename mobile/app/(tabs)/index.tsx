@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,6 +10,14 @@ import {
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useCurrentUserStore } from '../../shared/hooks/useCurrentUser';
+import { cleaningApi } from '../../shared/api/client';
+
+interface LeaderboardEntry {
+  userId: number;
+  userName: string;
+  role: string;
+  totalPoints: number;
+}
 
 const MODULE_TILES = [
   { key: 'cleaning', route: '/(tabs)/cleaning' as const, icon: '🧹' },
@@ -32,11 +41,25 @@ export default function DashboardScreen() {
   const currentUser = useCurrentUserStore((s) => s.currentUser);
   const clearCurrentUser = useCurrentUserStore((s) => s.clearCurrentUser);
 
-  // TODO: Replace with real points from Cleaning API leaderboard endpoint
-  const leaderboardData = PREDEFINED_USERS.map((user) => ({
-    ...user,
-    points: 0,
-  })).sort((a, b) => b.points - a.points || a.id - b.id);
+  // Fetch real leaderboard data from API
+  const [leaderboardApi, setLeaderboardApi] = useState<LeaderboardEntry[] | null>(null);
+
+  useEffect(() => {
+    const headers = { 'X-User-Id': String(currentUser?.id ?? 1) };
+    cleaningApi.get<LeaderboardEntry[]>('/leaderboard', headers)
+      .then(setLeaderboardApi)
+      .catch(() => setLeaderboardApi(null));
+  }, [currentUser?.id]);
+
+  const leaderboardData = (leaderboardApi
+    ? leaderboardApi.map((entry) => ({
+        id: entry.userId,
+        name: entry.userName,
+        role: entry.role,
+        points: entry.totalPoints,
+      }))
+    : PREDEFINED_USERS.map((user) => ({ ...user, points: 0 }))
+  ).sort((a, b) => b.points - a.points || a.id - b.id);
 
   const currentUserPoints =
     leaderboardData.find((u) => u.id === currentUser?.id)?.points ?? 0;

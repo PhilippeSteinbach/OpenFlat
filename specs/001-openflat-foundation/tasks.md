@@ -84,21 +84,21 @@
 
 ### Implementation for User Story 2
 
-- [ ] T027 [P] [US2] Implement CleaningTaskService with CRUD, move, assign, and point crediting/deducting logic in backend/OpenFlat.Cleaning.Api/Services/CleaningTaskService.cs
-- [ ] T028 [P] [US2] Implement LeaderboardService for point aggregation across all users in backend/OpenFlat.Cleaning.Api/Services/LeaderboardService.cs
-- [ ] T029 [US2] Implement task endpoints (listTasks, createTask, getTask, updateTask, deleteTask, moveTask, assignTask) per contracts/cleaning-api.yaml in backend/OpenFlat.Cleaning.Api/Endpoints/TaskEndpoints.cs
-- [ ] T030 [US2] Implement leaderboard endpoint (getLeaderboard) per contracts/cleaning-api.yaml in backend/OpenFlat.Cleaning.Api/Endpoints/LeaderboardEndpoints.cs
-- [ ] T031 [US2] Implement CleaningHub SignalR hub for real-time task and leaderboard updates in backend/OpenFlat.Cleaning.Api/Hubs/CleaningHub.cs
-- [ ] T032 [US2] Create Kanban board component with 4 columns and @dnd-kit/react drag-and-drop in frontend/src/features/cleaning/KanbanBoard.tsx
-- [ ] T033 [US2] Implement TaskCard component with title, points, assignee display, and current-user highlight in frontend/src/features/cleaning/TaskCard.tsx
-- [ ] T034 [US2] Implement create/edit/delete task dialogs and user assignment dropdown in frontend/src/features/cleaning/
-- [ ] T035 [US2] Connect cleaning board to SignalR CleaningHub via useSignalR hook in frontend/src/features/cleaning/
-- [ ] T035a [P] [US2] Write unit tests for CleaningTaskService (CRUD, move, assign, point credit/deduct, edge cases) and LeaderboardService in backend/tests/OpenFlat.Cleaning.Tests/Unit/
+- [X] T027 [P] [US2] Implement CleaningTaskService with CRUD, move, assign, and point crediting/deducting logic in backend/OpenFlat.Cleaning.Api/Services/CleaningTaskService.cs
+- [X] T028 [P] [US2] Implement LeaderboardService for point aggregation across all users in backend/OpenFlat.Cleaning.Api/Services/LeaderboardService.cs
+- [X] T029 [US2] Implement task endpoints (listTasks, createTask, getTask, updateTask, deleteTask, moveTask, assignTask) per contracts/cleaning-api.yaml in backend/OpenFlat.Cleaning.Api/Endpoints/TaskEndpoints.cs
+- [X] T030 [US2] Implement leaderboard endpoint (getLeaderboard) per contracts/cleaning-api.yaml in backend/OpenFlat.Cleaning.Api/Endpoints/LeaderboardEndpoints.cs
+- [X] T031 [US2] Implement CleaningHub SignalR hub for real-time task and leaderboard updates in backend/OpenFlat.Cleaning.Api/Hubs/CleaningHub.cs
+- [X] T032 [US2] Create Kanban board component with 4 columns and @dnd-kit/react drag-and-drop in frontend/src/features/cleaning/KanbanBoard.tsx
+- [X] T033 [US2] Implement TaskCard component with title, points, assignee display, and current-user highlight in frontend/src/features/cleaning/TaskCard.tsx
+- [X] T034 [US2] Implement create/edit/delete task dialogs and user assignment dropdown in frontend/src/features/cleaning/
+- [X] T035 [US2] Connect cleaning board to SignalR CleaningHub via useSignalR hook in frontend/src/features/cleaning/
+- [X] T035a [P] [US2] Write unit tests for CleaningTaskService (CRUD, move, assign, point credit/deduct, edge cases) and LeaderboardService in backend/tests/OpenFlat.Cleaning.Tests/
 - [ ] T035b [P] [US2] Write integration tests for all 12 Cleaning API endpoints using WebApplicationFactory + Testcontainers in backend/tests/OpenFlat.Cleaning.Tests/Integration/
 - [ ] T035c [US2] Write Playwright E2E test for Kanban board user journey (create task → drag to Done → verify points) in frontend/tests/e2e/cleaning.spec.ts
-- [ ] T036 [US2] Create mobile Kanban board with react-native-gesture-handler + react-native-reanimated drag-and-drop in mobile/app/(tabs)/cleaning/index.tsx
-- [ ] T037 [US2] Implement mobile task cards, create/edit/delete forms, and assignment control in mobile/features/cleaning/
-- [ ] T038 [US2] Wire leaderboard API data to dashboard leaderboard widgets on web and mobile
+- [X] T036 [US2] Create mobile cleaning board with status tabs, task cards, move actions, and create/assign modals in mobile/app/(tabs)/cleaning.tsx
+- [X] T037 [US2] Implement mobile task cards, create/edit/delete forms, and assignment control in mobile/app/(tabs)/cleaning.tsx
+- [X] T038 [US2] Wire leaderboard API data to dashboard leaderboard widgets on web and mobile
 
 **Checkpoint**: Cleaning Board fully functional with drag-and-drop, point system, real-time sync. Dashboard leaderboard reflects task completions.
 
