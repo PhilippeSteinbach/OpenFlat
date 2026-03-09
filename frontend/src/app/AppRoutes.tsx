@@ -5,6 +5,7 @@ import { useCurrentUserStore } from '@/shared/hooks/useCurrentUser';
 import { UserSelectionPage } from '@/features/user-selection/UserSelectionPage';
 import { DashboardPage } from '@/features/dashboard/DashboardPage';
 import { KanbanBoard } from '@/features/cleaning/KanbanBoard';
+import { ShoppingList } from '@/features/shopping/ShoppingList';
 
 function RequireUser({ children }: { children: React.ReactNode }) {
   const currentUser = useCurrentUserStore((s) => s.currentUser);
@@ -40,7 +41,7 @@ export function AppRoutes() {
             path="/shopping"
             element={
               <RequireUser>
-                <div>Shopping List (coming soon)</div>
+                <ShoppingList />
               </RequireUser>
             }
           />

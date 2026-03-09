@@ -112,17 +112,17 @@
 
 ### Implementation for User Story 3
 
-- [ ] T039 [P] [US3] Implement ShoppingItemService with CRUD, buy, undo, and validation logic in backend/OpenFlat.Shopping.Api/Services/ShoppingItemService.cs
-- [ ] T040 [P] [US3] Implement AutoClearService as hosted background service for 7-day expiry in backend/OpenFlat.Shopping.Api/Services/AutoClearService.cs
-- [ ] T041 [US3] Implement item endpoints (listItems, createItem, getItem, updateItem, buyItem, undoBuyItem) per contracts/shopping-api.yaml in backend/OpenFlat.Shopping.Api/Endpoints/ItemEndpoints.cs
-- [ ] T042 [US3] Implement ShoppingHub SignalR hub for real-time item updates in backend/OpenFlat.Shopping.Api/Hubs/ShoppingHub.cs
-- [ ] T043 [US3] Create shopping list view with active items list and Recently Bought section in frontend/src/features/shopping/ShoppingList.tsx
-- [ ] T044 [US3] Implement add/edit item form and check-off/undo interactions in frontend/src/features/shopping/
-- [ ] T045 [US3] Connect shopping list to SignalR ShoppingHub via useSignalR hook in frontend/src/features/shopping/
-- [ ] T046 [US3] Create mobile shopping list with active and Recently Bought sections in mobile/app/(tabs)/shopping/index.tsx
-- [ ] T047 [US3] Implement mobile add/edit item form, check-off/undo gestures in mobile/features/shopping/
-- [ ] T048 [US3] Connect mobile shopping list to SignalR ShoppingHub in mobile/features/shopping/
-- [ ] T048a [P] [US3] Write unit tests for ShoppingItemService (CRUD, buy, undo, validation) and AutoClearService (7-day expiry) in backend/tests/OpenFlat.Shopping.Tests/Unit/
+- [X] T039 [P] [US3] Implement ShoppingItemService with CRUD, buy, undo, and validation logic in backend/OpenFlat.Shopping.Api/Services/ShoppingItemService.cs
+- [X] T040 [P] [US3] Implement AutoClearService as hosted background service for 7-day expiry in backend/OpenFlat.Shopping.Api/Services/AutoClearService.cs
+- [X] T041 [US3] Implement item endpoints (listItems, createItem, getItem, updateItem, buyItem, undoBuyItem) per contracts/shopping-api.yaml in backend/OpenFlat.Shopping.Api/Endpoints/ItemEndpoints.cs
+- [X] T042 [US3] Implement ShoppingHub SignalR hub for real-time item updates in backend/OpenFlat.Shopping.Api/Hubs/ShoppingHub.cs
+- [X] T043 [US3] Create shopping list view with active items list and Recently Bought section in frontend/src/features/shopping/ShoppingList.tsx
+- [X] T044 [US3] Implement add/edit item form and check-off/undo interactions in frontend/src/features/shopping/
+- [X] T045 [US3] Connect shopping list to SignalR ShoppingHub via useSignalR hook in frontend/src/features/shopping/
+- [X] T046 [US3] Create mobile shopping list with active and Recently Bought sections in mobile/app/(tabs)/shopping/index.tsx
+- [X] T047 [US3] Implement mobile add/edit item form, check-off/undo gestures in mobile/features/shopping/
+- [X] T048 [US3] Connect mobile shopping list to SignalR ShoppingHub in mobile/features/shopping/
+- [X] T048a [P] [US3] Write unit tests for ShoppingItemService (CRUD, buy, undo, validation) and AutoClearService (7-day expiry) in backend/tests/OpenFlat.Shopping.Tests/Unit/
 - [ ] T048b [P] [US3] Write integration tests for all 10 Shopping API endpoints using WebApplicationFactory + Testcontainers in backend/tests/OpenFlat.Shopping.Tests/Integration/
 - [ ] T048c [US3] Write Playwright E2E test for shopping user journey (add item → check off → undo → verify Recently Bought) in frontend/tests/e2e/shopping.spec.ts
 
