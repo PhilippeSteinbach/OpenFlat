@@ -162,15 +162,15 @@
 
 ### Implementation for User Story 5
 
-- [ ] T057 [P] [US5] Implement task comment endpoints (listTaskComments, addTaskComment, updateTaskComment, deleteTaskComment) per contracts/cleaning-api.yaml in backend/OpenFlat.Cleaning.Api/Endpoints/CommentEndpoints.cs
-- [ ] T058 [P] [US5] Implement item comment endpoints (listItemComments, addItemComment, updateItemComment, deleteItemComment) per contracts/shopping-api.yaml in backend/OpenFlat.Shopping.Api/Endpoints/CommentEndpoints.cs
-- [ ] T059 [US5] Create shared CommentThread component with add, edit, delete, edited indicator, and own-only controls in frontend/src/features/comments/CommentThread.tsx
-- [ ] T060 [US5] Integrate CommentThread into cleaning task detail view in frontend/src/features/cleaning/TaskDetail.tsx
-- [ ] T061 [P] [US5] Integrate CommentThread into shopping item detail view in frontend/src/features/shopping/ItemDetail.tsx
-- [ ] T062 [US5] Create mobile shared CommentThread component in mobile/features/comments/CommentThread.tsx
-- [ ] T063 [US5] Integrate comments into mobile task detail screen in mobile/app/(tabs)/cleaning/[taskId].tsx
-- [ ] T064 [P] [US5] Integrate comments into mobile shopping item detail screen in mobile/features/shopping/
-- [ ] T064a [P] [US5] Write integration tests for comment endpoints (Cleaning + Shopping) covering add, edit own, delete own, reject other's in backend/tests/OpenFlat.Cleaning.Tests/ and backend/tests/OpenFlat.Shopping.Tests/
+- [X] T057 [P] [US5] Implement task comment endpoints (listTaskComments, addTaskComment, updateTaskComment, deleteTaskComment) per contracts/cleaning-api.yaml in backend/OpenFlat.Cleaning.Api/Endpoints/CommentEndpoints.cs
+- [X] T058 [P] [US5] Implement item comment endpoints (listItemComments, addItemComment, updateItemComment, deleteItemComment) per contracts/shopping-api.yaml in backend/OpenFlat.Shopping.Api/Endpoints/CommentEndpoints.cs
+- [X] T059 [US5] Create shared CommentThread component with add, edit, delete, edited indicator, and own-only controls in frontend/src/features/comments/CommentThread.tsx
+- [X] T060 [US5] Integrate CommentThread into cleaning task detail view in frontend/src/features/cleaning/TaskDetail.tsx
+- [X] T061 [P] [US5] Integrate CommentThread into shopping item detail view in frontend/src/features/shopping/ItemDetail.tsx
+- [X] T062 [US5] Create mobile shared CommentThread component in mobile/features/comments/CommentThread.tsx
+- [X] T063 [US5] Integrate comments into mobile task detail screen in mobile/app/(tabs)/cleaning/[taskId].tsx
+- [X] T064 [P] [US5] Integrate comments into mobile shopping item detail screen in mobile/features/shopping/
+- [X] T064a [P] [US5] Write integration tests for comment endpoints (Cleaning + Shopping) covering add, edit own, delete own, reject other's in backend/tests/OpenFlat.Cleaning.Tests/ and backend/tests/OpenFlat.Shopping.Tests/
 - [ ] T064b [US5] Write Playwright E2E test for comments user journey (add comment → edit → delete → verify permission enforcement) in frontend/tests/e2e/comments.spec.ts
 
 **Checkpoint**: Comments work on both cleaning tasks and shopping items, both web and mobile. Own-only edit/delete enforced. Edited indicator shown.

@@ -32,6 +32,11 @@ app.Use(async (ctx, next) =>
         ctx.Response.StatusCode = 404;
         await ctx.Response.WriteAsJsonAsync(new { title = "Not Found", detail = ex.Message, status = 404 });
     }
+    catch (ForbiddenException ex)
+    {
+        ctx.Response.StatusCode = 403;
+        await ctx.Response.WriteAsJsonAsync(new { title = "Forbidden", detail = ex.Message, status = 403 });
+    }
 });
 
 app.MapTaskEndpoints();

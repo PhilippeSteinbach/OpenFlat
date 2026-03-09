@@ -62,6 +62,14 @@ export interface LeaderboardEntry {
   totalPoints: number;
 }
 
+export interface CreateCommentRequest {
+  text: string;
+}
+
+export interface UpdateCommentRequest {
+  text: string;
+}
+
 export const TASK_STATUSES: TaskStatus[] = [
   'todo',
   'in_progress',

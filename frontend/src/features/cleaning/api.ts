@@ -3,11 +3,13 @@ import { cleaningApi } from '@/shared/api/client';
 import type {
   TaskDto,
   TaskDetailDto,
+  CommentDto,
   CreateTaskRequest,
   UpdateTaskRequest,
   MoveTaskRequest,
   MoveTaskResponse,
   AssignTaskRequest,
+  CreateCommentRequest,
   LeaderboardEntry,
 } from './types';
 
@@ -101,6 +103,43 @@ export function useAssignTaskMutation() {
   return useMutation<TaskDto, Error, { taskId: string; req: AssignTaskRequest }>({
     mutationFn: ({ taskId, req }) =>
       cleaningApi.post<TaskDto>(`/tasks/${taskId}/assign`, req, headers()),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cleaning'] });
+    },
+  });
+}
+
+// ── Comment mutations ──────────────────────
+
+export function useAddTaskCommentMutation() {
+  const queryClient = useQueryClient();
+  return useMutation<CommentDto, Error, { taskId: string; req: CreateCommentRequest }>(
+    {
+      mutationFn: ({ taskId, req }) =>
+        cleaningApi.post<CommentDto>(`/tasks/${taskId}/comments`, req, headers()),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['cleaning'] });
+      },
+    },
+  );
+}
+
+export function useUpdateTaskCommentMutation() {
+  const queryClient = useQueryClient();
+  return useMutation<CommentDto, Error, { taskId: string; commentId: string; text: string }>({
+    mutationFn: ({ taskId, commentId, text }) =>
+      cleaningApi.put<CommentDto>(`/tasks/${taskId}/comments/${commentId}`, { text }, headers()),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cleaning'] });
+    },
+  });
+}
+
+export function useDeleteTaskCommentMutation() {
+  const queryClient = useQueryClient();
+  return useMutation<void, Error, { taskId: string; commentId: string }>({
+    mutationFn: ({ taskId, commentId }) =>
+      cleaningApi.delete<void>(`/tasks/${taskId}/comments/${commentId}`, headers()),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cleaning'] });
     },

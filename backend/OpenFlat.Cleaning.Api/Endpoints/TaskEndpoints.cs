@@ -19,6 +19,12 @@ public static class TaskEndpoints
         group.MapDelete("/{taskId:guid}", DeleteTask);
         group.MapPost("/{taskId:guid}/move", MoveTask);
         group.MapPost("/{taskId:guid}/assign", AssignTask);
+
+        // ── Comment endpoints ──────────────────────
+        group.MapGet("/{taskId:guid}/comments", ListComments);
+        group.MapPost("/{taskId:guid}/comments", AddComment);
+        group.MapPut("/{taskId:guid}/comments/{commentId:guid}", UpdateComment);
+        group.MapDelete("/{taskId:guid}/comments/{commentId:guid}", DeleteComment);
     }
 
     private static int GetUserId(HttpContext ctx)
@@ -200,6 +206,78 @@ public static class TaskEndpoints
         await hub.Clients.All.SendAsync("TaskAssigned", dto);
         return Results.Ok(dto);
     }
+
+    // ── Comment handlers ──────────────────────
+
+    // GET /api/tasks/{taskId}/comments
+    private static async Task<IResult> ListComments(
+        HttpContext ctx,
+        Guid taskId,
+        CleaningTaskService svc)
+    {
+        GetUserId(ctx);
+        var task = await svc.GetByIdAsync(taskId);
+        if (task is null) return Results.NotFound();
+        return Results.Ok(task.Comments
+            .OrderBy(c => c.CreatedAt)
+            .Select(ToCommentDto)
+            .ToList());
+    }
+
+    // POST /api/tasks/{taskId}/comments
+    private static async Task<IResult> AddComment(
+        HttpContext ctx,
+        Guid taskId,
+        CreateCommentRequest req,
+        CleaningTaskService svc,
+        IHubContext<CleaningHub> hub)
+    {
+        var userId = GetUserId(ctx);
+        var comment = await svc.AddCommentAsync(taskId, userId, req.Text);
+        var dto = ToCommentDto(comment);
+        await hub.Clients.All.SendAsync("CommentAdded", taskId, dto);
+        return Results.Created($"/api/tasks/{taskId}/comments/{comment.Id}", dto);
+    }
+
+    // PUT /api/tasks/{taskId}/comments/{commentId}
+    private static async Task<IResult> UpdateComment(
+        HttpContext ctx,
+        Guid taskId,
+        Guid commentId,
+        UpdateCommentRequest req,
+        CleaningTaskService svc,
+        IHubContext<CleaningHub> hub)
+    {
+        var userId = GetUserId(ctx);
+        var comment = await svc.UpdateCommentAsync(taskId, commentId, userId, req.Text);
+        var dto = ToCommentDto(comment);
+        await hub.Clients.All.SendAsync("CommentUpdated", taskId, dto);
+        return Results.Ok(dto);
+    }
+
+    // DELETE /api/tasks/{taskId}/comments/{commentId}
+    private static async Task<IResult> DeleteComment(
+        HttpContext ctx,
+        Guid taskId,
+        Guid commentId,
+        CleaningTaskService svc,
+        IHubContext<CleaningHub> hub)
+    {
+        var userId = GetUserId(ctx);
+        await svc.DeleteCommentAsync(taskId, commentId, userId);
+        await hub.Clients.All.SendAsync("CommentDeleted", taskId, commentId);
+        return Results.NoContent();
+    }
+
+    private static CommentDto ToCommentDto(CleaningComment c) => new(
+        c.Id,
+        c.UserId,
+        PredefinedUsers.GetById(c.UserId)?.Name ?? "Unknown",
+        c.Text,
+        c.IsEdited,
+        c.CreatedAt,
+        c.UpdatedAt
+    );
 }
 
 // Request/Response DTOs
@@ -247,3 +325,6 @@ public record CommentDto(
     DateTimeOffset UpdatedAt);
 
 public record MoveTaskResponseDto(TaskDto Task, int PointsDelta, bool WarningNoAssignee);
+
+public record CreateCommentRequest(string Text);
+public record UpdateCommentRequest(string Text);

@@ -4,8 +4,10 @@ import type {
   ShoppingListResponse,
   ItemDto,
   ItemDetailDto,
+  CommentDto,
   CreateItemRequest,
   UpdateItemRequest,
+  CreateCommentRequest,
 } from './types';
 
 const userId = () => {
@@ -93,6 +95,41 @@ export function useUndoBuyMutation() {
   return useMutation<ItemDto, Error, string>({
     mutationFn: (itemId) =>
       shoppingApi.post<ItemDto>(`/items/${itemId}/undo`, {}, headers()),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['shopping'] });
+    },
+  });
+}
+
+// ── Comment mutations ──────────────────────
+
+export function useAddItemCommentMutation() {
+  const queryClient = useQueryClient();
+  return useMutation<CommentDto, Error, { itemId: string; req: CreateCommentRequest }>({
+    mutationFn: ({ itemId, req }) =>
+      shoppingApi.post<CommentDto>(`/items/${itemId}/comments`, req, headers()),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['shopping'] });
+    },
+  });
+}
+
+export function useUpdateItemCommentMutation() {
+  const queryClient = useQueryClient();
+  return useMutation<CommentDto, Error, { itemId: string; commentId: string; text: string }>({
+    mutationFn: ({ itemId, commentId, text }) =>
+      shoppingApi.put<CommentDto>(`/items/${itemId}/comments/${commentId}`, { text }, headers()),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['shopping'] });
+    },
+  });
+}
+
+export function useDeleteItemCommentMutation() {
+  const queryClient = useQueryClient();
+  return useMutation<void, Error, { itemId: string; commentId: string }>({
+    mutationFn: ({ itemId, commentId }) =>
+      shoppingApi.delete<void>(`/items/${itemId}/comments/${commentId}`, headers()),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['shopping'] });
     },

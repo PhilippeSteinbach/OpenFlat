@@ -158,9 +158,71 @@ public class CleaningTaskService(CleaningDbContext db)
         await db.SaveChangesAsync(ct);
         return task;
     }
+
+    // ── Comment operations ──────────────────────
+
+    public async Task<CleaningComment> AddCommentAsync(Guid taskId, int userId, string text, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            throw new ValidationException("Comment text is required.");
+        if (text.Length > 2000)
+            throw new ValidationException("Comment must be at most 2000 characters.");
+        if (!PredefinedUsers.IsValid(userId))
+            throw new ValidationException("Invalid user ID.");
+
+        var task = await db.Tasks.FindAsync([taskId], ct)
+            ?? throw new NotFoundException("Task not found.");
+
+        var comment = new CleaningComment
+        {
+            TaskId = taskId,
+            UserId = userId,
+            Text = text.Trim(),
+            CreatedAt = DateTimeOffset.UtcNow,
+            UpdatedAt = DateTimeOffset.UtcNow,
+        };
+
+        db.Comments.Add(comment);
+        await db.SaveChangesAsync(ct);
+        return comment;
+    }
+
+    public async Task<CleaningComment> UpdateCommentAsync(Guid taskId, Guid commentId, int userId, string text, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            throw new ValidationException("Comment text is required.");
+        if (text.Length > 2000)
+            throw new ValidationException("Comment must be at most 2000 characters.");
+
+        var comment = await db.Comments.FirstOrDefaultAsync(c => c.Id == commentId && c.TaskId == taskId, ct)
+            ?? throw new NotFoundException("Comment not found.");
+
+        if (comment.UserId != userId)
+            throw new ForbiddenException("Only the author can edit this comment.");
+
+        comment.Text = text.Trim();
+        comment.IsEdited = true;
+        comment.UpdatedAt = DateTimeOffset.UtcNow;
+
+        await db.SaveChangesAsync(ct);
+        return comment;
+    }
+
+    public async Task DeleteCommentAsync(Guid taskId, Guid commentId, int userId, CancellationToken ct = default)
+    {
+        var comment = await db.Comments.FirstOrDefaultAsync(c => c.Id == commentId && c.TaskId == taskId, ct)
+            ?? throw new NotFoundException("Comment not found.");
+
+        if (comment.UserId != userId)
+            throw new ForbiddenException("Only the author can delete this comment.");
+
+        db.Comments.Remove(comment);
+        await db.SaveChangesAsync(ct);
+    }
 }
 
 public record MoveResult(CleaningTask Task, int PointsDelta, bool WarningNoAssignee);
 
 public class ValidationException(string message) : Exception(message);
 public class NotFoundException(string message) : Exception(message);
+public class ForbiddenException(string message) : Exception(message);

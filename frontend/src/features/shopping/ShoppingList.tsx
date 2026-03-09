@@ -11,6 +11,7 @@ import {
 } from './api';
 import { useShoppingHub } from './useShoppingHub';
 import { ItemFormDialog, DeleteConfirmDialog } from './ShoppingDialogs';
+import { ItemDetail } from './ItemDetail';
 import type { ItemDto } from './types';
 
 export function ShoppingList() {
@@ -29,6 +30,7 @@ export function ShoppingList() {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editItem, setEditItem] = useState<ItemDto | null>(null);
   const [deleteItemId, setDeleteItemId] = useState<string | null>(null);
+  const [detailItem, setDetailItem] = useState<ItemDto | null>(null);
 
   const handleCreate = useCallback(
     (name: string, quantity: number) => {
@@ -120,6 +122,7 @@ export function ShoppingList() {
                 onBuy={handleBuy}
                 onEdit={setEditItem}
                 onDelete={(id) => setDeleteItemId(id)}
+                onViewDetail={setDetailItem}
               />
             ))}
           </div>
@@ -141,6 +144,7 @@ export function ShoppingList() {
                 key={item.id}
                 item={item}
                 onUndo={handleUndo}
+                onViewDetail={setDetailItem}
               />
             ))}
           </div>
@@ -174,6 +178,13 @@ export function ShoppingList() {
         onConfirm={handleDelete}
         isPending={deleteMutation.isPending}
       />
+
+      {detailItem && (
+        <ItemDetail
+          item={detailItem}
+          onClose={() => setDetailItem(null)}
+        />
+      )}
     </div>
   );
 }
@@ -185,9 +196,10 @@ interface ItemCardProps {
   onBuy: (id: string) => void;
   onEdit: (item: ItemDto) => void;
   onDelete: (id: string) => void;
+  onViewDetail: (item: ItemDto) => void;
 }
 
-function ItemCard({ item, onBuy, onEdit, onDelete }: ItemCardProps) {
+function ItemCard({ item, onBuy, onEdit, onDelete, onViewDetail }: ItemCardProps) {
   const { t } = useTranslation();
 
   return (
@@ -210,9 +222,22 @@ function ItemCard({ item, onBuy, onEdit, onDelete }: ItemCardProps) {
             </span>
           )}
           {item.commentCount > 0 && (
-            <span className="flex-shrink-0 text-xs text-gray-400" title="Comments">
+            <button
+              onClick={() => onViewDetail(item)}
+              className="flex-shrink-0 text-xs text-gray-400 hover:text-blue-500"
+              title="Comments"
+            >
               💬 {item.commentCount}
-            </span>
+            </button>
+          )}
+          {item.commentCount === 0 && (
+            <button
+              onClick={() => onViewDetail(item)}
+              className="flex-shrink-0 text-xs text-gray-300 hover:text-blue-400"
+              title="Add comment"
+            >
+              💬
+            </button>
           )}
         </div>
         <p className="text-xs text-gray-400">
@@ -238,9 +263,10 @@ function ItemCard({ item, onBuy, onEdit, onDelete }: ItemCardProps) {
 interface BoughtItemCardProps {
   item: ItemDto;
   onUndo: (id: string) => void;
+  onViewDetail: (item: ItemDto) => void;
 }
 
-function BoughtItemCard({ item, onUndo }: BoughtItemCardProps) {
+function BoughtItemCard({ item, onUndo, onViewDetail }: BoughtItemCardProps) {
   const { t } = useTranslation();
 
   return (
@@ -264,6 +290,13 @@ function BoughtItemCard({ item, onUndo }: BoughtItemCardProps) {
       </div>
 
       {/* Undo button */}
+      <button
+        onClick={() => onViewDetail(item)}
+        className="text-xs text-gray-400 hover:text-blue-500 px-1"
+        title="Comments"
+      >
+        💬
+      </button>
       <Button variant="ghost" size="sm" onClick={() => onUndo(item.id)} title={t('shopping.item.undoBuy')}>
         ↩️
       </Button>

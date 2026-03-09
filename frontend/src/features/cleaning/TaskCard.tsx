@@ -8,11 +8,12 @@ interface TaskCardProps {
   onEdit: (task: TaskDto) => void;
   onDelete: (taskId: string) => void;
   onAssign: (task: TaskDto) => void;
+  onViewDetail: (task: TaskDto) => void;
 }
 
 const AVATAR_COLORS = ['bg-blue-500', 'bg-emerald-500', 'bg-amber-500', 'bg-purple-500', 'bg-rose-500'];
 
-export function TaskCard({ task, onEdit, onDelete, onAssign }: TaskCardProps) {
+export function TaskCard({ task, onEdit, onDelete, onAssign, onViewDetail }: TaskCardProps) {
   const { t } = useTranslation();
   const currentUser = useCurrentUserStore((s) => s.currentUser);
   const isAssignedToCurrentUser = task.assignedUserId === currentUser?.id;
@@ -66,9 +67,22 @@ export function TaskCard({ task, onEdit, onDelete, onAssign }: TaskCardProps) {
 
         <div className="flex gap-1">
           {task.commentCount > 0 && (
-            <span className="text-xs text-gray-400" title={`${task.commentCount} comments`}>
+            <button
+              onClick={(e) => { e.stopPropagation(); onViewDetail(task); }}
+              className="text-xs text-gray-400 hover:text-blue-500 p-0.5"
+              title={`${task.commentCount} comments`}
+            >
               💬 {task.commentCount}
-            </span>
+            </button>
+          )}
+          {task.commentCount === 0 && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onViewDetail(task); }}
+              className="text-xs text-gray-300 hover:text-blue-400 p-0.5"
+              title="Add comment"
+            >
+              💬
+            </button>
           )}
           <button
             onClick={(e) => { e.stopPropagation(); onEdit(task); }}

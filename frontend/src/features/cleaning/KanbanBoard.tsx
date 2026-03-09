@@ -6,6 +6,7 @@ import { Button } from '@/shared/components';
 import { EmptyState } from '@/shared/components';
 import { TaskCard } from './TaskCard';
 import { TaskFormDialog, DeleteConfirmDialog, AssignDialog } from './TaskDialogs';
+import { TaskDetail } from './TaskDetail';
 import {
   useTasksQuery,
   useCreateTaskMutation,
@@ -40,9 +41,10 @@ interface ColumnProps {
   onEdit: (task: TaskDto) => void;
   onDelete: (taskId: string) => void;
   onAssign: (task: TaskDto) => void;
+  onViewDetail: (task: TaskDto) => void;
 }
 
-function Column({ status, tasks, onEdit, onDelete, onAssign }: ColumnProps) {
+function Column({ status, tasks, onEdit, onDelete, onAssign, onViewDetail }: ColumnProps) {
   const { t } = useTranslation();
   const { ref, isDropTarget } = useDroppable({ id: status });
 
@@ -74,6 +76,7 @@ function Column({ status, tasks, onEdit, onDelete, onAssign }: ColumnProps) {
               onEdit={onEdit}
               onDelete={onDelete}
               onAssign={onAssign}
+              onViewDetail={onViewDetail}
             />
           ))
         )}
@@ -100,6 +103,7 @@ export function KanbanBoard() {
   const [editTask, setEditTask] = useState<TaskDto | null>(null);
   const [deleteTaskId, setDeleteTaskId] = useState<string | null>(null);
   const [assignTask_, setAssignTask] = useState<TaskDto | null>(null);
+  const [detailTask, setDetailTask] = useState<TaskDto | null>(null);
 
   // Group tasks by status
   const columns = useMemo(() => {
@@ -230,6 +234,7 @@ export function KanbanBoard() {
                 onEdit={setEditTask}
                 onDelete={setDeleteTaskId}
                 onAssign={setAssignTask}
+                onViewDetail={setDetailTask}
               />
             ))}
           </div>
@@ -259,6 +264,12 @@ export function KanbanBoard() {
         onClose={() => setAssignTask(null)}
         onAssign={handleAssign}
       />
+      {detailTask && (
+        <TaskDetail
+          task={detailTask}
+          onClose={() => setDetailTask(null)}
+        />
+      )}
     </div>
   );
 }

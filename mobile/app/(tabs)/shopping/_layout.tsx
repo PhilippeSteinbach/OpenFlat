@@ -4,6 +4,7 @@ export default function ShoppingLayout() {
   return (
     <Stack>
       <Stack.Screen name="index" options={{ title: 'Shopping List' }} />
+      <Stack.Screen name="[itemId]" options={{ title: 'Item Detail', presentation: 'modal' }} />
     </Stack>
   );
 }
