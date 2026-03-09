@@ -6,7 +6,16 @@ import {
   useUpdateTaskCommentMutation,
   useDeleteTaskCommentMutation,
 } from './api';
+import { FrequencyUnit } from './types';
 import type { TaskDto } from './types';
+
+const PREDEFINED_USERS: Record<number, string> = {
+  1: 'Alex',
+  2: 'Jordan',
+  3: 'Sam',
+  4: 'Taylor',
+  5: 'Casey',
+};
 
 interface TaskDetailProps {
   task: TaskDto;
@@ -19,6 +28,10 @@ export function TaskDetail({ task, onClose }: TaskDetailProps) {
   const addComment = useAddTaskCommentMutation();
   const updateComment = useUpdateTaskCommentMutation();
   const deleteComment = useDeleteTaskCommentMutation();
+
+  const frequencyLabel = task.frequencyUnit === FrequencyUnit.Weeks
+    ? t('cleaning.frequency.weeks', 'Weeks')
+    : t('cleaning.frequency.days', 'Days');
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-label={task.title}>
@@ -40,13 +53,17 @@ export function TaskDetail({ task, onClose }: TaskDetailProps) {
         </div>
 
         {/* Task info */}
-        <div className="px-6 py-4 border-b border-gray-100 space-y-2">
-          <div className="flex items-center gap-3 text-sm flex-wrap">
+        <div className="px-6 py-4 border-b border-gray-100 space-y-3">
+          {/* Badges row */}
+          <div className="flex items-center gap-2 text-sm flex-wrap">
             <span className="bg-amber-100 text-amber-800 font-semibold px-2 py-0.5 rounded">
               {task.points} {t('common.points', 'pts')}
             </span>
-            <span className={task.isDone ? 'text-green-600 font-medium' : 'text-gray-500'}>
-              {task.isDone ? t('cleaning.task.done', 'Done') : t('cleaning.task.open', 'Open')}
+            <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs">
+              {t(`cleaning.effort.${task.effort}`, task.effort)}
+            </span>
+            <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs">
+              {t('cleaning.frequency.every', 'Every')} {task.frequencyValue} {frequencyLabel}
             </span>
             {task.assignedUserName && (
               <span className="text-gray-600">
@@ -54,15 +71,50 @@ export function TaskDetail({ task, onClose }: TaskDetailProps) {
               </span>
             )}
           </div>
-          {task.dueDate && (
+
+          {/* Due date */}
+          <p className="text-xs text-gray-500">
+            {t('cleaning.task.dueDate', 'Due')}: {task.dueDate}
+          </p>
+
+          {/* Last completed */}
+          {task.lastCompletedAt && (
             <p className="text-xs text-gray-500">
-              {t('cleaning.task.dueDate', 'Due')}: {task.dueDate}
+              {t('cleaning.task.lastCompleted', 'Last completed')}: {new Date(task.lastCompletedAt).toLocaleString()}
+              {task.lastCompletedByUserName && (
+                <span className="ml-1">({t('cleaning.task.by', 'by')} {task.lastCompletedByUserName})</span>
+              )}
             </p>
           )}
-          {task.completedAt && (
-            <p className="text-xs text-gray-500">
-              {t('cleaning.task.completedAt', 'Completed')}: {new Date(task.completedAt).toLocaleString()}
-            </p>
+
+          {/* Rotation schedule */}
+          {task.rotationOrder.length > 0 && (
+            <div>
+              <p className="text-xs font-medium text-gray-600 mb-1">
+                {t('cleaning.rotation.schedule', 'Rotation')}
+              </p>
+              <div className="flex items-center gap-1 flex-wrap">
+                {task.rotationOrder.map((userId, idx) => {
+                  const name = PREDEFINED_USERS[userId] ?? `User ${userId}`;
+                  const isCurrent = idx === task.rotationIndex;
+                  return (
+                    <span
+                      key={userId}
+                      className={`text-xs px-2 py-0.5 rounded-full ${
+                        isCurrent
+                          ? 'bg-primary-100 text-primary-700 font-semibold ring-1 ring-primary-300'
+                          : 'bg-gray-50 text-gray-500'
+                      }`}
+                    >
+                      {name}
+                      {idx < task.rotationOrder.length - 1 && (
+                        <span className="ml-1 text-gray-300">→</span>
+                      )}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
           )}
         </div>
 

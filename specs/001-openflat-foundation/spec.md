@@ -14,7 +14,7 @@
 - "Mobile-first UI" means the interface is optimized for smartphone viewports (≤ 428px width) but remains usable on tablet and desktop screens.
 - Currency for the Finance Tracker defaults to EUR (€). Multi-currency support is out of scope.
 - Real-time collaboration (multiple users editing simultaneously on different devices) is not required in this phase; the app is designed for one person acting at a time. However, SignalR keeps any open clients in sync for demo and testing convenience.
-- The Cleaning Checklist follows the same checklist pattern as the Shopping List — tasks are toggled done/undone rather than moved through columns.
+- The Cleaning Checklist uses a recurring-task model — completing a task advances the due date and rotation to the next cycle. There is no toggle/undo; completion is one-way.
 
 ## Clarifications
 
@@ -45,25 +45,28 @@ A person opens OpenFlat for the first time and sees a selection screen listing f
 
 ---
 
-### User Story 2 — Cleaning Checklist (Gamified Checklist) (Priority: P2)
+### User Story 2 — Cleaning Checklist (Recurring Tasks with Rotation) (Priority: P2)
 
-A user navigates to the Cleaning Checklist and sees a list of cleaning tasks displayed as checklist items (similar to the Shopping List pattern). Each item shows a title, a point value, the name of the responsible person (if assigned), and deadline information: the number of days remaining until the due date, or the number of days overdue (highlighted in red). Users can tap a checkbox to mark a task as done. Users can assign any of the five household members to a task. When a task is marked done, the point value is added to the assigned user's total points. Active (undone) tasks are sorted by urgency: overdue first, then due soonest, then no deadline. Completed tasks appear below.
+A user navigates to the Cleaning Checklist and sees a list of recurring cleaning tasks. Each item shows a title, an effort badge (None/Normal/Big/Huge/Custom), the point value, the currently assigned person, frequency (e.g., "every 3d"), and deadline information: days remaining or days overdue (highlighted in red). Users can complete a task (one-way — no undo), which credits the points to the completer, advances the rotation to the next user, and resets the due date to the next cycle. Any user can complete any task, including tasks assigned to someone else. Tasks are sorted by urgency: overdue first, then due soonest.
 
 **Why this priority**: The Cleaning Checklist validates the gamification system (points, leaderboard) and the assignment/deadline model that distinguishes it from the simpler Shopping List.
 
-**Independent Test**: Navigate to the Cleaning Checklist, verify tasks render with assignee names and deadline badges, create a task with a due date, mark it done, confirm point crediting.
+**Independent Test**: Navigate to the Cleaning Checklist, verify tasks render with effort badges, assignee names, frequency info, and deadline badges. Create a recurring task with effort=Big and frequency=7d. Complete the task as a different user than the assignee. Confirm points go to the completer, rotation advances, and due date resets.
 
 **Acceptance Scenarios**:
 
-1. **Given** the user opens the Cleaning Checklist, **When** the list loads, **Then** active (undone) tasks are displayed first, sorted by urgency, followed by completed tasks.
-2. **Given** an active task has a due date 3 days from now, **When** the list renders, **Then** a badge shows "3d left" next to the task.
-3. **Given** an active task's due date was 2 days ago, **When** the list renders, **Then** a badge shows "2d overdue" in a warning/red style.
-4. **Given** a task is assigned to a user, **When** the list renders, **Then** the assigned person's name is displayed on the checklist item.
-5. **Given** a task with 50 points is assigned to "User A", **When** the user taps the checkbox to mark it done, **Then** 50 points are added to User A's total score.
-6. **Given** a task has no user assigned, **When** it is marked done, **Then** no points are awarded and the system shows a visual indicator that an assignee is needed before points can be credited.
-7. **Given** the user is on the Cleaning Checklist, **When** they want to create a new task, **Then** they can add a task with a title, point value, and optional due date, and the task appears in the active list.
-8. **Given** a completed task exists, **When** the user taps its checkbox to uncheck it, **Then** the task moves back to the active list and previously credited points are deducted.
-9. **Given** the user opens the Cleaning Checklist, **When** no tasks exist, **Then** an empty state message is displayed (e.g., "No cleaning tasks yet — add one!").
+1. **Given** the user opens the Cleaning Checklist, **When** the list loads, **Then** all recurring tasks are displayed sorted by urgency (overdue → due soonest), each showing effort badge, frequency, and rotation info.
+2. **Given** a task has a due date 3 days from now, **When** the list renders, **Then** a badge shows "3d left" next to the task.
+3. **Given** a task's due date was 2 days ago, **When** the list renders, **Then** a badge shows "2d overdue" in a warning/red style.
+4. **Given** a task is assigned to a user via rotation, **When** the list renders, **Then** the assigned person's name is displayed on the checklist item.
+5. **Given** a task with effort=Big (2 points) is assigned to "Alex" and "Sam" taps the complete button, **When** the completion processes, **Then** 2 points are credited to Sam's (the completer's) total score, not Alex's.
+6. **Given** a task has no rotation configured (empty rotation order), **When** it is completed, **Then** points go to the completer and no rotation advance occurs; the task resets with no assignee.
+7. **Given** the user is on the Cleaning Checklist, **When** they create a new task, **Then** they provide a title, effort preset, frequency (value + unit), first due date, and optional rotation order; the task appears in the list.
+8. **Given** the user opens the Cleaning Checklist, **When** no tasks exist, **Then** an empty state message is displayed (e.g., "No cleaning tasks yet — add one!").
+9. **Given** a recurring task with frequency=7d and due date March 10, **When** a user completes it, **Then** the due date advances to March 17 (from the due date, not from today), rotation advances to the next user, and a completion log entry is recorded.
+10. **Given** a task is assigned to "Alex" and "Sam" completes it for them, **When** the next-in-rotation picker is shown, **Then** Sam can choose who is next; the system sets the rotation index to the chosen user's position.
+11. **Given** a user creates a task with effort=Custom, **When** the effort picker shows Custom, **Then** a manual points input is enabled; for all other presets (None/Normal/Big/Huge), the points input is disabled and auto-calculated.
+12. **Given** a rotation of [Alex, Sam, Jordan] with current index 2 (Jordan), **When** the task is completed, **Then** the index wraps to 0 and the task is assigned to Alex for the next cycle.
 
 ---
 
@@ -126,14 +129,15 @@ From a Cleaning Checklist task or a Shopping List item, a user can open a commen
 
 ### Edge Cases
 
-- What happens when a user marks a task as done without an assignee? No points are awarded and a visual indicator shows that an assignee is needed.
+- What happens when a user completes a task with no rotation configured? Points go to the completer; no rotation advance occurs; the due date still advances by frequency.
 - What happens when an expense amount of €0.00 or a negative value is entered? The system rejects non-positive amounts and shows a validation message.
 - What happens when a shopping item is added with an empty name? The system rejects the submission and highlights the required field.
 - What happens when all five users have identical total expenses? The Settlement View shows "All settled — no payments needed."
-- What happens when a user unchecks a completed task? The points previously credited are deducted from the assigned user's total.
+- What happens when a task is completed by mistake? There is no undo. A coordinator can manually edit the task to reassign and adjust the due date.
 - What happens when comment text is empty? The system prevents submission of blank comments.
-- What happens when a task's point value is zero? The task can still be checked off, but zero points are awarded.
-- What happens when a task has no due date? It appears after tasks with deadlines in the active list, with no deadline badge.
+- What happens when a task has effort=None (0 points)? The task can still be completed, but zero points are credited and the rotation still advances.
+- What happens when an overdue recurring task is completed? The next due date is calculated from the original due date, not from today, to preserve the recurrence rhythm. Multiple missed cycles are not "caught up" — only one cycle advances per completion.
+- What happens when a single-person rotation task is completed? The same user is reassigned and the due date advances normally.
 
 ## Requirements *(mandatory)*
 
@@ -159,16 +163,28 @@ From a Cleaning Checklist task or a Shopping List item, a user can open a commen
 - **FR-008**: Each checklist item MUST display a title, point value, assigned person's name (if any), and deadline badge (days remaining or days overdue).
 - **FR-008a**: Active tasks with a due date in the past MUST show a "Xd overdue" badge in a warning style (red).
 - **FR-008b**: Active tasks with a due date in the future MUST show a "Xd left" badge.
-- **FR-008c**: Active tasks with no due date MUST appear after deadline tasks with no deadline badge.
-- **FR-009**: System MUST allow any user to toggle a task's done/undone state by tapping a checkbox.
+- ~~**FR-008c**~~: *(Removed — v3 tasks always have a mandatory due date; this FR is structurally impossible.)*
+- **FR-009**: System MUST allow any user to complete a task via a one-way complete action (no undo/toggle). Completion advances the rotation and resets the due date to the next cycle.
 - **FR-010**: System MUST allow any user to assign any of the five household members to a task.
 - **FR-011**: Checklist items assigned to the currently selected user MUST be highlighted with a visually distinct color or border.
-- **FR-012**: When a task is marked done and has an assigned user, the system MUST credit the point value to that user's total score.
-- **FR-013**: When a completed task is unchecked (marked undone), the system MUST deduct the previously credited points from the assigned user's total score.
-- **FR-014**: System MUST allow any user to create a new task by providing a title, point value, and optional due date; the task appears in the active list.
-- **FR-014a**: System MUST allow any user to edit a task's title, point value, and due date. If the task is done and the point value changes, the assigned user's total score MUST be recalculated.
-- **FR-014b**: System MUST allow any user to delete a task. If the deleted task was done, the credited points MUST be deducted from the assigned user's total score.
-- **FR-015**: If a task with no assignee is marked done, the system MUST show a visual indicator that no points were awarded and an assignee is needed.
+- **FR-012**: When a task is completed, the system MUST credit the point value to the **completer** (the user who tapped complete), regardless of who the task was assigned to.
+- ~~**FR-013**~~: *(Removed — v3 completion is one-way with no undo. Completing a task advances the rotation. Mistaken completions are corrected by a coordinator editing the task to manually reassign and adjust the due date.)*
+- **FR-014**: System MUST allow any user to create a new recurring task by providing: title (required), effort preset (required: None/Normal/Big/Huge/Custom), frequency value + unit (required, e.g., every 3 days), first due date (required), and rotation order (optional list of user IDs). The task appears in the checklist.
+- **FR-014a**: System MUST allow any user to edit a task's title, effort preset, frequency (value + unit), due date, and rotation order. When effort is changed, points auto-recalculate from the preset (unless Custom). Changing the rotation order resets the rotation index to 0 and updates the assigned user.
+- **FR-014b**: System MUST allow any user to delete a task. Deletion cascades to the task's completion log entries, removing associated points from the leaderboard.
+- **FR-015**: If a non-rotating task (empty rotation order, no assignee) is completed, the system SHOULD show a visual note that no rotation advance occurred. Points still go to the completer.
+
+**Recurring Tasks & Rotation (v3)**
+
+- **FR-035**: Each cleaning task MUST have a frequency defined by a value (integer ≥ 1) and a unit (`Days` or `Weeks`). The next due date is calculated as `current_due_date + (frequency_value × unit_in_days)`.
+- **FR-036**: Each cleaning task MUST have an effort preset (None=0pts, Normal=1pt, Big=2pts, Huge=4pts, Custom=user-defined). When effort is not Custom, the point value MUST be auto-set from the preset and the manual points input MUST be disabled.
+- **FR-037**: Each cleaning task MAY have a rotation order — an ordered list of user IDs defining the round-robin assignment sequence. A rotation index tracks the current position.
+- **FR-038**: On completion, if the task has a non-empty rotation order, the system MUST advance the rotation index (`(index + 1) % length`), set the assigned user to `rotation_order[new_index]`, and advance the due date by frequency.
+- **FR-039**: Any user MUST be able to complete a task assigned to someone else ("complete for another"). The completer earns the points (FR-012). When completing for another, the system MUST show a next-in-rotation picker allowing the completer to choose who is assigned next (overriding the natural rotation advance).
+- **FR-040**: Every completion event MUST be recorded in a completion log with: task ID, completer user ID, assigned user ID at time of completion, points earned, and timestamp. Completion log entries are immutable (never edited or deleted directly).
+- **FR-041**: The leaderboard (FR-006a, FR-006b) MUST calculate totals by summing `points_earned` from the completion log grouped by `completed_by_user_id`, not from task state.
+- **FR-042**: For tasks with a single-person rotation (one user ID in rotation order), completion MUST re-assign the same user and advance the due date normally.
+- **FR-043**: When an overdue task is completed, the next due date MUST be calculated from the original due date (not from today), to preserve the intended recurrence rhythm.
 
 **Shopping List**
 
@@ -213,7 +229,7 @@ From a Cleaning Checklist task or a Shopping List item, a user can open a commen
 ### Key Entities
 
 - **User**: Represents a household member. Attributes: unique identifier, display name, role label ("Coordinator" or "Resident"), avatar/icon, total points earned. The five predefined users are: Alex (Coordinator), Jordan (Coordinator), Sam (Resident), Taylor (Resident), Casey (Resident). All are immutable.
-- **Task (Cleaning Checklist)**: A household chore. Attributes: title, point value, done/undone state, due date (optional), assigned user (optional), completed-at timestamp, comments. Tasks can be created by any user and toggled done/undone.
+- **Task (Cleaning Checklist)**: A recurring household chore. Attributes: title, effort preset (None/Normal/Big/Huge/Custom), point value, frequency (value + unit), due date (mandatory, auto-advances), rotation order (optional user ID list), rotation index, assigned user (rotation-derived), last completed at/by, completion log history, comments. Tasks are completed one-way (no undo); completion advances rotation and resets the due date.
 - **Shopping Item**: An item needed for the household. Attributes: name, quantity, added-by user, status (active or recently bought), comments.
 - **Expense**: A financial entry. Attributes: amount (EUR), description, logged-by user, date.
 - **Comment**: A text message attached to a Task or Shopping Item. Attributes: text content, author (user), timestamp, edited flag.
@@ -224,8 +240,8 @@ From a Cleaning Checklist task or a Shopping List item, a user can open a commen
 
 - **SC-001**: A new user can select their identity and reach the Main Dashboard in under 5 seconds (two taps maximum).
 - **SC-002**: A user can create a new cleaning task and see it appear on the board in under 10 seconds.
-- **SC-003**: A user can toggle a task's done state with a single tap on the checkbox, and the state change completes visually within 1 second.
-- **SC-004**: Points are accurately credited (or deducted) within 1 second of a task being marked done (or undone).
+- **SC-003**: A user can complete a task with a single tap on the complete button, and the completion (rotation advance + due date reset) completes visually within 1 second.
+- **SC-004**: Points are accurately credited to the completer within 1 second of a task being completed.
 - **SC-005**: A user can add a shopping item and see it in the list within 5 seconds.
 - **SC-006**: Checking off a shopping item moves it to "Recently Bought" within 1 second.
 - **SC-007**: A user can log an expense and see the Settlement View update within 5 seconds.

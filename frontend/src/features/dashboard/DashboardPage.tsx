@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { useCurrentUserStore } from '@/shared/hooks/useCurrentUser';
-import { Card, Button } from '@/shared/components';
+import { Card } from '@/shared/components';
 import { useLeaderboardQuery } from '@/features/cleaning/api';
 
 const MODULE_TILES = [
@@ -33,12 +33,6 @@ export function DashboardPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const currentUser = useCurrentUserStore((s) => s.currentUser);
-  const clearCurrentUser = useCurrentUserStore((s) => s.clearCurrentUser);
-
-  const handleSwitchUser = () => {
-    clearCurrentUser();
-    navigate('/');
-  };
 
   // Use real leaderboard data from API, fallback to static users with 0 points
   const { data: leaderboardApi, isLoading: leaderboardLoading, isError: leaderboardError, refetch: refetchLeaderboard } = useLeaderboardQuery();
@@ -55,25 +49,18 @@ export function DashboardPage() {
     leaderboardData.find((u) => u.id === currentUser?.id)?.points ?? 0;
 
   return (
-    <main className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-4 py-3">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold text-gray-900">
-              {t('dashboard.greeting', { name: currentUser?.name })}
-            </h1>
-            <p className="text-sm text-gray-500">
-              {currentUserPoints} {t('common.points')}
-            </p>
-          </div>
-          <Button variant="ghost" size="sm" onClick={handleSwitchUser}>
-            {t('dashboard.switchUser')}
-          </Button>
-        </div>
-      </header>
+    <div className="max-w-4xl mx-auto p-4 space-y-6">
+      {/* Greeting */}
+      <div>
+        <h1 className="text-xl font-bold text-gray-900">
+          {t('dashboard.greeting', { name: currentUser?.name })}
+        </h1>
+        <p className="text-sm text-gray-500">
+          {currentUserPoints} {t('common.points')}
+        </p>
+      </div>
 
-      <div className="max-w-4xl mx-auto p-4 space-y-6">
+      <div className="space-y-6">
         {/* Module Tiles */}
         <section>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -156,6 +143,6 @@ export function DashboardPage() {
           )}
         </section>
       </div>
-    </main>
+    </div>
   );
 }

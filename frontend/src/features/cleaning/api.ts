@@ -6,6 +6,7 @@ import type {
   CommentDto,
   CreateTaskRequest,
   UpdateTaskRequest,
+  CompleteTaskRequest,
   CompleteTaskResponse,
   AssignTaskRequest,
   CreateCommentRequest,
@@ -88,9 +89,9 @@ export function useDeleteTaskMutation() {
 
 export function useCompleteTaskMutation() {
   const queryClient = useQueryClient();
-  return useMutation<CompleteTaskResponse, Error, string>({
-    mutationFn: (taskId) =>
-      cleaningApi.post<CompleteTaskResponse>(`/tasks/${taskId}/complete`, {}, headers()),
+  return useMutation<CompleteTaskResponse, Error, { taskId: string; req?: CompleteTaskRequest }>({
+    mutationFn: ({ taskId, req }) =>
+      cleaningApi.post<CompleteTaskResponse>(`/tasks/${taskId}/complete`, req ?? {}, headers()),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cleaning'] });
     },

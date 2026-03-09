@@ -1,4 +1,5 @@
 import { Tabs } from 'expo-router';
+import { Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 export default function TabLayout() {
@@ -61,6 +62,6 @@ export default function TabLayout() {
 
 function TabBarEmoji({ emoji }: { emoji: string; color: string }) {
   return (
-    <>{emoji}</>
+    <Text style={{ fontSize: 20 }}>{emoji}</Text>
   );
 }

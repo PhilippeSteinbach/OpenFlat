@@ -1,7 +1,7 @@
-using OpenFlat.Cleaning.Api.Data;
-using OpenFlat.Finance.Api.Data;
+using OpenFlat.Api.Features.Cleaning.Data;
+using OpenFlat.Api.Features.Finance.Data;
 using OpenFlat.MigrationService;
-using OpenFlat.Shopping.Api.Data;
+using OpenFlat.Api.Features.Shopping.Data;
 
 var builder = Host.CreateApplicationBuilder(args);
 

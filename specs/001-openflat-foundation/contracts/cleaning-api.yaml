@@ -1,14 +1,15 @@
 openapi: 3.1.0
 info:
   title: OpenFlat Cleaning API
-  version: 2.0.0
+  version: 3.0.0
   description: |
-    REST API for the Cleaning Checklist module (gamified checklist).
-    Manages tasks with due dates, done/undone toggle, points, and task comments.
-    Real-time updates via SignalR hub at /hubs/cleaning.
+    REST API for the Cleaning Checklist module (recurring tasks with rotation).
+    Tasks recur on a frequency (every X days/weeks) and rotate among household members.
+    Points go to the completer, not the assigned user. Real-time updates via SignalR.
     
-    REDESIGNED (v2): Replaced 4-column Kanban board with simple checklist.
-    Tasks have a due date and done/undone state instead of status columns.
+    v3: Recurring tasks, effort presets, round-robin rotation, completion log.
+    v2: Simple checklist (done/undone toggle).
+    v1: 4-column Kanban board.
 
 servers:
   - url: https+http://cleaning-api
@@ -43,8 +44,10 @@ paths:
 
     post:
       operationId: createTask
-      summary: Create a new cleaning task
-      description: Creates a task with title, points, optional due date, and optional assignee.
+      summary: Create a new recurring cleaning task
+      description: |
+        Creates a recurring task with title, effort preset, frequency, first due date,
+        and optional rotation order (round-robin user list).
       parameters:
         - name: X-User-Id
           in: header
@@ -101,10 +104,11 @@ paths:
 
     put:
       operationId: updateTask
-      summary: Update task title, points, and/or due date
+      summary: Update task properties (effort, frequency, rotation, etc.)
       description: |
-        Edit a task's title, point value, and due date.
-        If task is done and points change, assigned user's score is recalculated.
+        Edit a recurring task's title, effort preset, frequency, due date, and rotation order.
+        When effort changes, points are auto-recalculated from the preset (unless Custom).
+        Changing rotation order resets the rotation index to 0.
       parameters:
         - name: X-User-Id
           in: header
@@ -137,7 +141,7 @@ paths:
       operationId: deleteTask
       summary: Delete a task
       description: |
-        Delete a task. If task was done, deduct points from assigned user.
+        Delete a recurring task. Cascades to completion_log entries, removing associated historical points from leaderboard totals.
       parameters:
         - name: X-User-Id
           in: header
@@ -161,24 +165,27 @@ paths:
 
     post:
       operationId: completeTask
-      summary: Toggle task done/undone
+      summary: Complete a recurring task
       description: |
-        Toggles the task's completion state. When marking done:
-        - Sets isDone=true, completedAt=now
-        - If assignee exists, credits points
-        - If no assignee, returns warningNoAssignee=true
-        When marking undone:
-        - Sets isDone=false, completedAt=null
-        - If assignee exists, deducts points
+        One-way completion (no undo). Logs completion, credits points to the
+        completer (X-User-Id), advances rotation, and sets next due date.
+        If completing for someone else, optionally provide nextUserId to
+        pick who is next in rotation instead of the natural next.
       parameters:
         - name: X-User-Id
           in: header
           required: true
           schema:
             type: integer
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompleteTaskRequest'
       responses:
         '200':
-          description: Task completion toggled
+          description: Task completed and advanced to next cycle
           content:
             application/json:
               schema:
@@ -197,8 +204,12 @@ paths:
 
     post:
       operationId: assignTask
-      summary: Assign or unassign a user to a task
-      description: Assign one of the 5 predefined users or unassign.
+      summary: Manually assign or unassign a user to a task (override rotation)
+      description: |
+        Manually assign one of the 5 predefined users or unassign, overriding the
+        rotation-derived assignment. Use for ad-hoc corrections; standard assignment
+        flows through rotation on completion (POST /complete) or rotation order
+        changes (PUT /tasks/{taskId}).
       parameters:
         - name: X-User-Id
           in: header
@@ -349,7 +360,7 @@ paths:
       summary: Get points leaderboard
       description: |
         Returns total points for each of the 5 users, sorted descending.
-        Points are calculated from completed tasks (isDone=true) with an assigned user.
+        Points are aggregated from the completion_log table for accuracy across rotations.
       responses:
         '200':
           description: Leaderboard
@@ -364,7 +375,7 @@ components:
   schemas:
     TaskDto:
       type: object
-      required: [id, title, points, isDone, createdByUserId, createdAt, updatedAt, commentCount]
+      required: [id, title, effort, points, frequencyValue, frequencyUnit, dueDate, rotationOrder, rotationIndex, createdByUserId, createdAt, updatedAt, commentCount]
       properties:
         id:
           type: string
@@ -372,22 +383,34 @@ components:
         title:
           type: string
           maxLength: 200
+        effort:
+          type: string
+          enum: [None, Normal, Big, Huge, Custom]
+          description: Effort preset
         points:
           type: integer
           minimum: 0
-        isDone:
-          type: boolean
-          description: Whether the task is completed
+          description: Point value (auto-set by effort or custom)
+        frequencyValue:
+          type: integer
+          minimum: 1
+          description: How often the task recurs (number)
+        frequencyUnit:
+          type: string
+          enum: [Days, Weeks]
+          description: Recurrence unit
         dueDate:
           type: string
           format: date
-          nullable: true
-          description: Due date (YYYY-MM-DD) or null if no deadline
-        completedAt:
-          type: string
-          format: date-time
-          nullable: true
-          description: When the task was marked done
+          description: Current cycle due date (YYYY-MM-DD)
+        rotationOrder:
+          type: array
+          items:
+            type: integer
+          description: Ordered list of user IDs for round-robin
+        rotationIndex:
+          type: integer
+          description: Current index in rotation_order
         assignedUserId:
           type: integer
           nullable: true
@@ -396,7 +419,16 @@ components:
         assignedUserName:
           type: string
           nullable: true
-          description: Display name of the responsible person
+          description: Display name of currently assigned person
+        lastCompletedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: When this task was last completed
+        lastCompletedByUserName:
+          type: string
+          nullable: true
+          description: Who last completed this task
         createdByUserId:
           type: integer
         createdAt:
@@ -421,56 +453,95 @@ components:
 
     CreateTaskRequest:
       type: object
-      required: [title, points]
+      required: [title, effort, frequencyValue, frequencyUnit, firstDueDate]
       properties:
         title:
           type: string
           minLength: 1
           maxLength: 200
+        effort:
+          type: string
+          enum: [None, Normal, Big, Huge, Custom]
         points:
           type: integer
           minimum: 0
+          description: Required when effort is Custom, ignored otherwise
+        frequencyValue:
+          type: integer
+          minimum: 1
+          description: Recurrence number (e.g., 3 for "every 3 days")
+        frequencyUnit:
+          type: string
+          enum: [Days, Weeks]
+        firstDueDate:
+          type: string
+          format: date
+          description: First due date (YYYY-MM-DD)
+        rotationOrder:
+          type: array
+          items:
+            type: integer
+          description: Optional user IDs for round-robin rotation
+
+    UpdateTaskRequest:
+      type: object
+      required: [title, effort, frequencyValue, frequencyUnit]
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        effort:
+          type: string
+          enum: [None, Normal, Big, Huge, Custom]
+        points:
+          type: integer
+          minimum: 0
+          description: Required when effort is Custom
+        frequencyValue:
+          type: integer
+          minimum: 1
+        frequencyUnit:
+          type: string
+          enum: [Days, Weeks]
         dueDate:
           type: string
           format: date
-          nullable: true
-          description: Optional due date (YYYY-MM-DD)
-        assignedUserId:
+          description: Override current due date
+        rotationOrder:
+          type: array
+          items:
+            type: integer
+          description: Updated rotation (resets rotation_index to 0)
+
+    CompleteTaskRequest:
+      type: object
+      properties:
+        nextUserId:
           type: integer
           nullable: true
           minimum: 1
           maximum: 5
-          description: Optional initial assignee
-
-    UpdateTaskRequest:
-      type: object
-      required: [title, points]
-      properties:
-        title:
-          type: string
-          minLength: 1
-          maxLength: 200
-        points:
-          type: integer
-          minimum: 0
-        dueDate:
-          type: string
-          format: date
-          nullable: true
-          description: Due date or null to remove deadline
+          description: |
+            When completing for someone else, pick who is next in rotation.
+            If null/omitted, the natural next in rotation_order is used.
 
     CompleteTaskResponse:
       type: object
-      required: [task, pointsDelta]
+      required: [task, pointsEarned, completedByUserName]
       properties:
         task:
           $ref: '#/components/schemas/TaskDto'
-        pointsDelta:
+        pointsEarned:
           type: integer
-          description: Points credited (+) or deducted (-). Zero if no assignee.
-        warningNoAssignee:
-          type: boolean
-          description: True if completed without an assignee
+          description: Points credited to the completer
+        completedByUserName:
+          type: string
+          description: Name of the user who completed the task
+        nextAssignedUserName:
+          type: string
+          nullable: true
+          description: Who is now assigned in the next cycle
 
     AssignTaskRequest:
       type: object
@@ -560,8 +631,7 @@ components:
   #   TaskCreated(TaskDto task)
   #   TaskUpdated(TaskDto task)
   #   TaskDeleted(Guid taskId)
-  #   TaskCompleted(CompleteTaskResponse response)
-  #   TaskUncompleted(CompleteTaskResponse response)
+  #   TaskCompleted(CompleteTaskResponse response)   — one-way, no undo
   #   TaskAssigned(TaskDto task)
   #   CommentAdded(Guid taskId, CommentDto comment)
   #   CommentUpdated(Guid taskId, CommentDto comment)

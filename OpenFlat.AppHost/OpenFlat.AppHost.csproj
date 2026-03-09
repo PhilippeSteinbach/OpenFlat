@@ -8,9 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\backend\OpenFlat.Cleaning.Api\OpenFlat.Cleaning.Api.csproj" />
-    <ProjectReference Include="..\backend\OpenFlat.Shopping.Api\OpenFlat.Shopping.Api.csproj" />
-    <ProjectReference Include="..\backend\OpenFlat.Finance.Api\OpenFlat.Finance.Api.csproj" />
+    <ProjectReference Include="..\backend\OpenFlat.Api\OpenFlat.Api.csproj" />
     <ProjectReference Include="..\OpenFlat.MigrationService\OpenFlat.MigrationService.csproj" />
   </ItemGroup>
 

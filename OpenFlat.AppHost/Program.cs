@@ -13,18 +13,8 @@ var migrations = builder.AddProject<Projects.OpenFlat_MigrationService>("migrati
     .WithReference(db)
     .WaitFor(db);
 
-// Backend APIs — wait for migrations to complete
-var cleaningApi = builder.AddProject<Projects.OpenFlat_Cleaning_Api>("cleaning-api")
-    .WithReference(db)
-    .WaitFor(db)
-    .WaitForCompletion(migrations);
-
-var shoppingApi = builder.AddProject<Projects.OpenFlat_Shopping_Api>("shopping-api")
-    .WithReference(db)
-    .WaitFor(db)
-    .WaitForCompletion(migrations);
-
-var financeApi = builder.AddProject<Projects.OpenFlat_Finance_Api>("finance-api")
+// Backend API — wait for migrations to complete
+var api = builder.AddProject<Projects.OpenFlat_Api>("api")
     .WithReference(db)
     .WaitFor(db)
     .WaitForCompletion(migrations);
@@ -32,8 +22,6 @@ var financeApi = builder.AddProject<Projects.OpenFlat_Finance_Api>("finance-api"
 // React frontend (Vite dev server)
 builder.AddViteApp("frontend", "../frontend")
     .WithHttpEndpoint(name: "vite", env: "PORT")
-    .WithReference(cleaningApi)
-    .WithReference(shoppingApi)
-    .WithReference(financeApi);
+    .WithReference(api);
 
 builder.Build().Run();

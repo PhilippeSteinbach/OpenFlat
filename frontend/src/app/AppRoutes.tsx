@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@/shared/api/queryClient';
 import { useCurrentUserStore } from '@/shared/hooks/useCurrentUser';
+import { TabLayout } from '@/shared/components';
 import { UserSelectionPage } from '@/features/user-selection/UserSelectionPage';
 import { DashboardPage } from '@/features/dashboard/DashboardPage';
 import { CleaningChecklist } from '@/features/cleaning/CleaningChecklist';
@@ -23,37 +24,17 @@ export function AppRoutes() {
         <Routes>
           <Route path="/" element={<UserSelectionPage />} />
           <Route
-            path="/dashboard"
             element={
               <RequireUser>
-                <DashboardPage />
+                <TabLayout />
               </RequireUser>
             }
-          />
-          <Route
-            path="/cleaning"
-            element={
-              <RequireUser>
-                <CleaningChecklist />
-              </RequireUser>
-            }
-          />
-          <Route
-            path="/shopping"
-            element={
-              <RequireUser>
-                <ShoppingList />
-              </RequireUser>
-            }
-          />
-          <Route
-            path="/finance"
-            element={
-              <RequireUser>
-                <FinanceTracker />
-              </RequireUser>
-            }
-          />
+          >
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/cleaning" element={<CleaningChecklist />} />
+            <Route path="/shopping" element={<ShoppingList />} />
+            <Route path="/finance" element={<FinanceTracker />} />
+          </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

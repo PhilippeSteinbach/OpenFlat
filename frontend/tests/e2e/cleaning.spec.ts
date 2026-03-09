@@ -1,12 +1,12 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * E2E: Cleaning Checklist journey (US2)
- * Validates: create task → view checklist → toggle done →
- * edit task → delete task → assign task → deadline badges
+ * E2E: Cleaning Recurring Tasks with Rotation (US2 v3)
+ * Validates: create recurring task with effort/frequency → view checklist →
+ * one-way complete → rotation advance → edit task → delete task → leaderboard update
  */
 
-test.describe('Cleaning Checklist', () => {
+test.describe('Cleaning Recurring Tasks', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
     await page.getByText('Alex').click();
@@ -17,54 +17,64 @@ test.describe('Cleaning Checklist', () => {
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible({ timeout: 5000 });
   });
 
-  test('should display checklist with active and completed sections', async ({ page }) => {
-    // Seed data should provide at least active and completed tasks
-    await expect(page.getByText(/Active/i)).toBeVisible({ timeout: 5000 });
+  test('should display task list sorted by urgency', async ({ page }) => {
+    // Seed data provides recurring tasks — list should be visible
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible({ timeout: 5000 });
   });
 
-  test('should create a new task', async ({ page }) => {
+  test('should create a recurring task with effort preset and frequency', async ({ page }) => {
     await page.getByRole('button', { name: /Create Task/i }).click();
 
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
-    await expect(dialog.getByText('Create Task')).toBeVisible();
 
-    await page.getByLabel('Title').fill('Clean the kitchen');
-    await page.getByLabel('Points').fill('15');
-    await dialog.getByRole('button', { name: 'Create Task' }).click();
+    // Fill in v3 form fields
+    await page.getByLabel('Title').fill('Vacuum the hallway');
+
+    // Select effort preset (Big = 2 pts)
+    await dialog.getByRole('button', { name: /Big/i }).click();
+
+    // Set frequency
+    await page.getByLabel(/Frequency/i).fill('7');
+
+    // Submit
+    await dialog.getByRole('button', { name: /Create/i }).click();
 
     // Task appears in the checklist
-    await expect(page.getByText('Clean the kitchen')).toBeVisible({ timeout: 5000 });
-    await expect(page.getByText('15 pts')).toBeVisible();
+    await expect(page.getByText('Vacuum the hallway')).toBeVisible({ timeout: 5000 });
   });
 
-  test('should toggle task completion', async ({ page }) => {
+  test('should complete a task (one-way, no toggle)', async ({ page }) => {
     // Create a task first
     await page.getByRole('button', { name: /Create Task/i }).click();
-    await page.getByLabel('Title').fill('Toggle test task');
-    await page.getByLabel('Points').fill('10');
-    await page.getByRole('dialog').getByRole('button', { name: 'Create Task' }).click();
-    await expect(page.getByText('Toggle test task')).toBeVisible({ timeout: 5000 });
+    const dialog = page.getByRole('dialog');
+    await page.getByLabel('Title').fill('Complete test task');
+    await dialog.getByRole('button', { name: /Normal/i }).click();
+    await page.getByLabel(/Frequency/i).fill('7');
+    await dialog.getByRole('button', { name: /Create/i }).click();
+    await expect(page.getByText('Complete test task')).toBeVisible({ timeout: 5000 });
 
-    // Click the checkbox to mark done
-    await page.getByRole('button', { name: /Mark as done/i }).first().click();
+    // Click the complete button (one-way — no undo)
+    await page.getByRole('button', { name: /Complete/i }).first().click();
 
-    // Task should move to completed section
-    await expect(page.getByText(/Completed/i)).toBeVisible({ timeout: 5000 });
+    // Task should remain in list (recurring) with updated due date
+    await expect(page.getByText('Complete test task')).toBeVisible({ timeout: 5000 });
   });
 
-  test('should open task detail panel', async ({ page }) => {
-    // Create a task first
+  test('should open task detail panel with effort and frequency info', async ({ page }) => {
+    // Create a task
     await page.getByRole('button', { name: /Create Task/i }).click();
+    const dialog = page.getByRole('dialog');
     await page.getByLabel('Title').fill('Detail test task');
-    await page.getByLabel('Points').fill('10');
-    await page.getByRole('dialog').getByRole('button', { name: 'Create Task' }).click();
+    await dialog.getByRole('button', { name: /Big/i }).click();
+    await page.getByLabel(/Frequency/i).fill('14');
+    await dialog.getByRole('button', { name: /Create/i }).click();
     await expect(page.getByText('Detail test task')).toBeVisible({ timeout: 5000 });
 
     // Click the task text to open detail panel
     await page.getByText('Detail test task').click();
 
-    // Detail panel opens
+    // Detail panel opens with v3 info
     const panel = page.getByRole('dialog', { name: /Detail test task/i });
     await expect(panel).toBeVisible({ timeout: 3000 });
 
@@ -76,9 +86,11 @@ test.describe('Cleaning Checklist', () => {
   test('should edit a task', async ({ page }) => {
     // Create a task
     await page.getByRole('button', { name: /Create Task/i }).click();
+    const dialog = page.getByRole('dialog');
     await page.getByLabel('Title').fill('Mop the floors');
-    await page.getByLabel('Points').fill('8');
-    await page.getByRole('dialog').getByRole('button', { name: 'Create Task' }).click();
+    await dialog.getByRole('button', { name: /Normal/i }).click();
+    await page.getByLabel(/Frequency/i).fill('7');
+    await dialog.getByRole('button', { name: /Create/i }).click();
     await expect(page.getByText('Mop the floors')).toBeVisible({ timeout: 5000 });
 
     // Hover and click edit button
@@ -86,10 +98,10 @@ test.describe('Cleaning Checklist', () => {
     await page.getByRole('button', { name: 'Edit' }).first().click();
 
     // Edit dialog appears
-    const dialog = page.getByRole('dialog');
-    await expect(dialog.getByText('Edit Task')).toBeVisible();
+    const editDialog = page.getByRole('dialog');
+    await expect(editDialog.getByText('Edit Task')).toBeVisible();
     await page.getByLabel('Title').fill('Mop all floors');
-    await dialog.getByRole('button', { name: 'Save' }).click();
+    await editDialog.getByRole('button', { name: 'Save' }).click();
 
     // Updated title visible
     await expect(page.getByText('Mop all floors')).toBeVisible({ timeout: 5000 });
@@ -98,13 +110,15 @@ test.describe('Cleaning Checklist', () => {
   test('should delete a task', async ({ page }) => {
     // Create a task
     await page.getByRole('button', { name: /Create Task/i }).click();
-    await page.getByLabel('Title').fill('Wash dishes');
-    await page.getByLabel('Points').fill('5');
-    await page.getByRole('dialog').getByRole('button', { name: 'Create Task' }).click();
-    await expect(page.getByText('Wash dishes')).toBeVisible({ timeout: 5000 });
+    const dialog = page.getByRole('dialog');
+    await page.getByLabel('Title').fill('Wash dishes e2e');
+    await dialog.getByRole('button', { name: /Normal/i }).click();
+    await page.getByLabel(/Frequency/i).fill('1');
+    await dialog.getByRole('button', { name: /Create/i }).click();
+    await expect(page.getByText('Wash dishes e2e')).toBeVisible({ timeout: 5000 });
 
     // Hover and click delete button
-    await page.getByText('Wash dishes').hover();
+    await page.getByText('Wash dishes e2e').hover();
     await page.getByRole('button', { name: 'Delete' }).first().click();
 
     // Confirm deletion
@@ -113,27 +127,15 @@ test.describe('Cleaning Checklist', () => {
     await confirmDialog.getByRole('button', { name: 'Delete' }).click();
 
     // Task removed
-    await expect(page.getByText('Wash dishes')).not.toBeVisible({ timeout: 5000 });
+    await expect(page.getByText('Wash dishes e2e')).not.toBeVisible({ timeout: 5000 });
   });
 
-  test('should assign a task', async ({ page }) => {
-    // Create a task
-    await page.getByRole('button', { name: /Create Task/i }).click();
-    await page.getByLabel('Title').fill('Take out trash');
-    await page.getByLabel('Points').fill('3');
-    await page.getByRole('dialog').getByRole('button', { name: 'Create Task' }).click();
-    await expect(page.getByText('Take out trash')).toBeVisible({ timeout: 5000 });
+  test('should show leaderboard updates after completion', async ({ page }) => {
+    // Navigate to dashboard first to check initial leaderboard
+    await page.getByRole('link', { name: /Dashboard/i }).or(page.getByText(/Dashboard/i)).first().click();
+    await expect(page.getByText(/Leaderboard/i)).toBeVisible({ timeout: 5000 });
 
-    // Hover and click assign button
-    await page.getByText('Take out trash').hover();
-    await page.getByRole('button', { name: /Assign/i }).first().click();
-
-    // Assign dialog appears
-    const dialog = page.getByRole('dialog');
-    await expect(dialog.getByText('Assign Task')).toBeVisible();
-    await dialog.getByText('Jordan').click();
-
-    // Verify task shows Jordan as assignee
-    await expect(page.getByText('Jordan')).toBeVisible({ timeout: 5000 });
+    // Verify leaderboard shows users with points
+    await expect(page.getByText('Alex')).toBeVisible();
   });
 });

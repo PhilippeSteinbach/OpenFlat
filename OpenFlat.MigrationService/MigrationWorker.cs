@@ -1,9 +1,9 @@
 using System.Diagnostics;
 using Microsoft.EntityFrameworkCore;
-using OpenFlat.Cleaning.Api.Data;
-using OpenFlat.Finance.Api.Data;
+using OpenFlat.Api.Features.Cleaning.Data;
+using OpenFlat.Api.Features.Finance.Data;
 using OpenFlat.Shared.Users;
-using OpenFlat.Shopping.Api.Data;
+using OpenFlat.Api.Features.Shopping.Data;
 
 namespace OpenFlat.MigrationService;
 
@@ -76,59 +76,84 @@ public class MigrationWorker(
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
         db.Tasks.AddRange(
+            // Vacuum living room — Big effort, 2 pts, every 7 days, overdue by 2 days
             new CleaningTask
             {
                 Title = "Vacuum living room",
-                Points = 30,
-                IsDone = false,
-                DueDate = today.AddDays(-2), // overdue
+                Effort = CleaningEffort.Big,
+                Points = 2,
+                FrequencyValue = 7,
+                FrequencyUnit = FrequencyUnit.Days,
+                DueDate = today.AddDays(-2),
+                RotationOrder = [alex.Id, sam.Id, jordan.Id, 4, 5],
+                RotationIndex = 0,
                 AssignedUserId = alex.Id,
                 CreatedByUserId = alex.Id,
                 CreatedAt = now.AddDays(-5),
                 UpdatedAt = now.AddDays(-5),
             },
+            // Clean kitchen counters — Normal effort, 1 pt, every 3 days, 2 days left
             new CleaningTask
             {
                 Title = "Clean kitchen counters",
-                Points = 20,
-                IsDone = false,
-                DueDate = today.AddDays(1), // due soon
-                AssignedUserId = jordan.Id,
+                Effort = CleaningEffort.Normal,
+                Points = 1,
+                FrequencyValue = 3,
+                FrequencyUnit = FrequencyUnit.Days,
+                DueDate = today.AddDays(2),
+                RotationOrder = [sam.Id, 4, 5],
+                RotationIndex = 0,
+                AssignedUserId = sam.Id,
                 CreatedByUserId = jordan.Id,
                 CreatedAt = now.AddDays(-3),
                 UpdatedAt = now.AddDays(-3),
             },
+            // Take out trash — None effort, 0 pts, every 1 day, 1 day left
             new CleaningTask
             {
                 Title = "Take out trash",
-                Points = 10,
-                IsDone = false,
-                DueDate = today.AddDays(2), // due soon
-                AssignedUserId = sam.Id,
+                Effort = CleaningEffort.None,
+                Points = 0,
+                FrequencyValue = 1,
+                FrequencyUnit = FrequencyUnit.Days,
+                DueDate = today.AddDays(1),
+                RotationOrder = [alex.Id, jordan.Id, sam.Id, 4, 5],
+                RotationIndex = 0,
+                AssignedUserId = alex.Id,
                 CreatedByUserId = sam.Id,
                 CreatedAt = now.AddDays(-2),
                 UpdatedAt = now.AddDays(-2),
             },
+            // Mop bathroom floor — Huge effort, 4 pts, every 14 days, 6 days left
             new CleaningTask
             {
                 Title = "Mop bathroom floor",
-                Points = 25,
-                IsDone = false,
-                DueDate = null, // no deadline
+                Effort = CleaningEffort.Huge,
+                Points = 4,
+                FrequencyValue = 14,
+                FrequencyUnit = FrequencyUnit.Days,
+                DueDate = today.AddDays(6),
+                RotationOrder = [jordan.Id, alex.Id],
+                RotationIndex = 0,
+                AssignedUserId = jordan.Id,
                 CreatedByUserId = alex.Id,
                 CreatedAt = now.AddDays(-1),
                 UpdatedAt = now.AddDays(-1),
             },
+            // Wash dishes — Normal effort, 1 pt, every 1 day, due today, no rotation
             new CleaningTask
             {
                 Title = "Wash dishes",
-                Points = 15,
-                IsDone = true,
-                CompletedAt = now.AddHours(-6),
-                AssignedUserId = jordan.Id,
+                Effort = CleaningEffort.Normal,
+                Points = 1,
+                FrequencyValue = 1,
+                FrequencyUnit = FrequencyUnit.Days,
+                DueDate = today,
+                RotationOrder = [],
+                RotationIndex = 0,
                 CreatedByUserId = jordan.Id,
                 CreatedAt = now.AddDays(-4),
-                UpdatedAt = now.AddHours(-6),
+                UpdatedAt = now.AddDays(-4),
             }
         );
 

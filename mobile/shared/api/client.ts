@@ -1,12 +1,22 @@
 import Constants from 'expo-constants';
 
-const API_BASE =
-  Constants.expoConfig?.extra?.apiBaseUrl ?? 'http://localhost:5000';
+// Resolve the host IP: use Expo's debugger host (works on physical devices),
+// fall back to localhost for simulators/web.
+function getHostIp(): string {
+  const debuggerHost = Constants.expoConfig?.hostUri ?? Constants.manifest2?.extra?.expoGo?.debuggerHost;
+  if (debuggerHost) {
+    return debuggerHost.split(':')[0]; // strip Expo's Metro port
+  }
+  return 'localhost';
+}
 
+const HOST = getHostIp();
+
+// Single unified API on port 5100
 const BASE_URLS = {
-  cleaning: `${API_BASE}/api/cleaning`,
-  shopping: `${API_BASE}/api/shopping`,
-  finance: `${API_BASE}/api/finance`,
+  cleaning: `http://${HOST}:5100/api`,
+  shopping: `http://${HOST}:5100/api`,
+  finance: `http://${HOST}:5100/api`,
 } as const;
 
 type ServiceName = keyof typeof BASE_URLS;

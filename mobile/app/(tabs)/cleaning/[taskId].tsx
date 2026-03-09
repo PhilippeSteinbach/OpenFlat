@@ -16,11 +16,17 @@ import { CommentThread, type CommentDto } from '../../../features/comments/Comme
 interface TaskDetailData {
   id: string;
   title: string;
+  effort: string;
   points: number;
-  status: string;
+  frequencyValue: number;
+  frequencyUnit: string;
+  dueDate: string;
+  rotationOrder: number[];
+  rotationIndex: number;
   assignedUserId: number | null;
   assignedUserName: string | null;
-  sortOrder: number;
+  lastCompletedAt: string | null;
+  lastCompletedByUserName: string | null;
   createdByUserId: number;
   createdAt: string;
   updatedAt: string;
@@ -28,12 +34,17 @@ interface TaskDetailData {
   comments: CommentDto[];
 }
 
-const STATUS_LABELS: Record<string, string> = {
-  todo: 'cleaning.columns.todo',
-  in_progress: 'cleaning.columns.inProgress',
-  awaiting_review: 'cleaning.columns.awaitingReview',
-  done: 'cleaning.columns.done',
-};
+const PREDEFINED_USERS = [
+  { id: 1, name: 'Alex' },
+  { id: 2, name: 'Jordan' },
+  { id: 3, name: 'Sam' },
+  { id: 4, name: 'Taylor' },
+  { id: 5, name: 'Casey' },
+];
+
+function formatFrequency(value: number, unit: string, t: (key: string) => string): string {
+  return `${t('cleaning.frequency.every')} ${value} ${t(`cleaning.frequency.${unit.toLowerCase()}`)}`;
+}
 
 export default function TaskDetailScreen() {
   const { taskId } = useLocalSearchParams<{ taskId: string }>();
@@ -76,10 +87,14 @@ export default function TaskDetailScreen() {
   if (!task) {
     return (
       <View style={styles.center}>
-        <Text style={styles.errorText}>{t('common.error', 'Task not found')}</Text>
+        <Text style={styles.errorText}>{t('common.error')}</Text>
       </View>
     );
   }
+
+  const rotationNames = task.rotationOrder
+    .map((id) => PREDEFINED_USERS.find((u) => u.id === id)?.name ?? `#${id}`)
+    .join(' → ');
 
   return (
     <ScrollView
@@ -96,11 +111,31 @@ export default function TaskDetailScreen() {
           <View style={styles.pointsBadge}>
             <Text style={styles.pointsText}>{task.points} {t('common.points')}</Text>
           </View>
-          <Text style={styles.statusText}>{STATUS_LABELS[task.status] ? t(STATUS_LABELS[task.status]) : task.status}</Text>
-          {task.assignedUserName && (
-            <Text style={styles.assigneeText}>→ {task.assignedUserName}</Text>
-          )}
+          <View style={styles.effortBadge}>
+            <Text style={styles.effortText}>{t(`cleaning.effort.${task.effort}`)}</Text>
+          </View>
         </View>
+      </View>
+
+      {/* Details */}
+      <View style={styles.detailSection}>
+        <DetailRow label={t('cleaning.task.frequency')} value={formatFrequency(task.frequencyValue, task.frequencyUnit, t)} />
+        <DetailRow label={t('cleaning.task.dueDate')} value={task.dueDate} />
+        <DetailRow
+          label={t('cleaning.task.assign')}
+          value={task.assignedUserName
+            ? `${task.assignedUserName}${task.assignedUserId === currentUser?.id ? t('cleaning.task.youSuffix') : ''}`
+            : t('cleaning.task.unassigned')}
+        />
+        {task.lastCompletedByUserName && (
+          <DetailRow
+            label={t('cleaning.task.lastCompleted')}
+            value={`${task.lastCompletedByUserName} — ${new Date(task.lastCompletedAt!).toLocaleDateString()}`}
+          />
+        )}
+        {task.rotationOrder.length > 0 && (
+          <DetailRow label={t('cleaning.rotation.order')} value={rotationNames} />
+        )}
       </View>
 
       {/* Divider */}
@@ -126,6 +161,15 @@ export default function TaskDetailScreen() {
   );
 }
 
+function DetailRow({ label, value }: { label: string; value: string }) {
+  return (
+    <View style={styles.detailRow}>
+      <Text style={styles.detailLabel}>{label}</Text>
+      <Text style={styles.detailValue}>{value}</Text>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFFFFF' },
   content: { padding: 20, paddingBottom: 100 },
@@ -141,7 +185,16 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   pointsText: { fontSize: 13, fontWeight: '600', color: '#92400E' },
-  statusText: { fontSize: 14, color: '#6B7280' },
-  assigneeText: { fontSize: 14, color: '#374151' },
+  effortBadge: {
+    backgroundColor: '#EFF6FF',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  effortText: { fontSize: 13, fontWeight: '500', color: '#2563EB' },
+  detailSection: { marginTop: 8, gap: 10 },
+  detailRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  detailLabel: { fontSize: 14, color: '#6B7280', fontWeight: '500' },
+  detailValue: { fontSize: 14, color: '#111827', fontWeight: '600', textAlign: 'right', flex: 1, marginLeft: 12 },
   divider: { height: 1, backgroundColor: '#E5E7EB', marginVertical: 16 },
 });

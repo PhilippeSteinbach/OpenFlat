@@ -16,13 +16,12 @@ export function useCleaningHub() {
   useEffect(() => {
     const unsubs: (() => void)[] = [];
 
-    // Task mutations
+    // Task mutations (v3: no TaskUncompleted — completion is one-way)
     const taskEvents = [
       'TaskCreated',
       'TaskUpdated',
       'TaskDeleted',
       'TaskCompleted',
-      'TaskUncompleted',
       'TaskAssigned',
     ];
 

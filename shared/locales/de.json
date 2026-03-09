@@ -40,8 +40,7 @@
   "cleaning": {
     "title": "Putzplan",
     "sections": {
-      "active": "Aktiv",
-      "completed": "Erledigt"
+      "tasks": "Aufgaben"
     },
     "emptyState": {
       "title": "Noch keine Aufgaben",
@@ -54,24 +53,46 @@
       "daysLeft_one": "noch {{count}}T",
       "daysLeft_other": "noch {{count}}T"
     },
+    "effort": {
+      "None": "Kein",
+      "Normal": "Normal",
+      "Big": "Groß",
+      "Huge": "Riesig",
+      "Custom": "Individuell"
+    },
+    "frequency": {
+      "every": "Alle",
+      "days": "Tage",
+      "weeks": "Wochen"
+    },
+    "rotation": {
+      "schedule": "Rotation",
+      "nextUp": "Als Nächstes",
+      "order": "Reihenfolge"
+    },
     "task": {
       "create": "Aufgabe erstellen",
       "edit": "Aufgabe bearbeiten",
       "delete": "Aufgabe löschen",
       "deleteConfirm": "Möchtest du diese Aufgabe wirklich löschen?",
-      "title": "Titel",
+      "deleteWarning": "Diese Aktion kann nicht rückgängig gemacht werden. Erledigungsverlauf wird ebenfalls gelöscht.",
+      "titleLabel": "Titel",
       "titlePlaceholder": "z. B. Wohnzimmer staubsaugen",
-      "points": "Punkte",
+      "effort": "Aufwand",
+      "customPoints": "Individuelle Punkte",
+      "frequency": "Häufigkeit",
+      "firstDueDate": "Erster Fälligkeitstag",
       "dueDate": "Fälligkeitsdatum",
-      "assignee": "Zugewiesen an",
+      "rotationOrder": "Reihenfolge",
+      "rotationHint": "optional",
       "assign": "Zuweisen",
       "unassigned": "Nicht zugewiesen",
-      "unassignedWarning": "Kein Benutzer zugewiesen — es werden keine Punkte vergeben",
+      "complete": "Erledigen",
       "youSuffix": " (du)",
-      "markDone": "Als erledigt markieren",
-      "markUndone": "Als nicht erledigt markieren",
-      "done": "Erledigt",
-      "open": "Offen"
+      "lastBy": "zuletzt:",
+      "lastCompleted": "Zuletzt erledigt",
+      "by": "von",
+      "noUndo": "Erledigung kann nicht rückgängig gemacht werden"
     },
     "signalr": {
       "connected": "Echtzeit verbunden",
@@ -81,8 +102,8 @@
       "taskCreated": "Aufgabe erstellt",
       "taskUpdated": "Aufgabe aktualisiert",
       "taskDeleted": "Aufgabe gelöscht",
-      "pointsCredited": "{{points}} Punkte an {{name}} gutgeschrieben",
-      "pointsDeducted": "{{points}} Punkte von {{name}} abgezogen"
+      "taskCompleted": "{{name}} erledigt — {{points}} Pkt. erhalten",
+      "pointsCredited": "{{points}} Punkte an {{name}} gutgeschrieben"
     }
   },
   "shopping": {

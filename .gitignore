@@ -3,6 +3,18 @@
 # =========================
 bin/
 obj/
+# Catch malformed build directories with literal backslash in name
+# (created by some .NET tooling on Linux using Windows-style paths)
+bin\\Debug/
+bin\\Release/
+obj\\Debug/
+obj\\Release/
+bin\\[Dd]ebug/
+bin\\[Rr]elease/
+obj\\[Dd]ebug/
+obj\\[Rr]elease/
+**/bin\\*
+**/obj\\*
 *.user
 *.suo
 *.userprefs

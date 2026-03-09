@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { EmptyState } from '@/shared/components';
 import {
@@ -33,14 +33,6 @@ export function CleaningChecklist() {
   const [assigningTask, setAssigningTask] = useState<TaskDto | null>(null);
   const [detailTask, setDetailTask] = useState<TaskDto | null>(null);
 
-  const { activeTasks, completedTasks } = useMemo(() => {
-    if (!tasks) return { activeTasks: [], completedTasks: [] };
-    return {
-      activeTasks: tasks.filter((t) => !t.isDone),
-      completedTasks: tasks.filter((t) => t.isDone),
-    };
-  }, [tasks]);
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -56,6 +48,9 @@ export function CleaningChecklist() {
       </div>
     );
   }
+
+  // Tasks are already sorted by dueDate (urgency) from the API
+  const taskList = tasks ?? [];
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-6">
@@ -92,8 +87,8 @@ export function CleaningChecklist() {
         </div>
       )}
 
-      {/* Active tasks */}
-      {activeTasks.length === 0 && completedTasks.length === 0 ? (
+      {/* Task list — single list sorted by urgency (overdue → due soon → later) */}
+      {taskList.length === 0 ? (
         <EmptyState
           icon="🧹"
           title={t('cleaning.emptyState.title', 'No tasks yet')}
@@ -104,59 +99,42 @@ export function CleaningChecklist() {
           }}
         />
       ) : (
-        <>
-          {/* Active section */}
-          <section>
-            {activeTasks.length > 0 && (
-              <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                {t('cleaning.sections.active', 'Active')} ({activeTasks.length})
-              </h2>
-            )}
-            <div className="space-y-1">
-              {activeTasks.map((task) => (
-                <ChecklistItem
-                  key={task.id}
-                  task={task}
-                  onToggle={() => completeTask.mutate(task.id)}
-                  onClick={() => setDetailTask(task)}
-                  onEdit={() => setEditingTask(task)}
-                  onDelete={() => setDeletingTask(task)}
-                  onAssign={() => setAssigningTask(task)}
-                />
-              ))}
-            </div>
-          </section>
-
-          {/* Completed section */}
-          {completedTasks.length > 0 && (
-            <section className="mt-6">
-              <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                {t('cleaning.sections.completed', 'Completed')} ({completedTasks.length})
-              </h2>
-              <div className="space-y-1">
-                {completedTasks.map((task) => (
-                  <ChecklistItem
-                    key={task.id}
-                    task={task}
-                    onToggle={() => completeTask.mutate(task.id)}
-                    onClick={() => setDetailTask(task)}
-                    onEdit={() => setEditingTask(task)}
-                    onDelete={() => setDeletingTask(task)}
-                    onAssign={() => setAssigningTask(task)}
-                  />
-                ))}
-              </div>
-            </section>
-          )}
-        </>
+        <section>
+          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+            {t('cleaning.sections.tasks', 'Tasks')} ({taskList.length})
+          </h2>
+          <div className="space-y-1">
+            {taskList.map((task) => (
+              <ChecklistItem
+                key={task.id}
+                task={task}
+                onComplete={(nextUserId) =>
+                  completeTask.mutate({ taskId: task.id, req: nextUserId != null ? { nextUserId } : undefined })
+                }
+                onClick={() => setDetailTask(task)}
+                onEdit={() => setEditingTask(task)}
+                onDelete={() => setDeletingTask(task)}
+                onAssign={() => setAssigningTask(task)}
+              />
+            ))}
+          </div>
+        </section>
       )}
 
       {/* Dialogs */}
       <TaskFormDialog
         isOpen={showCreateDialog}
         onClose={() => setShowCreateDialog(false)}
-        onSubmit={(title, points, dueDate, assignedUserId) => {
-          createTask.mutate({ title, points, dueDate, assignedUserId });
+        onSubmit={(data) => {
+          createTask.mutate({
+            title: data.title,
+            effort: data.effort,
+            points: data.points,
+            frequencyValue: data.frequencyValue,
+            frequencyUnit: data.frequencyUnit,
+            firstDueDate: data.firstDueDate!,
+            rotationOrder: data.rotationOrder,
+          });
         }}
       />
 
@@ -164,9 +142,20 @@ export function CleaningChecklist() {
         isOpen={!!editingTask}
         task={editingTask}
         onClose={() => setEditingTask(null)}
-        onSubmit={(title, points, dueDate) => {
+        onSubmit={(data) => {
           if (editingTask) {
-            updateTask.mutate({ taskId: editingTask.id, req: { title, points, dueDate } });
+            updateTask.mutate({
+              taskId: editingTask.id,
+              req: {
+                title: data.title,
+                effort: data.effort,
+                points: data.points,
+                frequencyValue: data.frequencyValue,
+                frequencyUnit: data.frequencyUnit,
+                dueDate: data.dueDate,
+                rotationOrder: data.rotationOrder,
+              },
+            });
           }
         }}
       />

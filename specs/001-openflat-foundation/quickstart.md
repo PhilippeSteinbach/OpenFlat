@@ -13,7 +13,7 @@
 | [Node.js](https://nodejs.org/) | 22 LTS | Frontend (Vite), Mobile (Expo) |
 | [Docker Desktop](https://www.docker.com/products/docker-desktop/) | Latest | PostgreSQL container (managed by Aspire) |
 | [Expo CLI](https://docs.expo.dev/get-started/installation/) | Latest | `npx expo` — mobile development |
-| [Expo Go](https://expo.dev/go) (iOS/Android) | SDK 52+ | Testing mobile app on physical devices |
+| [Expo Go](https://expo.dev/go) (iOS/Android) | SDK 54+ | Testing mobile app on physical devices |
 
 > **Note**: Docker must be running before starting the Aspire AppHost. Aspire automatically provisions a PostgreSQL container.
 
@@ -49,7 +49,7 @@ dotnet run
 This single command orchestrates:
 - **PostgreSQL** container (port 5432, managed by Aspire)
 - **Migration Service** — runs EF Core migrations for all 3 schemas, seeds data, then stops
-- **Cleaning API** — checklist tasks with due dates, gamification; SignalR hub at `/hubs/cleaning`
+- **Cleaning API** — recurring checklist tasks with effort presets, round-robin rotation, and gamification; SignalR hub at `/hubs/cleaning`
 - **Shopping API** — with SignalR hub at `/hubs/shopping`
 - **Finance API** — REST-only (no hub)
 - **React Frontend** — Vite dev server with HMR
@@ -146,7 +146,7 @@ OpenFlat/
 ├── OpenFlat.ServiceDefaults/   # Shared service configuration
 ├── OpenFlat.MigrationService/  # DB migrations + seeding
 ├── backend/
-│   ├── OpenFlat.Cleaning.Api/  # Cleaning Board module
+│   ├── OpenFlat.Cleaning.Api/  # Recurring cleaning tasks with rotation
 │   ├── OpenFlat.Shopping.Api/  # Shopping List module
 │   ├── OpenFlat.Finance.Api/   # Finance Tracker module
 │   ├── OpenFlat.Shared/        # Shared constants, DTOs

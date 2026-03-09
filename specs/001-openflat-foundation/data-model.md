@@ -50,58 +50,130 @@ All `UserId` foreign keys in database tables reference these predefined IDs (1�
 
 ### `cleaning.tasks`
 
-> **REDESIGNED** (2026-03-09): Converted from Kanban board (4-column status + sort order) to checklist (done/not-done + due date).
+> **REDESIGNED v3** (2026-03-09): Recurring tasks with rotation, effort presets, and completer-gets-points.
+> Previous versions: v1 (Kanban 4-column) → v2 (simple checklist) → v3 (recurring + rotation).
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
 | `id` | `uuid` | PK, default `gen_random_uuid()` | Task unique identifier |
 | `title` | `varchar(200)` | NOT NULL | Task title |
-| `points` | `integer` | NOT NULL, CHECK >= 0 | Point value for gamification |
-| `is_done` | `boolean` | NOT NULL, default `false` | Whether the task is completed |
-| `due_date` | `date` | NULL | When the task is due (nullable = no deadline) |
-| `completed_at` | `timestamptz` | NULL | When the task was marked done |
-| `assigned_user_id` | `integer` | NULL | Predefined user ID (1–5) — the responsible person |
+| `effort` | `integer` | NOT NULL, default `1` | Effort enum: 0=None, 1=Normal, 2=Big, 3=Huge, 4=Custom |
+| `points` | `integer` | NOT NULL, CHECK >= 0 | Point value (auto-set by effort preset, or manual for Custom) |
+| `frequency_value` | `integer` | NOT NULL, CHECK >= 1 | How often the task recurs (number) |
+| `frequency_unit` | `varchar(10)` | NOT NULL | Recurrence unit: `'Days'` or `'Weeks'` |
+| `due_date` | `date` | NOT NULL | When the current cycle is due |
+| `rotation_order` | `integer[]` | NOT NULL, default `'{}'` | Ordered list of user IDs for round-robin |
+| `rotation_index` | `integer` | NOT NULL, default `0` | Pointer into `rotation_order` for current assignee |
+| `assigned_user_id` | `integer` | NULL | Currently assigned user (derived from rotation) |
+| `last_completed_at` | `timestamptz` | NULL | When the task was last completed |
+| `last_completed_by_user_id` | `integer` | NULL | Who last completed the task |
 | `created_by_user_id` | `integer` | NOT NULL | User who created the task |
 | `created_at` | `timestamptz` | NOT NULL, default `now()` | Creation timestamp |
 | `updated_at` | `timestamptz` | NOT NULL, default `now()` | Last modification timestamp |
 
-**Removed columns** (from Kanban design):
-- ~~`status`~~ → replaced by `is_done` boolean
-- ~~`sort_order`~~ → replaced by natural sort (overdue → due soon → no deadline → creation date)
+**Removed columns** (from v2 checklist):
+- ~~`is_done`~~ → tasks are never permanently "done"; completing advances to next cycle
+- ~~`completed_at`~~ → replaced by `last_completed_at` + `completion_log` table
+
+**New columns** (v3):
+- `effort` — effort preset enum
+- `frequency_value` + `frequency_unit` — recurrence schedule
+- `rotation_order` + `rotation_index` — round-robin user rotation
+- `last_completed_at` + `last_completed_by_user_id` — most recent completion
 
 **Indexes**:
-- `ix_tasks_is_done_due_date` on `(is_done, due_date)` — checklist rendering order (active first, sorted by urgency)
-- `ix_tasks_assigned_user_id` on `(assigned_user_id)` WHERE `assigned_user_id IS NOT NULL` — leaderboard queries
+- `ix_tasks_due_date` on `(due_date)` — checklist rendering order (overdue → due soon)
+- `ix_tasks_assigned_user_id` on `(assigned_user_id)` WHERE `assigned_user_id IS NOT NULL` — per-user views
 
 **EF Core Entity**:
 
 ```csharp
+public enum CleaningEffort
+{
+    None = 0,    // 0 points
+    Normal = 1,  // 1 point
+    Big = 2,     // 2 points
+    Huge = 3,    // 4 points
+    Custom = 4   // user-defined
+}
+
+public enum FrequencyUnit
+{
+    Days,
+    Weeks
+}
+
 public class CleaningTask
 {
     public Guid Id { get; set; }
     public string Title { get; set; } = string.Empty;
+    public CleaningEffort Effort { get; set; } = CleaningEffort.Normal;
     public int Points { get; set; }
-    public bool IsDone { get; set; }
-    public DateOnly? DueDate { get; set; }
-    public DateTimeOffset? CompletedAt { get; set; }
+    public int FrequencyValue { get; set; } = 7;
+    public FrequencyUnit FrequencyUnit { get; set; } = FrequencyUnit.Days;
+    public DateOnly DueDate { get; set; }
+    public int[] RotationOrder { get; set; } = [];
+    public int RotationIndex { get; set; }
     public int? AssignedUserId { get; set; }
+    public DateTimeOffset? LastCompletedAt { get; set; }
+    public int? LastCompletedByUserId { get; set; }
     public int CreatedByUserId { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
 
     public ICollection<CleaningComment> Comments { get; set; } = new List<CleaningComment>();
+    public ICollection<CleaningCompletionLog> CompletionLogs { get; set; } = new List<CleaningCompletionLog>();
 }
 ```
 
 **Business Rules**:
-- Marking as done (`IsDone = true`) with `AssignedUserId != null` → credit `Points` to that user
-- Marking as undone (`IsDone = false`) → deduct `Points` from assigned user
-- Marking as done with `AssignedUserId == null` → no points, visual warning
+- **Completion** (one-way, no undo): logs to `completion_log`, credits points to the *completer* (not assigned user), advances `rotation_index`, resets `due_date` to next cycle
+- **Rotation advance**: `rotation_index = (rotation_index + 1) % rotation_order.length`, then `assigned_user_id = rotation_order[rotation_index]`
+- **Complete for someone else**: completer earns points; picks who is next in rotation (sets `rotation_index` to that user's position)
+- **Effort validation**: when `effort != Custom`, `points` must equal the preset value
+- **Frequency**: next `due_date = old_due_date + (frequency_value × unit)`; advances from the due date, not from "today"
+- **Empty rotation**: if `rotation_order` is empty, no auto-assignment; `assigned_user_id` stays null
 - Display: days remaining = `DueDate - today` (green >3, yellow 1–3, orange 0, red <0)
-- Editing `Points` while `IsDone = true` → recalculate delta for assigned user (FR-014a)
-- Deleting a task with `IsDone = true` → deduct `Points` from assigned user (FR-014b)
+
+### `cleaning.completion_log`
+
+> **NEW** (2026-03-09): Tracks historical completions for leaderboard accuracy across rotations.
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| `id` | `uuid` | PK, default `gen_random_uuid()` | Log entry identifier |
+| `task_id` | `uuid` | FK → `cleaning.tasks(id)`, ON DELETE CASCADE | Which task was completed |
+| `completed_by_user_id` | `integer` | NOT NULL | User who performed the completion |
+| `assigned_user_id` | `integer` | NULL | User who was assigned at the time |
+| `points_earned` | `integer` | NOT NULL | Points credited at time of completion |
+| `completed_at` | `timestamptz` | NOT NULL, default `now()` | Completion timestamp |
+
+**Indexes**:
+- `ix_completion_log_completed_by` on `(completed_by_user_id)` — leaderboard aggregation
+- `ix_completion_log_task_id` on `(task_id)` — task history lookups
+
+**EF Core Entity**:
+
+```csharp
+public class CleaningCompletionLog
+{
+    public Guid Id { get; set; }
+    public Guid TaskId { get; set; }
+    public int CompletedByUserId { get; set; }
+    public int? AssignedUserId { get; set; }
+    public int PointsEarned { get; set; }
+    public DateTimeOffset CompletedAt { get; set; }
+
+    public CleaningTask Task { get; set; } = null!;
+}
+```
+
+**Business Rules**:
+- One entry per completion event (immutable — entries are never edited or deleted)
+- Leaderboard query: `SELECT completed_by_user_id, SUM(points_earned) FROM completion_log GROUP BY completed_by_user_id`
 
 ### `cleaning.comments`
+
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
@@ -281,6 +353,7 @@ public class CleaningDbContext : DbContext
 {
     public DbSet<CleaningTask> Tasks => Set<CleaningTask>();
     public DbSet<CleaningComment> Comments => Set<CleaningComment>();
+    public DbSet<CleaningCompletionLog> CompletionLogs => Set<CleaningCompletionLog>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -291,17 +364,36 @@ public class CleaningDbContext : DbContext
             e.ToTable("tasks");
             e.HasKey(t => t.Id);
             e.Property(t => t.Title).HasMaxLength(200).IsRequired();
+            e.Property(t => t.Effort).HasDefaultValue(CleaningEffort.Normal);
             e.Property(t => t.Points).IsRequired();
-            e.Property(t => t.IsDone).HasDefaultValue(false);
-            e.Property(t => t.DueDate);
-            e.Property(t => t.CompletedAt);
+            e.Property(t => t.FrequencyValue).IsRequired();
+            e.Property(t => t.FrequencyUnit).HasConversion<string>().HasMaxLength(10).IsRequired();
+            e.Property(t => t.DueDate).IsRequired();
+            e.Property(t => t.RotationOrder).HasDefaultValueSql("'{}'");
+            e.Property(t => t.RotationIndex).HasDefaultValue(0);
             e.Property(t => t.CreatedAt).HasDefaultValueSql("now()");
             e.Property(t => t.UpdatedAt).HasDefaultValueSql("now()");
 
-            e.HasIndex(t => new { t.IsDone, t.DueDate }).HasDatabaseName("ix_tasks_is_done_due_date");
+            e.HasIndex(t => t.DueDate).HasDatabaseName("ix_tasks_due_date");
             e.HasIndex(t => t.AssignedUserId)
                 .HasDatabaseName("ix_tasks_assigned_user_id")
                 .HasFilter("assigned_user_id IS NOT NULL");
+        });
+
+        modelBuilder.Entity<CleaningCompletionLog>(e =>
+        {
+            e.ToTable("completion_log");
+            e.HasKey(cl => cl.Id);
+            e.Property(cl => cl.PointsEarned).IsRequired();
+            e.Property(cl => cl.CompletedAt).HasDefaultValueSql("now()");
+
+            e.HasOne(cl => cl.Task)
+                .WithMany(t => t.CompletionLogs)
+                .HasForeignKey(cl => cl.TaskId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasIndex(cl => cl.CompletedByUserId).HasDatabaseName("ix_completion_log_completed_by");
+            e.HasIndex(cl => cl.TaskId).HasDatabaseName("ix_completion_log_task_id");
         });
 
         modelBuilder.Entity<CleaningComment>(e =>
@@ -411,13 +503,13 @@ Seeded by the `OpenFlat.MigrationService` after running all migrations.
 
 ### Cleaning Tasks (sample)
 
-| Title | Points | IsDone | DueDate | Assigned To |
-|-------|--------|--------|---------|-------------|
-| Vacuum living room | 30 | `false` | `2026-03-07` (overdue) | — |
-| Clean kitchen counters | 20 | `false` | `2026-03-11` (2d left) | Sam |
-| Take out trash | 10 | `false` | `null` (no deadline) | — |
-| Mop bathroom floor | 25 | `false` | `2026-03-10` (1d left) | Alex |
-| Wash dishes | 15 | `true` | `2026-03-08` | Jordan |
+| Title | Effort | Pts | Freq | Due Date | Rotation | Assigned |
+|-------|--------|-----|------|----------|----------|----------|
+| Vacuum living room | Big | 2 | 7d | `2026-03-07` (overdue) | Alex→Sam→Jordan→Taylor→Casey | Alex |
+| Clean kitchen counters | Normal | 1 | 3d | `2026-03-11` (2d left) | Sam→Taylor→Casey | Sam |
+| Take out trash | None | 0 | 1d | `2026-03-10` (1d left) | Alex→Jordan→Sam→Taylor→Casey | Alex |
+| Mop bathroom floor | Huge | 4 | 14d | `2026-03-15` (6d left) | Jordan→Alex | Jordan |
+| Wash dishes | Normal | 1 | 1d | `2026-03-09` (today) | — (no rotation) | — |
 
 ### Shopping Items (sample)
 
@@ -450,14 +542,25 @@ Seeded by the `OpenFlat.MigrationService` after running all migrations.
 │  │──────────────│                 │──────────────────│         │
 │  │ id (PK)      │                 │ id (PK)          │         │
 │  │ title        │                 │ task_id (FK)     │         │
-│  │ points       │                 │ user_id          │         │
-│  │ is_done      │                 │ text             │         │
-│  │ due_date     │                 │ is_edited        │         │
-│  │ completed_at │                 │ created_at       │         │
-│  │ assigned_    │                 │ updated_at       │         │
+│  │ effort       │                 │ user_id          │         │
+│  │ points       │                 │ text             │         │
+│  │ frequency_   │                 │ is_edited        │         │
+│  │   value      │                 │ created_at       │         │
+│  │ frequency_   │                 │ updated_at       │         │
+│  │   unit       │                 └──────────────────┘         │
+│  │ due_date     │                                               │
+│  │ rotation_    │       1:N       ┌──────────────────┐         │
+│  │   order[]    │────────────────▶│ cleaning.        │         │
+│  │ rotation_    │                 │ completion_log   │         │
+│  │   index      │                 │──────────────────│         │
+│  │ assigned_    │                 │ id (PK)          │         │
+│  │   user_id    │                 │ task_id (FK)     │         │
+│  │ last_compl._ │                 │ completed_by_    │         │
+│  │   at         │                 │   user_id        │         │
+│  │ last_compl._ │                 │ assigned_user_id │         │
+│  │   by_user_id │                 │ points_earned    │         │
+│  │ created_by_  │                 │ completed_at     │         │
 │  │   user_id    │                 └──────────────────┘         │
-│  │ created_by_  │                                               │
-│  │   user_id    │                                               │
 │  │ created_at   │                                               │
 │  │ updated_at   │                                               │
 │  └──────────────┘                                               │

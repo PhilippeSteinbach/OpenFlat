@@ -1,7 +1,7 @@
 const BASE_URLS = {
-  cleaning: '/api/cleaning',
-  shopping: '/api/shopping',
-  finance: '/api/finance',
+  cleaning: '/api',
+  shopping: '/api',
+  finance: '/api',
 } as const;
 
 type ServiceName = keyof typeof BASE_URLS;
