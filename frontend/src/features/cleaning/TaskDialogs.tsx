@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Modal, Button, Input } from '@/shared/components';
+import { Modal } from '@/shared/components';
+import { Button, Input } from '@/shared/ui';
+import { cn } from '@/shared/lib/utils';
 import { CleaningEffort, FrequencyUnit } from './types';
 import type { TaskDto } from './types';
 
@@ -139,7 +141,7 @@ export function TaskFormDialog({ isOpen, task, onClose, onSubmit }: TaskFormDial
 
         {/* Effort preset */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+          <label className="block text-sm font-medium text-foreground mb-1.5">
             {t('cleaning.task.effort', 'Effort')}
           </label>
           <div className="flex flex-wrap gap-2">
@@ -148,11 +150,12 @@ export function TaskFormDialog({ isOpen, task, onClose, onSubmit }: TaskFormDial
                 key={opt.value}
                 type="button"
                 onClick={() => { setEffort(opt.value); setError(''); }}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${
+                className={cn(
+                  'px-3 py-1.5 rounded-md text-sm font-medium border transition-colors',
                   effort === opt.value
-                    ? 'bg-primary-600 text-white border-primary-600'
-                    : 'bg-white text-gray-700 border-gray-300 hover:border-primary-400'
-                }`}
+                    ? 'bg-primary text-primary-foreground border-primary'
+                    : 'bg-card text-card-foreground border-border hover:border-primary/50',
+                )}
               >
                 {t(`cleaning.effort.${opt.value}`, opt.value)}
                 {opt.pts !== null && (
@@ -176,22 +179,22 @@ export function TaskFormDialog({ isOpen, task, onClose, onSubmit }: TaskFormDial
 
         {/* Frequency */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+          <label className="block text-sm font-medium text-foreground mb-1.5">
             {t('cleaning.task.frequency', 'Frequency')}
           </label>
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">{t('cleaning.frequency.every', 'Every')}</span>
+            <span className="text-sm text-muted-foreground">{t('cleaning.frequency.every', 'Every')}</span>
             <input
               type="number"
               value={frequencyValue}
               onChange={(e) => setFrequencyValue(e.target.value)}
               min={1}
-              className="w-20 rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-20 rounded-md border border-input bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
             />
             <select
               value={frequencyUnit}
               onChange={(e) => setFrequencyUnit(e.target.value as FrequencyUnit)}
-              className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="rounded-md border border-input bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
             >
               <option value={FrequencyUnit.Days}>{t('cleaning.frequency.days', 'Days')}</option>
               <option value={FrequencyUnit.Weeks}>{t('cleaning.frequency.weeks', 'Weeks')}</option>
@@ -209,12 +212,11 @@ export function TaskFormDialog({ isOpen, task, onClose, onSubmit }: TaskFormDial
 
         {/* Rotation order */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+          <label className="block text-sm font-medium text-foreground mb-1.5">
             {t('cleaning.task.rotationOrder', 'Rotation Order')}
-            <span className="text-xs text-gray-400 ml-1">({t('cleaning.task.rotationHint', 'optional')})</span>
+            <span className="text-xs text-muted-foreground ml-1">({t('cleaning.task.rotationHint', 'optional')})</span>
           </label>
 
-          {/* User selection */}
           <div className="flex flex-wrap gap-1.5 mb-2">
             {PREDEFINED_USERS.map((user) => {
               const isSelected = rotationOrder.includes(user.id);
@@ -223,11 +225,12 @@ export function TaskFormDialog({ isOpen, task, onClose, onSubmit }: TaskFormDial
                   key={user.id}
                   type="button"
                   onClick={() => toggleRotationUser(user.id)}
-                  className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${
+                  className={cn(
+                    'px-2.5 py-1 rounded-full text-xs font-medium border transition-colors',
                     isSelected
-                      ? 'bg-primary-100 text-primary-700 border-primary-300'
-                      : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-gray-400'
-                  }`}
+                      ? 'bg-primary/15 text-primary border-primary/30'
+                      : 'bg-muted text-muted-foreground border-border hover:border-primary/30',
+                  )}
                 >
                   {isSelected && '✓ '}{user.name}
                 </button>
@@ -242,13 +245,13 @@ export function TaskFormDialog({ isOpen, task, onClose, onSubmit }: TaskFormDial
                 const user = PREDEFINED_USERS.find((u) => u.id === uid);
                 return (
                   <div key={uid} className="flex items-center gap-2 text-sm">
-                    <span className="text-gray-400 w-4 text-right">{idx + 1}.</span>
-                    <span className="flex-1 text-gray-700">{user?.name ?? `User ${uid}`}</span>
+                    <span className="text-muted-foreground w-4 text-right">{idx + 1}.</span>
+                    <span className="flex-1 text-card-foreground">{user?.name ?? `User ${uid}`}</span>
                     <button
                       type="button"
                       disabled={idx === 0}
                       onClick={() => moveRotationUser(idx, -1)}
-                      className="text-gray-400 hover:text-gray-600 disabled:opacity-30 px-1"
+                      className="text-muted-foreground hover:text-foreground disabled:opacity-30 px-1"
                     >
                       ↑
                     </button>
@@ -256,7 +259,7 @@ export function TaskFormDialog({ isOpen, task, onClose, onSubmit }: TaskFormDial
                       type="button"
                       disabled={idx === rotationOrder.length - 1}
                       onClick={() => moveRotationUser(idx, 1)}
-                      className="text-gray-400 hover:text-gray-600 disabled:opacity-30 px-1"
+                      className="text-muted-foreground hover:text-foreground disabled:opacity-30 px-1"
                     >
                       ↓
                     </button>
@@ -268,7 +271,7 @@ export function TaskFormDialog({ isOpen, task, onClose, onSubmit }: TaskFormDial
         </div>
 
         {error && (
-          <p className="text-sm text-red-600">{error}</p>
+          <p className="text-sm text-destructive">{error}</p>
         )}
 
         <div className="flex gap-2 justify-end">
@@ -302,14 +305,14 @@ export function DeleteConfirmDialog({ isOpen, onClose, onConfirm }: DeleteConfir
       title={t('cleaning.task.deleteConfirm', 'Delete Task?')}
     >
       <div className="space-y-4">
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-muted-foreground">
           {t('cleaning.task.deleteWarning', 'This action cannot be undone. Historical completion records will also be removed.')}
         </p>
         <div className="flex gap-2 justify-end">
           <Button variant="secondary" onClick={onClose}>
             {t('common.cancel', 'Cancel')}
           </Button>
-          <Button variant="danger" onClick={() => { onConfirm(); onClose(); }}>
+          <Button variant="destructive" onClick={() => { onConfirm(); onClose(); }}>
             {t('common.delete', 'Delete')}
           </Button>
         </div>
@@ -339,19 +342,23 @@ export function AssignDialog({ isOpen, task, onClose, onAssign }: AssignDialogPr
       <div className="space-y-2">
         <button
           onClick={() => { onAssign(null); onClose(); }}
-          className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
-            task?.assignedUserId === null ? 'bg-gray-100 font-medium' : 'hover:bg-gray-50'
-          }`}
+          className={cn(
+            'w-full text-left px-3 py-2 rounded-md text-sm transition-colors',
+            task?.assignedUserId === null ? 'bg-accent font-medium' : 'hover:bg-accent',
+          )}
         >
-          <span className="italic text-gray-500">{t('cleaning.task.unassigned', 'Unassigned')}</span>
+          <span className="italic text-muted-foreground">{t('cleaning.task.unassigned', 'Unassigned')}</span>
         </button>
         {PREDEFINED_USERS.map((user) => (
           <button
             key={user.id}
             onClick={() => { onAssign(user.id); onClose(); }}
-            className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
-              task?.assignedUserId === user.id ? 'bg-primary-50 text-primary-700 font-medium' : 'hover:bg-gray-50'
-            }`}
+            className={cn(
+              'w-full text-left px-3 py-2 rounded-md text-sm transition-colors',
+              task?.assignedUserId === user.id
+                ? 'bg-primary/10 text-primary font-medium'
+                : 'hover:bg-accent text-card-foreground',
+            )}
           >
             {user.name}
           </button>

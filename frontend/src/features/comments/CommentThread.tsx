@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { MessageCircle, Pencil, Trash2 } from 'lucide-react';
+import { Button } from '@/shared/ui';
 import { useCurrentUserStore } from '@/shared/hooks/useCurrentUser';
 
 export interface CommentDto {
@@ -66,13 +68,13 @@ export function CommentThread({ comments, onAdd, onUpdate, onDelete }: CommentTh
 
   return (
     <div className="space-y-4">
-      <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
-        💬 {t('comments.title', 'Comments')} ({comments.length})
+      <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
+        <MessageCircle className="w-4 h-4" /> {t('comments.title', 'Comments')} ({comments.length})
       </h3>
 
       {/* Comment list */}
       {comments.length === 0 ? (
-        <p className="text-sm text-gray-400 py-4 text-center">
+        <p className="text-sm text-muted-foreground py-4 text-center">
           {t('comments.empty', 'No comments yet — start the conversation!')}
         </p>
       ) : (
@@ -90,38 +92,42 @@ export function CommentThread({ comments, onAdd, onUpdate, onDelete }: CommentTh
             return (
               <div
                 key={comment.id}
-                className="bg-gray-50 rounded-lg px-4 py-3 border border-gray-100"
+                className="bg-muted rounded-lg px-4 py-3 border border-border"
               >
                 <div className="flex items-center justify-between mb-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-gray-900">
+                    <span className="text-sm font-semibold text-foreground">
                       {comment.userName}
                     </span>
-                    <span className="text-xs text-gray-400">{date}</span>
+                    <span className="text-xs text-muted-foreground">{date}</span>
                     {comment.isEdited && (
-                      <span className="text-xs text-gray-400 italic">
+                      <span className="text-xs text-muted-foreground italic">
                         {t('comments.edited', '(edited)')}
                       </span>
                     )}
                   </div>
                   {isOwn && !isEditing && (
                     <div className="flex gap-1">
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
                         onClick={() => startEditing(comment)}
-                        className="text-xs text-blue-600 hover:text-blue-800 px-1"
                         title={t('comments.edit', 'Edit')}
                         aria-label={t('comments.edit', 'Edit')}
                       >
-                        ✏️
-                      </button>
-                      <button
+                        <Pencil className="w-3 h-3" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 text-destructive hover:text-destructive"
                         onClick={() => onDelete(comment.id)}
-                        className="text-xs text-red-500 hover:text-red-700 px-1"
                         title={t('comments.delete', 'Delete')}
                         aria-label={t('comments.delete', 'Delete')}
                       >
-                        🗑️
-                      </button>
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
                     </div>
                   )}
                 </div>
@@ -132,7 +138,7 @@ export function CommentThread({ comments, onAdd, onUpdate, onDelete }: CommentTh
                       type="text"
                       value={editText}
                       onChange={(e) => setEditText(e.target.value)}
-                      className="flex-1 text-sm border border-gray-300 rounded-md px-3 py-1.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                      className="flex-1 text-sm border border-input bg-background rounded-md px-3 py-1.5 focus:ring-2 focus:ring-ring focus:border-ring outline-none text-foreground"
                       maxLength={2000}
                       aria-label={t('comments.editInput', 'Edit comment')}
                       onKeyDown={(e) => {
@@ -146,7 +152,7 @@ export function CommentThread({ comments, onAdd, onUpdate, onDelete }: CommentTh
                     <button
                       onClick={() => handleUpdate(comment.id)}
                       disabled={submitting || !editText.trim()}
-                      className="text-sm bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700 disabled:opacity-50"
+                      className="text-sm bg-primary text-primary-foreground px-3 py-1 rounded-md hover:bg-primary/90 disabled:opacity-50"
                     >
                       {t('common.save', 'Save')}
                     </button>
@@ -155,13 +161,13 @@ export function CommentThread({ comments, onAdd, onUpdate, onDelete }: CommentTh
                         setEditingId(null);
                         setEditText('');
                       }}
-                      className="text-sm text-gray-500 hover:text-gray-700 px-2"
+                      className="text-sm text-muted-foreground hover:text-foreground px-2"
                     >
                       {t('common.cancel', 'Cancel')}
                     </button>
                   </div>
                 ) : (
-                  <p className="text-sm text-gray-700 whitespace-pre-wrap">{comment.text}</p>
+                  <p className="text-sm text-foreground/80 whitespace-pre-wrap">{comment.text}</p>
                 )}
               </div>
             );
@@ -171,7 +177,7 @@ export function CommentThread({ comments, onAdd, onUpdate, onDelete }: CommentTh
 
       {/* Mutation error */}
       {mutationError && (
-        <p className="text-sm text-red-600" role="alert">{mutationError}</p>
+        <p className="text-sm text-destructive" role="alert">{mutationError}</p>
       )}
 
       {/* Add comment input */}
@@ -181,7 +187,7 @@ export function CommentThread({ comments, onAdd, onUpdate, onDelete }: CommentTh
           value={newText}
           onChange={(e) => setNewText(e.target.value)}
           placeholder={t('comments.add', 'Add a comment...')}
-          className="flex-1 text-sm border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+          className="flex-1 text-sm border border-input bg-background rounded-lg px-4 py-2 focus:ring-2 focus:ring-ring focus:border-ring outline-none text-foreground placeholder:text-muted-foreground"
           maxLength={2000}
           aria-label={t('comments.add', 'Add a comment...')}
           onKeyDown={(e) => {
@@ -191,7 +197,7 @@ export function CommentThread({ comments, onAdd, onUpdate, onDelete }: CommentTh
         <button
           onClick={handleAdd}
           disabled={submitting || !newText.trim()}
-          className="text-sm bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 font-medium"
+          className="text-sm bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 disabled:opacity-50 font-medium"
         >
           {t('comments.addButton', 'Post')}
         </button>

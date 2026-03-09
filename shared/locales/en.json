@@ -204,5 +204,11 @@
     "itemNameRequired": "Item name is required",
     "descriptionRequired": "Description is required",
     "commentRequired": "Comment text is required"
+  },
+  "settings": {
+    "theme": "Theme",
+    "darkMode": "Dark Mode",
+    "lightMode": "Light Mode",
+    "systemMode": "System"
   }
 }

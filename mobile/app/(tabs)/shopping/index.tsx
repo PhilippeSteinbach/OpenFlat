@@ -8,13 +8,13 @@ import {
   Alert,
   TextInput,
   Modal,
-  StyleSheet,
   ActivityIndicator,
   SectionList,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useCurrentUserStore } from '../../../shared/hooks/useCurrentUser';
 import { shoppingApi } from '../../../shared/api/client';
+import { useTheme, type ThemeColors } from '../../../shared/theme';
 
 // ── Types ──────────────────────
 
@@ -42,6 +42,8 @@ interface ShoppingListResponse {
 
 export default function ShoppingListScreen() {
   const { t } = useTranslation();
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const currentUser = useCurrentUserStore((s) => s.currentUser);
   const [data, setData] = useState<ShoppingListResponse>({ active: [], recentlyBought: [] });
   const [loading, setLoading] = useState(true);
@@ -125,7 +127,7 @@ export default function ShoppingListScreen() {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#2563EB" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -133,9 +135,9 @@ export default function ShoppingListScreen() {
   if (error) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text style={{ color: 'red', fontSize: 16, marginBottom: 12 }}>{t('common.error', 'Something went wrong')}</Text>
+        <Text style={{ color: colors.destructive, fontSize: 16, marginBottom: 12 }}>{t('common.error', 'Something went wrong')}</Text>
         <TouchableOpacity onPress={() => { setLoading(true); fetchItems(); }} accessibilityRole="button" accessibilityLabel={t('common.retry', 'Retry')}>
-          <Text style={{ color: '#2563EB', fontSize: 14 }}>{t('common.retry', 'Retry')}</Text>
+          <Text style={{ color: colors.primary, fontSize: 14 }}>{t('common.retry', 'Retry')}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -319,6 +321,8 @@ function ItemFormModal({
   initialQuantity?: number;
 }) {
   const { t } = useTranslation();
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const [name, setName] = useState(initialName);
   const [quantity, setQuantity] = useState(String(initialQuantity));
 
@@ -381,136 +385,134 @@ function ItemFormModal({
 
 // ── Styles ──────────────────────
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F9FAFB' },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: 60,
-    paddingBottom: 16,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-  },
-  headerTitle: { fontSize: 20, fontWeight: '700', color: '#111827' },
-  createButton: {
-    backgroundColor: '#2563EB',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  createButtonText: { color: '#FFFFFF', fontSize: 14, fontWeight: '600' },
-  listContent: { padding: 16, paddingBottom: 100 },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginBottom: 10,
-    marginTop: 4,
-  },
-  sectionTitle: { fontSize: 16, fontWeight: '600', color: '#374151' },
-  sectionCount: { fontSize: 14, color: '#9CA3AF' },
-  card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  cardBought: { opacity: 0.65 },
-  cardRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  checkCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    borderWidth: 2,
-    borderColor: '#D1D5DB',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  checkCircleInner: {},
-  checkCircleDone: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: '#059669',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  checkText: { color: '#FFFFFF', fontSize: 14, fontWeight: '700' },
-  cardInfo: { flex: 1 },
-  nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' },
-  cardName: { fontSize: 15, fontWeight: '600', color: '#111827' },
-  cardNameBought: { fontSize: 15, fontWeight: '500', color: '#6B7280', textDecorationLine: 'line-through' },
-  quantityBadge: {
-    backgroundColor: '#F3F4F6',
-    paddingHorizontal: 6,
-    paddingVertical: 1,
-    borderRadius: 4,
-  },
-  quantityText: { fontSize: 11, color: '#6B7280', fontWeight: '500' },
-  commentCount: { fontSize: 11, color: '#9CA3AF' },
-  cardMeta: { fontSize: 12, color: '#9CA3AF', marginTop: 2 },
-  cardActions: { flexDirection: 'row', gap: 8 },
-  actionIcon: { fontSize: 16, padding: 4 },
-  undoButton: { padding: 6 },
-  undoButtonText: { fontSize: 18 },
-  emptyState: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 60 },
-  emptyEmoji: { fontSize: 48, marginBottom: 12 },
-  emptyText: { fontSize: 15, color: '#9CA3AF', marginBottom: 16 },
-  emptyButton: {
-    backgroundColor: '#2563EB',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
-  },
-  emptyButtonText: { color: '#FFFFFF', fontSize: 14, fontWeight: '600' },
-  // Modal styles
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0,0,0,0.4)',
-  },
-  modalContent: {
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 24,
-    paddingBottom: 40,
-  },
-  modalTitle: { fontSize: 18, fontWeight: '700', color: '#111827', marginBottom: 16 },
-  inputLabel: { fontSize: 14, fontWeight: '500', color: '#374151', marginBottom: 4, marginTop: 12 },
-  textInput: {
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 15,
-    color: '#111827',
-  },
-  modalActions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 10, marginTop: 20 },
-  cancelButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 8,
-    backgroundColor: '#F3F4F6',
-  },
-  cancelButtonText: { fontSize: 14, fontWeight: '500', color: '#6B7280' },
-  submitButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 8,
-    backgroundColor: '#2563EB',
-  },
-  submitButtonText: { fontSize: 14, fontWeight: '600', color: '#FFFFFF' },
-});
+function getStyles(colors: ThemeColors) {
+  return {
+    container: { flex: 1 as const, backgroundColor: colors.background },
+    center: { flex: 1 as const, justifyContent: 'center' as const, alignItems: 'center' as const },
+    header: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      justifyContent: 'space-between' as const,
+      paddingHorizontal: 20,
+      paddingTop: 60,
+      paddingBottom: 16,
+      backgroundColor: colors.card,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    headerTitle: { fontSize: 20, fontWeight: '700' as const, color: colors.foreground },
+    createButton: {
+      backgroundColor: colors.primary,
+      paddingHorizontal: 14,
+      paddingVertical: 8,
+      borderRadius: 8,
+    },
+    createButtonText: { color: colors.primaryForeground, fontSize: 14, fontWeight: '600' as const },
+    listContent: { padding: 16, paddingBottom: 100 },
+    sectionHeader: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      gap: 6,
+      marginBottom: 10,
+      marginTop: 4,
+    },
+    sectionTitle: { fontSize: 16, fontWeight: '600' as const, color: colors.foreground },
+    sectionCount: { fontSize: 14, color: colors.mutedForeground },
+    card: {
+      backgroundColor: colors.card,
+      borderRadius: 12,
+      padding: 14,
+      marginBottom: 8,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    cardBought: { opacity: 0.65 },
+    cardRow: { flexDirection: 'row' as const, alignItems: 'center' as const, gap: 12 },
+    checkCircle: {
+      width: 28,
+      height: 28,
+      borderRadius: 14,
+      borderWidth: 2,
+      borderColor: colors.input,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+    },
+    checkCircleInner: {},
+    checkCircleDone: {
+      width: 28,
+      height: 28,
+      borderRadius: 14,
+      backgroundColor: colors.success,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+    },
+    checkText: { color: '#FFFFFF', fontSize: 14, fontWeight: '700' as const },
+    cardInfo: { flex: 1 as const },
+    nameRow: { flexDirection: 'row' as const, alignItems: 'center' as const, gap: 6, flexWrap: 'wrap' as const },
+    cardName: { fontSize: 15, fontWeight: '600' as const, color: colors.foreground },
+    cardNameBought: { fontSize: 15, fontWeight: '500' as const, color: colors.mutedForeground, textDecorationLine: 'line-through' as const },
+    quantityBadge: {
+      backgroundColor: colors.muted,
+      paddingHorizontal: 6,
+      paddingVertical: 1,
+      borderRadius: 4,
+    },
+    quantityText: { fontSize: 11, color: colors.mutedForeground, fontWeight: '500' as const },
+    commentCount: { fontSize: 11, color: colors.mutedForeground },
+    cardMeta: { fontSize: 12, color: colors.mutedForeground, marginTop: 2 },
+    cardActions: { flexDirection: 'row' as const, gap: 8 },
+    actionIcon: { fontSize: 16, padding: 4 },
+    undoButton: { padding: 6 },
+    undoButtonText: { fontSize: 18 },
+    emptyState: { flex: 1 as const, alignItems: 'center' as const, justifyContent: 'center' as const, paddingVertical: 60 },
+    emptyEmoji: { fontSize: 48, marginBottom: 12 },
+    emptyText: { fontSize: 15, color: colors.mutedForeground, marginBottom: 16 },
+    emptyButton: {
+      backgroundColor: colors.primary,
+      paddingHorizontal: 20,
+      paddingVertical: 10,
+      borderRadius: 8,
+    },
+    emptyButtonText: { color: colors.primaryForeground, fontSize: 14, fontWeight: '600' as const },
+    // Modal styles
+    modalOverlay: {
+      flex: 1 as const,
+      justifyContent: 'flex-end' as const,
+      backgroundColor: 'rgba(0,0,0,0.4)',
+    },
+    modalContent: {
+      backgroundColor: colors.card,
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+      padding: 24,
+      paddingBottom: 40,
+    },
+    modalTitle: { fontSize: 18, fontWeight: '700' as const, color: colors.foreground, marginBottom: 16 },
+    inputLabel: { fontSize: 14, fontWeight: '500' as const, color: colors.foreground, marginBottom: 4, marginTop: 12 },
+    textInput: {
+      borderWidth: 1,
+      borderColor: colors.input,
+      borderRadius: 8,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      fontSize: 15,
+      color: colors.foreground,
+      backgroundColor: colors.background,
+    },
+    modalActions: { flexDirection: 'row' as const, justifyContent: 'flex-end' as const, gap: 10, marginTop: 20 },
+    cancelButton: {
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      borderRadius: 8,
+      backgroundColor: colors.muted,
+    },
+    cancelButtonText: { fontSize: 14, fontWeight: '500' as const, color: colors.mutedForeground },
+    submitButton: {
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      borderRadius: 8,
+      backgroundColor: colors.primary,
+    },
+    submitButtonText: { fontSize: 14, fontWeight: '600' as const, color: colors.primaryForeground },
+  };
+}

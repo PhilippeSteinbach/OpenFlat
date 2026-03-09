@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { EmptyState } from '@/shared/components';
+import { Sparkles } from 'lucide-react';
+import { Button, Badge, EmptyState } from '@/shared/ui';
 import {
   useTasksQuery,
   useLeaderboardQuery,
@@ -36,7 +37,7 @@ export function CleaningChecklist() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <p className="text-gray-500">{t('common.loading')}</p>
+        <p className="text-muted-foreground">{t('common.loading')}</p>
       </div>
     );
   }
@@ -44,7 +45,7 @@ export function CleaningChecklist() {
   if (isError) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <p className="text-red-500">{t('common.error')}</p>
+        <p className="text-destructive">{t('common.error')}</p>
       </div>
     );
   }
@@ -57,32 +58,26 @@ export function CleaningChecklist() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{t('cleaning.title')}</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <h1 className="text-2xl font-bold text-foreground">{t('cleaning.title')}</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
             {isConnected
               ? t('cleaning.signalr.connected')
               : t('cleaning.signalr.connecting')}
           </p>
         </div>
-        <button
-          onClick={() => setShowCreateDialog(true)}
-          className="px-4 py-2 rounded-lg bg-primary-600 text-white text-sm font-medium hover:bg-primary-700 transition-colors"
-        >
+        <Button onClick={() => setShowCreateDialog(true)} size="sm">
           + {t('cleaning.task.create')}
-        </button>
+        </Button>
       </div>
 
       {/* Leaderboard compact */}
       {leaderboard && leaderboard.length > 0 && (
         <div className="flex gap-3 mb-6 flex-wrap">
           {leaderboard.map((entry) => (
-            <div
-              key={entry.userId}
-              className="flex items-center gap-1.5 text-sm bg-gray-50 rounded-full px-3 py-1"
-            >
-              <span className="font-medium text-gray-700">{entry.userName}</span>
-              <span className="text-amber-600 font-semibold">{entry.totalPoints} {t('common.points')}</span>
-            </div>
+            <Badge key={entry.userId} variant="secondary" className="flex items-center gap-1.5 text-sm">
+              <span className="font-medium">{entry.userName}</span>
+              <span className="text-primary font-semibold">{entry.totalPoints} {t('common.points')}</span>
+            </Badge>
           ))}
         </div>
       )}
@@ -90,7 +85,7 @@ export function CleaningChecklist() {
       {/* Task list — single list sorted by urgency (overdue → due soon → later) */}
       {taskList.length === 0 ? (
         <EmptyState
-          icon="🧹"
+          icon={Sparkles}
           title={t('cleaning.emptyState.title', 'No tasks yet')}
           description={t('cleaning.emptyState.description', 'Create your first cleaning task to get started!')}
           action={{
@@ -100,7 +95,7 @@ export function CleaningChecklist() {
         />
       ) : (
         <section>
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
             {t('cleaning.sections.tasks', 'Tasks')} ({taskList.length})
           </h2>
           <div className="space-y-1">

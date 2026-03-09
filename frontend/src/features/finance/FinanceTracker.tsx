@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Card, EmptyState } from '@/shared/components';
+import { Button, Card, EmptyState } from '@/shared/ui';
+import { Wallet, Pencil, Trash2 } from 'lucide-react';
 import {
   useExpensesQuery,
   useCreateExpenseMutation,
@@ -20,10 +21,10 @@ export function FinanceTracker() {
   return (
     <div className="max-w-2xl mx-auto p-4 sm:p-6 space-y-6">
       {/* Header */}
-      <h1 className="text-2xl font-bold text-gray-900">{t('finance.title')}</h1>
+      <h1 className="text-2xl font-bold text-foreground">{t('finance.title')}</h1>
 
       {/* Tab Bar */}
-      <div className="flex border-b border-gray-200" role="tablist">
+      <div className="flex border-b border-border" role="tablist">
         {(['expenses', 'settlement'] as const).map((tab) => (
           <button
             key={tab}
@@ -32,8 +33,8 @@ export function FinanceTracker() {
             aria-selected={activeTab === tab}
             className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
               activeTab === tab
-                ? 'border-primary-600 text-primary-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
+                ? 'border-primary text-primary'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
             }`}
           >
             {t(`finance.tabs.${tab}`)}
@@ -86,7 +87,7 @@ function ExpenseList() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="animate-spin h-8 w-8 border-4 border-primary-600 border-t-transparent rounded-full" />
+        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
       </div>
     );
   }
@@ -94,10 +95,10 @@ function ExpenseList() {
   if (error) {
     return (
       <div className="p-4 text-center">
-        <p className="text-center text-red-600">{t('common.error', 'Failed to load expenses')}</p>
+        <p className="text-center text-destructive">{t('common.error', 'Failed to load expenses')}</p>
         <button
           onClick={() => refetch()}
-          className="mt-2 text-sm text-blue-600 hover:text-blue-800 underline"
+          className="mt-2 text-sm text-primary hover:text-primary/80 underline"
         >
           {t('common.retry', 'Retry')}
         </button>
@@ -119,7 +120,7 @@ function ExpenseList() {
       {/* Expense list */}
       {list.length === 0 ? (
         <EmptyState
-          icon="💰"
+          icon={Wallet}
           title={t('finance.empty')}
           action={{ label: t('finance.expense.log'), onClick: () => setShowLogDialog(true) }}
         />
@@ -187,15 +188,15 @@ function ExpenseCard({ expense, onEdit, onDelete }: ExpenseCardProps) {
     <Card className="flex items-center gap-3">
       {/* Amount */}
       <div className="flex-shrink-0 text-right min-w-[70px]">
-        <span className="text-lg font-bold text-gray-900">
+        <span className="text-lg font-bold text-foreground">
           €{expense.amountEur.toFixed(2)}
         </span>
       </div>
 
       {/* Description + meta */}
       <div className="flex-1 min-w-0">
-        <p className="font-medium text-gray-900 truncate">{expense.description}</p>
-        <p className="text-xs text-gray-400">
+        <p className="font-medium text-foreground truncate">{expense.description}</p>
+        <p className="text-xs text-muted-foreground">
           {t('finance.expense.loggedBy', { name: expense.loggedByUserName })} · {date}
         </p>
       </div>
@@ -203,11 +204,11 @@ function ExpenseCard({ expense, onEdit, onDelete }: ExpenseCardProps) {
       {/* Own-only actions */}
       {expense.isOwn && (
         <div className="flex items-center gap-1">
-          <Button variant="ghost" size="sm" onClick={() => onEdit(expense)} aria-label={t('common.edit')}>
-            ✏️
+          <Button variant="ghost" size="icon" onClick={() => onEdit(expense)} aria-label={t('common.edit')}>
+            <Pencil className="w-4 h-4" />
           </Button>
-          <Button variant="ghost" size="sm" onClick={() => onDelete(expense.id)} aria-label={t('common.delete')}>
-            🗑️
+          <Button variant="ghost" size="icon" onClick={() => onDelete(expense.id)} aria-label={t('common.delete')}>
+            <Trash2 className="w-4 h-4" />
           </Button>
         </div>
       )}

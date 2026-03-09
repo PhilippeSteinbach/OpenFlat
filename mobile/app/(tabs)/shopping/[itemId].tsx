@@ -4,7 +4,6 @@ import {
   Text,
   ScrollView,
   ActivityIndicator,
-  StyleSheet,
   RefreshControl,
 } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
@@ -12,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { useCurrentUserStore } from '../../../shared/hooks/useCurrentUser';
 import { shoppingApi } from '../../../shared/api/client';
 import { CommentThread, type CommentDto } from '../../../features/comments/CommentThread';
+import { useTheme } from '../../../shared/theme';
 
 interface ItemDetailData {
   item: {
@@ -30,6 +30,7 @@ interface ItemDetailData {
 export default function ItemDetailScreen() {
   const { itemId } = useLocalSearchParams<{ itemId: string }>();
   const { t } = useTranslation();
+  const { colors } = useTheme();
   const currentUser = useCurrentUserStore((s) => s.currentUser);
   const [detail, setDetail] = useState<ItemDetailData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -59,16 +60,16 @@ export default function ItemDetailScreen() {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#2563EB" />
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
 
   if (!detail) {
     return (
-      <View style={styles.center}>
-        <Text style={styles.errorText}>{t('common.error', 'Item not found')}</Text>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
+        <Text style={{ fontSize: 16, color: colors.mutedForeground }}>{t('common.error', 'Item not found')}</Text>
       </View>
     );
   }
@@ -77,32 +78,32 @@ export default function ItemDetailScreen() {
 
   return (
     <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.content}
+      style={{ flex: 1, backgroundColor: colors.card }}
+      contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
       refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchDetail(); }} />
+        <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchDetail(); }} tintColor={colors.primary} />
       }
     >
       {/* Item info header */}
-      <View style={styles.itemHeader}>
-        <Text style={styles.itemName}>{item.name}</Text>
-        <View style={styles.itemMeta}>
-          <View style={styles.quantityBadge}>
-            <Text style={styles.quantityText}>×{item.quantity}</Text>
+      <View style={{ marginBottom: 16 }}>
+        <Text style={{ fontSize: 22, fontWeight: '700', color: colors.foreground, marginBottom: 8 }}>{item.name}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <View style={{ backgroundColor: colors.muted, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6 }}>
+            <Text style={{ fontSize: 13, fontWeight: '600', color: colors.foreground }}>×{item.quantity}</Text>
           </View>
-          <Text style={styles.addedByText}>
+          <Text style={{ fontSize: 14, color: colors.mutedForeground }}>
             {t('shopping.item.addedBy', { name: item.addedByUserName })}
           </Text>
           {item.isBought && item.boughtByUserName && (
-            <View style={styles.boughtBadge}>
-              <Text style={styles.boughtText}>✓ {item.boughtByUserName}</Text>
+            <View style={{ backgroundColor: `${colors.success}20`, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6 }}>
+              <Text style={{ fontSize: 12, color: colors.success }}>✓ {item.boughtByUserName}</Text>
             </View>
           )}
         </View>
       </View>
 
       {/* Divider */}
-      <View style={styles.divider} />
+      <View style={{ height: 1, backgroundColor: colors.border, marginVertical: 16 }} />
 
       {/* Comments */}
       <CommentThread
@@ -123,29 +124,3 @@ export default function ItemDetailScreen() {
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFFFF' },
-  content: { padding: 20, paddingBottom: 100 },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  errorText: { fontSize: 16, color: '#9CA3AF' },
-  itemHeader: { marginBottom: 16 },
-  itemName: { fontSize: 22, fontWeight: '700', color: '#111827', marginBottom: 8 },
-  itemMeta: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  quantityBadge: {
-    backgroundColor: '#F3F4F6',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 6,
-  },
-  quantityText: { fontSize: 13, fontWeight: '600', color: '#374151' },
-  addedByText: { fontSize: 14, color: '#6B7280' },
-  boughtBadge: {
-    backgroundColor: '#D1FAE5',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 6,
-  },
-  boughtText: { fontSize: 12, color: '#065F46' },
-  divider: { height: 1, backgroundColor: '#E5E7EB', marginVertical: 16 },
-});

@@ -4,7 +4,6 @@ import {
   Text,
   ScrollView,
   ActivityIndicator,
-  StyleSheet,
   RefreshControl,
 } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
@@ -12,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { useCurrentUserStore } from '../../../shared/hooks/useCurrentUser';
 import { cleaningApi } from '../../../shared/api/client';
 import { CommentThread, type CommentDto } from '../../../features/comments/CommentThread';
+import { useTheme } from '../../../shared/theme';
 
 interface TaskDetailData {
   id: string;
@@ -49,6 +49,7 @@ function formatFrequency(value: number, unit: string, t: (key: string) => string
 export default function TaskDetailScreen() {
   const { taskId } = useLocalSearchParams<{ taskId: string }>();
   const { t } = useTranslation();
+  const { colors } = useTheme();
   const currentUser = useCurrentUserStore((s) => s.currentUser);
   const [task, setTask] = useState<TaskDetailData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -78,16 +79,16 @@ export default function TaskDetailScreen() {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#2563EB" />
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
 
   if (!task) {
     return (
-      <View style={styles.center}>
-        <Text style={styles.errorText}>{t('common.error')}</Text>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
+        <Text style={{ fontSize: 16, color: colors.mutedForeground }}>{t('common.error')}</Text>
       </View>
     );
   }
@@ -98,27 +99,27 @@ export default function TaskDetailScreen() {
 
   return (
     <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.content}
+      style={{ flex: 1, backgroundColor: colors.card }}
+      contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
       refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchTask(); }} />
+        <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchTask(); }} tintColor={colors.primary} />
       }
     >
       {/* Task info header */}
-      <View style={styles.taskHeader}>
-        <Text style={styles.taskTitle}>{task.title}</Text>
-        <View style={styles.taskMeta}>
-          <View style={styles.pointsBadge}>
-            <Text style={styles.pointsText}>{task.points} {t('common.points')}</Text>
+      <View style={{ marginBottom: 16 }}>
+        <Text style={{ fontSize: 22, fontWeight: '700', color: colors.foreground, marginBottom: 8 }}>{task.title}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <View style={{ backgroundColor: `${colors.warning}20`, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6 }}>
+            <Text style={{ fontSize: 13, fontWeight: '600', color: colors.warning }}>{task.points} {t('common.points')}</Text>
           </View>
-          <View style={styles.effortBadge}>
-            <Text style={styles.effortText}>{t(`cleaning.effort.${task.effort}`)}</Text>
+          <View style={{ backgroundColor: `${colors.primary}15`, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6 }}>
+            <Text style={{ fontSize: 13, fontWeight: '500', color: colors.primary }}>{t(`cleaning.effort.${task.effort}`)}</Text>
           </View>
         </View>
       </View>
 
       {/* Details */}
-      <View style={styles.detailSection}>
+      <View style={{ marginTop: 8, gap: 10 }}>
         <DetailRow label={t('cleaning.task.frequency')} value={formatFrequency(task.frequencyValue, task.frequencyUnit, t)} />
         <DetailRow label={t('cleaning.task.dueDate')} value={task.dueDate} />
         <DetailRow
@@ -139,7 +140,7 @@ export default function TaskDetailScreen() {
       </View>
 
       {/* Divider */}
-      <View style={styles.divider} />
+      <View style={{ height: 1, backgroundColor: colors.border, marginVertical: 16 }} />
 
       {/* Comments */}
       <CommentThread
@@ -162,39 +163,11 @@ export default function TaskDetailScreen() {
 }
 
 function DetailRow({ label, value }: { label: string; value: string }) {
+  const { colors } = useTheme();
   return (
-    <View style={styles.detailRow}>
-      <Text style={styles.detailLabel}>{label}</Text>
-      <Text style={styles.detailValue}>{value}</Text>
+    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+      <Text style={{ fontSize: 14, color: colors.mutedForeground, fontWeight: '500' }}>{label}</Text>
+      <Text style={{ fontSize: 14, color: colors.foreground, fontWeight: '600', textAlign: 'right', flex: 1, marginLeft: 12 }}>{value}</Text>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFFFF' },
-  content: { padding: 20, paddingBottom: 100 },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  errorText: { fontSize: 16, color: '#9CA3AF' },
-  taskHeader: { marginBottom: 16 },
-  taskTitle: { fontSize: 22, fontWeight: '700', color: '#111827', marginBottom: 8 },
-  taskMeta: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  pointsBadge: {
-    backgroundColor: '#FEF3C7',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 6,
-  },
-  pointsText: { fontSize: 13, fontWeight: '600', color: '#92400E' },
-  effortBadge: {
-    backgroundColor: '#EFF6FF',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 6,
-  },
-  effortText: { fontSize: 13, fontWeight: '500', color: '#2563EB' },
-  detailSection: { marginTop: 8, gap: 10 },
-  detailRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  detailLabel: { fontSize: 14, color: '#6B7280', fontWeight: '500' },
-  detailValue: { fontSize: 14, color: '#111827', fontWeight: '600', textAlign: 'right', flex: 1, marginLeft: 12 },
-  divider: { height: 1, backgroundColor: '#E5E7EB', marginVertical: 16 },
-});

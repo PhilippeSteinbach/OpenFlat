@@ -8,13 +8,13 @@ import {
   Alert,
   TextInput,
   Modal,
-  StyleSheet,
   ActivityIndicator,
   ScrollView,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useCurrentUserStore } from '../../../shared/hooks/useCurrentUser';
 import { financeApi } from '../../../shared/api/client';
+import { useTheme, type ThemeColors } from '../../../shared/theme';
 
 // ── Types ──────────────────────
 
@@ -58,6 +58,8 @@ type Tab = 'expenses' | 'settlement';
 
 export default function FinanceTrackerScreen() {
   const { t } = useTranslation();
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const currentUser = useCurrentUserStore((s) => s.currentUser);
   const [activeTab, setActiveTab] = useState<Tab>('expenses');
   const [expenses, setExpenses] = useState<ExpenseDto[]>([]);
@@ -123,7 +125,7 @@ export default function FinanceTrackerScreen() {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#2563EB" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -131,9 +133,9 @@ export default function FinanceTrackerScreen() {
   if (error) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text style={{ color: 'red', fontSize: 16, marginBottom: 12 }}>{t('common.error', 'Something went wrong')}</Text>
+        <Text style={{ color: colors.destructive, fontSize: 16, marginBottom: 12 }}>{t('common.error', 'Something went wrong')}</Text>
         <TouchableOpacity onPress={() => { setLoading(true); fetchData(); }} accessibilityRole="button" accessibilityLabel={t('common.retry', 'Retry')}>
-          <Text style={{ color: '#2563EB', fontSize: 14 }}>{t('common.retry', 'Retry')}</Text>
+          <Text style={{ color: colors.primary, fontSize: 14 }}>{t('common.retry', 'Retry')}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -336,6 +338,8 @@ function ExpenseFormModal({
   initialDescription?: string;
 }) {
   const { t } = useTranslation();
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const [amount, setAmount] = useState(initialAmount);
   const [description, setDescription] = useState(initialDescription);
 
@@ -402,157 +406,155 @@ function ExpenseFormModal({
 
 // ── Styles ──────────────────────
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F9FAFB' },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: 60,
-    paddingBottom: 16,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-  },
-  headerTitle: { fontSize: 20, fontWeight: '700', color: '#111827' },
-  createButton: {
-    backgroundColor: '#2563EB',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  createButtonText: { color: '#FFFFFF', fontSize: 14, fontWeight: '600' },
-  tabBar: {
-    flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: 12,
-    alignItems: 'center',
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
-  },
-  tabActive: { borderBottomColor: '#2563EB' },
-  tabText: { fontSize: 14, fontWeight: '500', color: '#6B7280' },
-  tabTextActive: { color: '#2563EB' },
-  listContent: { padding: 16, paddingBottom: 100 },
-  card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  cardRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  amountText: { fontSize: 18, fontWeight: '700', color: '#111827', minWidth: 80, textAlign: 'right' },
-  cardInfo: { flex: 1 },
-  descText: { fontSize: 15, fontWeight: '600', color: '#111827' },
-  metaText: { fontSize: 12, color: '#9CA3AF', marginTop: 2 },
-  cardActions: { flexDirection: 'row', gap: 8 },
-  actionIcon: { fontSize: 16, padding: 4 },
-  emptyState: { alignItems: 'center', paddingVertical: 60 },
-  emptyEmoji: { fontSize: 48, marginBottom: 12 },
-  emptyText: { fontSize: 15, color: '#9CA3AF' },
-  // Settlement
-  summaryCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 20,
-    marginBottom: 16,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-  },
-  summaryLabel: { fontSize: 13, color: '#6B7280', marginTop: 4 },
-  summaryAmount: { fontSize: 28, fontWeight: '700', color: '#111827', marginVertical: 4 },
-  settledState: { alignItems: 'center', paddingVertical: 30 },
-  settledEmoji: { fontSize: 40, marginBottom: 8 },
-  settledText: { fontSize: 16, fontWeight: '600', color: '#059669' },
-  txCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  txText: { fontSize: 14, color: '#374151', flex: 1 },
-  txAmount: { fontSize: 16, fontWeight: '700', color: '#DC2626' },
-  balancesHeader: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#6B7280',
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    marginTop: 20,
-    marginBottom: 8,
-  },
-  balanceRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    backgroundColor: '#F9FAFB',
-    borderRadius: 8,
-    marginBottom: 4,
-  },
-  balanceName: { fontSize: 14, fontWeight: '600', color: '#111827' },
-  balancePaid: { fontSize: 11, color: '#9CA3AF' },
-  balanceNet: { fontSize: 14, fontWeight: '600', color: '#6B7280' },
-  balancePositive: { color: '#059669' },
-  balanceNegative: { color: '#DC2626' },
-  // Modal
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0,0,0,0.4)',
-  },
-  modalContent: {
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 24,
-    paddingBottom: 40,
-  },
-  modalTitle: { fontSize: 18, fontWeight: '700', color: '#111827', marginBottom: 16 },
-  inputLabel: { fontSize: 14, fontWeight: '500', color: '#374151', marginBottom: 4, marginTop: 12 },
-  textInput: {
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 15,
-    color: '#111827',
-  },
-  modalActions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 10, marginTop: 20 },
-  cancelButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 8,
-    backgroundColor: '#F3F4F6',
-  },
-  cancelButtonText: { fontSize: 14, fontWeight: '500', color: '#6B7280' },
-  submitButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 8,
-    backgroundColor: '#2563EB',
-  },
-  submitButtonText: { fontSize: 14, fontWeight: '600', color: '#FFFFFF' },
-});
+function getStyles(colors: ThemeColors) {
+  return {
+    container: { flex: 1 as const, backgroundColor: colors.background },
+    center: { flex: 1 as const, justifyContent: 'center' as const, alignItems: 'center' as const },
+    header: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      justifyContent: 'space-between' as const,
+      paddingHorizontal: 20,
+      paddingTop: 60,
+      paddingBottom: 16,
+      backgroundColor: colors.card,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    headerTitle: { fontSize: 20, fontWeight: '700' as const, color: colors.foreground },
+    createButton: {
+      backgroundColor: colors.primary,
+      paddingHorizontal: 14,
+      paddingVertical: 8,
+      borderRadius: 8,
+    },
+    createButtonText: { color: colors.primaryForeground, fontSize: 14, fontWeight: '600' as const },
+    tabBar: {
+      flexDirection: 'row' as const,
+      backgroundColor: colors.card,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    tab: {
+      flex: 1 as const,
+      paddingVertical: 12,
+      alignItems: 'center' as const,
+      borderBottomWidth: 2,
+      borderBottomColor: 'transparent',
+    },
+    tabActive: { borderBottomColor: colors.primary },
+    tabText: { fontSize: 14, fontWeight: '500' as const, color: colors.mutedForeground },
+    tabTextActive: { color: colors.primary },
+    listContent: { padding: 16, paddingBottom: 100 },
+    card: {
+      backgroundColor: colors.card,
+      borderRadius: 12,
+      padding: 14,
+      marginBottom: 8,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    cardRow: { flexDirection: 'row' as const, alignItems: 'center' as const, gap: 12 },
+    amountText: { fontSize: 18, fontWeight: '700' as const, color: colors.foreground, minWidth: 80, textAlign: 'right' as const },
+    cardInfo: { flex: 1 as const },
+    descText: { fontSize: 15, fontWeight: '600' as const, color: colors.foreground },
+    metaText: { fontSize: 12, color: colors.mutedForeground, marginTop: 2 },
+    cardActions: { flexDirection: 'row' as const, gap: 8 },
+    actionIcon: { fontSize: 16, padding: 4 },
+    emptyState: { alignItems: 'center' as const, paddingVertical: 60 },
+    emptyEmoji: { fontSize: 48, marginBottom: 12 },
+    emptyText: { fontSize: 15, color: colors.mutedForeground },
+    // Settlement
+    summaryCard: {
+      backgroundColor: colors.card,
+      borderRadius: 12,
+      padding: 20,
+      marginBottom: 16,
+      alignItems: 'center' as const,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    summaryLabel: { fontSize: 13, color: colors.mutedForeground, marginTop: 4 },
+    summaryAmount: { fontSize: 28, fontWeight: '700' as const, color: colors.foreground, marginVertical: 4 },
+    settledState: { alignItems: 'center' as const, paddingVertical: 30 },
+    settledEmoji: { fontSize: 40, marginBottom: 8 },
+    settledText: { fontSize: 16, fontWeight: '600' as const, color: colors.success },
+    txCard: {
+      backgroundColor: colors.card,
+      borderRadius: 12,
+      padding: 14,
+      marginBottom: 8,
+      borderWidth: 1,
+      borderColor: colors.border,
+      flexDirection: 'row' as const,
+      justifyContent: 'space-between' as const,
+      alignItems: 'center' as const,
+    },
+    txText: { fontSize: 14, color: colors.foreground, flex: 1 as const },
+    txAmount: { fontSize: 16, fontWeight: '700' as const, color: colors.destructive },
+    balancesHeader: {
+      fontSize: 12,
+      fontWeight: '600' as const,
+      color: colors.mutedForeground,
+      textTransform: 'uppercase' as const,
+      letterSpacing: 1,
+      marginTop: 20,
+      marginBottom: 8,
+    },
+    balanceRow: {
+      flexDirection: 'row' as const,
+      justifyContent: 'space-between' as const,
+      alignItems: 'center' as const,
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+      backgroundColor: colors.muted,
+      borderRadius: 8,
+      marginBottom: 4,
+    },
+    balanceName: { fontSize: 14, fontWeight: '600' as const, color: colors.foreground },
+    balancePaid: { fontSize: 11, color: colors.mutedForeground },
+    balanceNet: { fontSize: 14, fontWeight: '600' as const, color: colors.mutedForeground },
+    balancePositive: { color: colors.success },
+    balanceNegative: { color: colors.destructive },
+    // Modal
+    modalOverlay: {
+      flex: 1 as const,
+      justifyContent: 'flex-end' as const,
+      backgroundColor: 'rgba(0,0,0,0.4)',
+    },
+    modalContent: {
+      backgroundColor: colors.card,
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+      padding: 24,
+      paddingBottom: 40,
+    },
+    modalTitle: { fontSize: 18, fontWeight: '700' as const, color: colors.foreground, marginBottom: 16 },
+    inputLabel: { fontSize: 14, fontWeight: '500' as const, color: colors.foreground, marginBottom: 4, marginTop: 12 },
+    textInput: {
+      borderWidth: 1,
+      borderColor: colors.input,
+      borderRadius: 8,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      fontSize: 15,
+      color: colors.foreground,
+      backgroundColor: colors.background,
+    },
+    modalActions: { flexDirection: 'row' as const, justifyContent: 'flex-end' as const, gap: 10, marginTop: 20 },
+    cancelButton: {
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      borderRadius: 8,
+      backgroundColor: colors.muted,
+    },
+    cancelButtonText: { fontSize: 14, fontWeight: '500' as const, color: colors.mutedForeground },
+    submitButton: {
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      borderRadius: 8,
+      backgroundColor: colors.primary,
+    },
+    submitButtonText: { fontSize: 14, fontWeight: '600' as const, color: colors.primaryForeground },
+  };
+}

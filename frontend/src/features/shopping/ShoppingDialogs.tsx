@@ -101,14 +101,14 @@ export function DeleteConfirmDialog({
       onClose={onClose}
       title={t('common.confirmDelete', 'Confirm Delete')}
     >
-      <p className="text-gray-600 mb-6">
+      <p className="text-muted-foreground mb-6">
         {t('common.deleteConfirmMessage', 'Are you sure you want to delete this item? This action cannot be undone.')}
       </p>
       <div className="flex justify-end gap-2">
         <Button variant="secondary" onClick={onClose}>
           {t('common.cancel', 'Cancel')}
         </Button>
-        <Button variant="danger" onClick={onConfirm} disabled={isPending}>
+        <Button variant="destructive" onClick={onConfirm} disabled={isPending}>
           {isPending ? t('common.deleting', 'Deleting...') : t('common.delete', 'Delete')}
         </Button>
       </div>

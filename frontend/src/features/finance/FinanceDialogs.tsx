@@ -108,14 +108,14 @@ export function DeleteConfirmDialog({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={t('finance.expense.delete')}>
-      <p className="text-gray-600 mb-6">
+      <p className="text-muted-foreground mb-6">
         {t('finance.expense.deleteConfirm')}
       </p>
       <div className="flex justify-end gap-2">
         <Button variant="secondary" onClick={onClose}>
           {t('common.cancel', 'Cancel')}
         </Button>
-        <Button variant="danger" onClick={onConfirm} disabled={isPending}>
+        <Button variant="destructive" onClick={onConfirm} disabled={isPending}>
           {isPending ? t('common.deleting', 'Deleting...') : t('common.delete', 'Delete')}
         </Button>
       </div>

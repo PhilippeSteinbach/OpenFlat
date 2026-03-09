@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { useCurrentUserStore } from '../shared/hooks/useCurrentUser';
+import { ThemeProvider } from '../shared/theme';
 import '../shared/i18n';
 
 export default function RootLayout() {
@@ -18,15 +19,17 @@ export default function RootLayout() {
   }, [currentUser, segments, router]);
 
   return (
-    <Stack>
-      <Stack.Screen
-        name="user-selection"
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="(tabs)"
-        options={{ headerShown: false }}
-      />
-    </Stack>
+    <ThemeProvider>
+      <Stack>
+        <Stack.Screen
+          name="user-selection"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="(tabs)"
+          options={{ headerShown: false }}
+        />
+      </Stack>
+    </ThemeProvider>
   );
 }

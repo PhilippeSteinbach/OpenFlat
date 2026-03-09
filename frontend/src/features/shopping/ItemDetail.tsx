@@ -1,4 +1,6 @@
 import { useTranslation } from 'react-i18next';
+import { X } from 'lucide-react';
+import { Badge } from '@/shared/ui';
 import { CommentThread } from '@/features/comments/CommentThread';
 import {
   useItemDetailQuery,
@@ -23,35 +25,35 @@ export function ItemDetail({ item, onClose }: ItemDetailProps) {
   return (
     <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-label={item.name}>
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/30" onClick={onClose} aria-hidden="true" />
+      <div className="absolute inset-0 bg-black/60" onClick={onClose} aria-hidden="true" />
 
       {/* Panel */}
-      <div className="relative bg-white w-full max-w-lg shadow-xl flex flex-col animate-in slide-in-from-right">
+      <div className="relative bg-card w-full max-w-lg shadow-elevation-4 flex flex-col animate-in slide-in-from-right">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900 truncate">{item.name}</h2>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+          <h2 className="text-lg font-semibold text-foreground truncate">{item.name}</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-lg"
+            className="text-muted-foreground hover:text-foreground transition-colors"
             aria-label={t('common.close', 'Close')}
           >
-            ✕
+            <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Item info */}
-        <div className="px-6 py-4 border-b border-gray-100 space-y-2">
+        <div className="px-6 py-4 border-b border-border space-y-2">
           <div className="flex items-center gap-3 text-sm">
-            <span className="bg-gray-100 text-gray-700 font-medium px-2 py-0.5 rounded">
+            <span className="bg-muted text-muted-foreground font-medium px-2 py-0.5 rounded">
               ×{item.quantity}
             </span>
-            <span className="text-gray-500">
+            <span className="text-muted-foreground">
               {t('shopping.item.addedBy', { name: item.addedByUserName })}
             </span>
             {item.isBought && item.boughtByUserName && (
-              <span className="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded">
+              <Badge variant="success">
                 ✓ {item.boughtByUserName}
-              </span>
+              </Badge>
             )}
           </div>
         </div>
@@ -59,7 +61,7 @@ export function ItemDetail({ item, onClose }: ItemDetailProps) {
         {/* Comments section */}
         <div className="flex-1 overflow-y-auto px-6 py-4">
           {isLoading ? (
-            <p className="text-sm text-gray-400 text-center py-8">{t('comments.loading')}</p>
+            <p className="text-sm text-muted-foreground text-center py-8">{t('comments.loading')}</p>
           ) : (
             <CommentThread
               comments={detail?.comments ?? []}

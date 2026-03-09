@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Card, EmptyState } from '@/shared/components';
+import { Button, Card, EmptyState } from '@/shared/ui';
+import { ShoppingCart, Pencil, Trash2, MessageCircle, Check, Undo2 } from 'lucide-react';
 import {
   useShoppingListQuery,
   useCreateItemMutation,
@@ -68,7 +69,7 @@ export function ShoppingList() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full py-20">
-        <div className="animate-spin h-8 w-8 border-4 border-primary-600 border-t-transparent rounded-full" />
+        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
       </div>
     );
   }
@@ -76,10 +77,10 @@ export function ShoppingList() {
   if (error) {
     return (
       <div className="p-6 text-center">
-        <p className="text-center text-red-600">{t('common.error', 'Failed to load shopping list')}</p>
+        <p className="text-center text-destructive">{t('common.error', 'Failed to load shopping list')}</p>
         <button
           onClick={() => refetch()}
-          className="mt-2 text-sm text-blue-600 hover:text-blue-800 underline"
+          className="mt-2 text-sm text-primary hover:text-primary/80 underline"
         >
           {t('common.retry', 'Retry')}
         </button>
@@ -94,7 +95,7 @@ export function ShoppingList() {
     <div className="max-w-2xl mx-auto p-4 sm:p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-2xl font-bold text-foreground">
           {t('shopping.title')}
         </h1>
         <Button onClick={() => setShowAddDialog(true)} size="sm">
@@ -104,10 +105,10 @@ export function ShoppingList() {
 
       {/* Active Items */}
       <section>
-        <h2 className="text-lg font-semibold text-gray-700 mb-3">
+        <h2 className="text-lg font-semibold text-foreground mb-3">
           {t('shopping.sections.active')}
           {active.length > 0 && (
-            <span className="ml-2 text-sm font-normal text-gray-400">
+            <span className="ml-2 text-sm font-normal text-muted-foreground">
               ({active.length})
             </span>
           )}
@@ -115,7 +116,7 @@ export function ShoppingList() {
 
         {active.length === 0 ? (
           <EmptyState
-            icon="🛒"
+            icon={ShoppingCart}
             title={t('shopping.empty.active')}
             action={{ label: t('shopping.item.add'), onClick: () => setShowAddDialog(true) }}
           />
@@ -138,9 +139,9 @@ export function ShoppingList() {
       {/* Recently Bought */}
       {recentlyBought.length > 0 && (
         <section>
-          <h2 className="text-lg font-semibold text-gray-500 mb-3">
+          <h2 className="text-lg font-semibold text-muted-foreground mb-3">
             {t('shopping.sections.recentlyBought')}
-            <span className="ml-2 text-sm font-normal text-gray-400">
+            <span className="ml-2 text-sm font-normal text-muted-foreground/70">
               ({recentlyBought.length})
             </span>
           </h2>
@@ -213,7 +214,7 @@ function ItemCard({ item, onBuy, onEdit, onDelete, onViewDetail }: ItemCardProps
       {/* Buy button */}
       <button
         onClick={() => onBuy(item.id)}
-        className="flex-shrink-0 w-6 h-6 rounded-full border-2 border-gray-300 hover:border-primary-500 hover:bg-primary-50 transition-colors"
+        className="flex-shrink-0 w-6 h-6 rounded-full border-2 border-border hover:border-primary hover:bg-primary/10 transition-colors"
         aria-label={t('shopping.item.markBought')}
         title={t('shopping.item.markBought')}
       />
@@ -221,45 +222,45 @@ function ItemCard({ item, onBuy, onEdit, onDelete, onViewDetail }: ItemCardProps
       {/* Item info */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span className="font-medium text-gray-900 truncate">{item.name}</span>
+          <span className="font-medium text-foreground truncate">{item.name}</span>
           {item.quantity > 1 && (
-            <span className="flex-shrink-0 text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">
+            <span className="flex-shrink-0 text-xs bg-muted text-muted-foreground px-1.5 py-0.5 rounded">
               ×{item.quantity}
             </span>
           )}
           {item.commentCount > 0 && (
             <button
               onClick={() => onViewDetail(item)}
-              className="flex-shrink-0 text-xs text-gray-400 hover:text-blue-500"
+              className="flex-shrink-0 flex items-center gap-0.5 text-xs text-muted-foreground hover:text-primary"
               title={t('comments.title')}
               aria-label={t('comments.countTooltip', { count: item.commentCount })}
             >
-              💬 {item.commentCount}
+              <MessageCircle className="w-3.5 h-3.5" /> {item.commentCount}
             </button>
           )}
           {item.commentCount === 0 && (
             <button
               onClick={() => onViewDetail(item)}
-              className="flex-shrink-0 text-xs text-gray-300 hover:text-blue-400"
+              className="flex-shrink-0 text-xs text-muted-foreground/50 hover:text-primary"
               title={t('comments.addTooltip')}
               aria-label={t('comments.addTooltip')}
             >
-              💬
+              <MessageCircle className="w-3.5 h-3.5" />
             </button>
           )}
         </div>
-        <p className="text-xs text-gray-400">
+        <p className="text-xs text-muted-foreground">
           {t('shopping.item.addedBy', { name: item.addedByUserName })}
         </p>
       </div>
 
       {/* Actions */}
       <div className="flex items-center gap-1">
-        <Button variant="ghost" size="sm" onClick={() => onEdit(item)} aria-label={t('common.edit')}>
-          ✏️
+        <Button variant="ghost" size="icon" onClick={() => onEdit(item)} aria-label={t('common.edit')}>
+          <Pencil className="w-4 h-4" />
         </Button>
-        <Button variant="ghost" size="sm" onClick={() => onDelete(item.id)} aria-label={t('common.delete')}>
-          🗑️
+        <Button variant="ghost" size="icon" onClick={() => onDelete(item.id)} aria-label={t('common.delete')}>
+          <Trash2 className="w-4 h-4" />
         </Button>
       </div>
     </Card>
@@ -281,18 +282,16 @@ function BoughtItemCard({ item, onUndo, onViewDetail }: BoughtItemCardProps) {
     <Card className="flex items-center gap-3">
       {/* Checked circle */}
       <div className="flex-shrink-0 w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center">
-        <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-        </svg>
+        <Check className="w-4 h-4 text-white" />
       </div>
 
       {/* Item info */}
       <div className="flex-1 min-w-0">
-        <span className="font-medium text-gray-500 line-through truncate block">
+        <span className="font-medium text-muted-foreground line-through truncate block">
           {item.name}
           {item.quantity > 1 && <span className="ml-1">×{item.quantity}</span>}
         </span>
-        <p className="text-xs text-gray-400">
+        <p className="text-xs text-muted-foreground">
           {t('shopping.item.boughtBy', { name: item.boughtByUserName })}
         </p>
       </div>
@@ -300,14 +299,14 @@ function BoughtItemCard({ item, onUndo, onViewDetail }: BoughtItemCardProps) {
       {/* Undo button */}
       <button
         onClick={() => onViewDetail(item)}
-        className="text-xs text-gray-400 hover:text-blue-500 px-1"
+        className="text-xs text-muted-foreground hover:text-primary px-1"
         title={t('comments.title')}
         aria-label={t('comments.title')}
       >
-        💬
+        <MessageCircle className="w-3.5 h-3.5" />
       </button>
-      <Button variant="ghost" size="sm" onClick={() => onUndo(item.id)} title={t('shopping.item.undoBuy')} aria-label={t('shopping.item.undoBuy')}>
-        ↩️
+      <Button variant="ghost" size="icon" onClick={() => onUndo(item.id)} title={t('shopping.item.undoBuy')} aria-label={t('shopping.item.undoBuy')}>
+        <Undo2 className="w-4 h-4" />
       </Button>
     </Card>
   );

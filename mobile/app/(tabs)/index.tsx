@@ -3,14 +3,16 @@ import {
   View,
   Text,
   TouchableOpacity,
-  StyleSheet,
   ScrollView,
   SafeAreaView,
+  StyleSheet,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useCurrentUserStore } from '../../shared/hooks/useCurrentUser';
 import { cleaningApi } from '../../shared/api/client';
+import { useTheme, avatarColors } from '../../shared/theme';
+import { ThemeToggle } from '../../components';
 
 interface LeaderboardEntry {
   userId: number;
@@ -20,7 +22,7 @@ interface LeaderboardEntry {
 }
 
 const MODULE_TILES = [
-  { key: 'cleaning', route: '/(tabs)/cleaning' as const, icon: '🧹' },
+  { key: 'cleaning', route: '/(tabs)/cleaning' as const, icon: '✨' },
   { key: 'shopping', route: '/(tabs)/shopping' as const, icon: '🛒' },
   { key: 'finance', route: '/(tabs)/finance' as const, icon: '💰' },
 ] as const;
@@ -33,15 +35,13 @@ const PREDEFINED_USERS = [
   { id: 5, name: 'Casey', role: 'Resident' },
 ] as const;
 
-const AVATAR_COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#F43F5E'];
-
 export default function DashboardScreen() {
   const { t } = useTranslation();
   const router = useRouter();
+  const { colors } = useTheme();
   const currentUser = useCurrentUserStore((s) => s.currentUser);
   const clearCurrentUser = useCurrentUserStore((s) => s.clearCurrentUser);
 
-  // Fetch real leaderboard data from API
   const [leaderboardApi, setLeaderboardApi] = useState<LeaderboardEntry[] | null>(null);
 
   useEffect(() => {
@@ -70,46 +70,68 @@ export default function DashboardScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={{
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        backgroundColor: colors.card,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.border,
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+      }}>
         <View>
-          <Text style={styles.greeting}>
+          <Text style={{ fontSize: 20, fontWeight: '700', color: colors.foreground }}>
             {t('dashboard.greeting', { name: currentUser?.name })}
           </Text>
-          <Text style={styles.pointsText}>
+          <Text style={{ fontSize: 13, color: colors.mutedForeground, marginTop: 2 }}>
             {currentUserPoints} {t('common.points')}
           </Text>
         </View>
-        <TouchableOpacity
-          onPress={handleSwitchUser}
-          style={styles.switchButton}
-          accessibilityRole="button"
-          accessibilityLabel={t('dashboard.switchUser')}
-        >
-          <Text style={styles.switchButtonText}>
-            {t('dashboard.switchUser')}
-          </Text>
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <ThemeToggle />
+          <TouchableOpacity
+            onPress={handleSwitchUser}
+            style={{
+              paddingHorizontal: 12,
+              paddingVertical: 6,
+              borderRadius: 8,
+              backgroundColor: colors.muted,
+            }}
+            accessibilityRole="button"
+            accessibilityLabel={t('dashboard.switchUser')}
+          >
+            <Text style={{ fontSize: 13, fontWeight: '500', color: colors.mutedForeground }}>
+              {t('dashboard.switchUser')}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-      >
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, gap: 24 }}>
         {/* Module Tiles */}
-        <View style={styles.tilesRow}>
+        <View style={{ flexDirection: 'row', gap: 12 }}>
           {MODULE_TILES.map((mod) => (
             <TouchableOpacity
               key={mod.key}
-              style={styles.tile}
+              style={{
+                flex: 1,
+                backgroundColor: colors.card,
+                borderRadius: 16,
+                paddingVertical: 24,
+                alignItems: 'center',
+                borderWidth: 1,
+                borderColor: colors.border,
+              }}
               onPress={() => router.push(mod.route)}
               activeOpacity={0.7}
               accessibilityRole="button"
               accessibilityLabel={t(`dashboard.modules.${mod.key}`)}
             >
-              <Text style={styles.tileIcon}>{mod.icon}</Text>
-              <Text style={styles.tileLabel}>
+              <Text style={{ fontSize: 32, marginBottom: 8 }}>{mod.icon}</Text>
+              <Text style={{ fontSize: 13, fontWeight: '600', color: colors.foreground, textAlign: 'center' }}>
                 {t(`dashboard.modules.${mod.key}`)}
               </Text>
             </TouchableOpacity>
@@ -117,44 +139,67 @@ export default function DashboardScreen() {
         </View>
 
         {/* Leaderboard */}
-        <View style={styles.leaderboardSection}>
-          <Text style={styles.leaderboardTitle}>
+        <View style={{ gap: 12 }}>
+          <Text style={{ fontSize: 17, fontWeight: '600', color: colors.foreground }}>
             {t('dashboard.leaderboard.title')}
           </Text>
-          <View style={styles.leaderboardCard}>
+          <View style={{
+            backgroundColor: colors.card,
+            borderRadius: 16,
+            overflow: 'hidden',
+            borderWidth: 1,
+            borderColor: colors.border,
+          }}>
             {leaderboardData.map((user, index) => {
               const isCurrentUser = user.id === currentUser?.id;
               return (
                 <View
                   key={user.id}
                   style={[
-                    styles.leaderboardRow,
-                    isCurrentUser && styles.leaderboardRowHighlight,
-                    index < leaderboardData.length - 1 && styles.leaderboardRowBorder,
+                    {
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      paddingHorizontal: 14,
+                      paddingVertical: 10,
+                      gap: 10,
+                    },
+                    isCurrentUser && { backgroundColor: `${colors.primary}15` },
+                    index < leaderboardData.length - 1 && {
+                      borderBottomWidth: StyleSheet.hairlineWidth,
+                      borderBottomColor: colors.border,
+                    },
                   ]}
                 >
-                  <Text style={styles.rankText}>{index + 1}</Text>
+                  <Text style={{ fontSize: 13, fontWeight: '500', color: colors.mutedForeground, width: 20, textAlign: 'center' }}>
+                    {index + 1}
+                  </Text>
                   <View
-                    style={[
-                      styles.smallAvatar,
-                      { backgroundColor: AVATAR_COLORS[(user.id - 1) % AVATAR_COLORS.length] },
-                    ]}
+                    style={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: 16,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: avatarColors[(user.id - 1) % avatarColors.length],
+                    }}
                   >
-                    <Text style={styles.smallAvatarText}>
+                    <Text style={{ color: '#FFF', fontSize: 13, fontWeight: '600' }}>
                       {user.name.charAt(0)}
                     </Text>
                   </View>
                   <Text
-                    style={[
-                      styles.leaderboardName,
-                      isCurrentUser && styles.leaderboardNameHighlight,
-                    ]}
+                    style={{
+                      flex: 1,
+                      fontSize: 14,
+                      fontWeight: '500',
+                      color: isCurrentUser ? colors.primary : colors.foreground,
+                    }}
                     numberOfLines={1}
                   >
                     {user.name}
                     {isCurrentUser ? ` (${t('common.you', 'you')})` : ''}
                   </Text>
-                  <Text style={styles.leaderboardPoints}>
+                  <Text style={{ fontSize: 13, fontWeight: '600', color: colors.primary }}>
                     {user.points} {t('common.points')}
                   </Text>
                 </View>
@@ -166,139 +211,3 @@ export default function DashboardScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F9FAFB',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  greeting: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#111827',
-  },
-  pointsText: {
-    fontSize: 13,
-    color: '#6B7280',
-    marginTop: 2,
-  },
-  switchButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-    backgroundColor: '#F3F4F6',
-  },
-  switchButtonText: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: '#4B5563',
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 16,
-    gap: 24,
-  },
-  tilesRow: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  tile: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    paddingVertical: 24,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 1,
-  },
-  tileIcon: {
-    fontSize: 32,
-    marginBottom: 8,
-  },
-  tileLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#111827',
-    textAlign: 'center',
-  },
-  leaderboardSection: {
-    gap: 12,
-  },
-  leaderboardTitle: {
-    fontSize: 17,
-    fontWeight: '600',
-    color: '#111827',
-  },
-  leaderboardCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 1,
-  },
-  leaderboardRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    gap: 10,
-  },
-  leaderboardRowHighlight: {
-    backgroundColor: '#EFF6FF',
-  },
-  leaderboardRowBorder: {
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#F3F4F6',
-  },
-  rankText: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: '#9CA3AF',
-    width: 20,
-    textAlign: 'center',
-  },
-  smallAvatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  smallAvatarText: {
-    color: '#FFFFFF',
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  leaderboardName: {
-    flex: 1,
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#111827',
-  },
-  leaderboardNameHighlight: {
-    color: '#2563EB',
-  },
-  leaderboardPoints: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#374151',
-  },
-});

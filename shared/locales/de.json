@@ -204,5 +204,11 @@
     "itemNameRequired": "Artikelname ist erforderlich",
     "descriptionRequired": "Beschreibung ist erforderlich",
     "commentRequired": "Kommentartext ist erforderlich"
+  },
+  "settings": {
+    "theme": "Design",
+    "darkMode": "Dunkler Modus",
+    "lightMode": "Heller Modus",
+    "systemMode": "System"
   }
 }
