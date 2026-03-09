@@ -1,0 +1,154 @@
+{
+  "common": {
+    "appName": "OpenFlat",
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "retry": "Retry",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "confirm": "Confirm",
+    "back": "Back",
+    "close": "Close",
+    "noData": "No data available",
+    "points": "pts",
+    "euro": "€"
+  },
+  "userSelection": {
+    "title": "Who are you?",
+    "subtitle": "Select your profile to continue",
+    "roles": {
+      "coordinator": "Coordinator",
+      "resident": "Resident"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "greeting": "Hey, {{name}}!",
+    "modules": {
+      "cleaning": "Cleaning Board",
+      "shopping": "Shopping List",
+      "finance": "Finance Tracker"
+    },
+    "leaderboard": {
+      "title": "Leaderboard",
+      "empty": "No points yet — complete cleaning tasks to earn points!"
+    },
+    "switchUser": "Switch User"
+  },
+  "cleaning": {
+    "title": "Cleaning Board",
+    "columns": {
+      "todo": "To Do",
+      "inProgress": "In Progress",
+      "awaitingReview": "Awaiting Review",
+      "done": "Done"
+    },
+    "task": {
+      "create": "Create Task",
+      "edit": "Edit Task",
+      "delete": "Delete Task",
+      "deleteConfirm": "Are you sure you want to delete this task?",
+      "title": "Title",
+      "titlePlaceholder": "e.g. Vacuum living room",
+      "points": "Points",
+      "assignee": "Assigned to",
+      "unassigned": "Unassigned",
+      "unassignedWarning": "No user assigned — no points will be credited"
+    },
+    "notifications": {
+      "taskCreated": "Task created",
+      "taskUpdated": "Task updated",
+      "taskDeleted": "Task deleted",
+      "pointsCredited": "{{points}} points credited to {{name}}",
+      "pointsDeducted": "{{points}} points deducted from {{name}}"
+    }
+  },
+  "shopping": {
+    "title": "Shopping List",
+    "sections": {
+      "active": "Active Items",
+      "recentlyBought": "Recently Bought"
+    },
+    "item": {
+      "add": "Add Item",
+      "edit": "Edit Item",
+      "name": "Item name",
+      "namePlaceholder": "e.g. Milk",
+      "quantity": "Quantity",
+      "addedBy": "Added by {{name}}",
+      "boughtBy": "Bought by {{name}}",
+      "markBought": "Mark as bought",
+      "undoBuy": "Move back to active"
+    },
+    "empty": {
+      "active": "No items — add something to the list!",
+      "recentlyBought": "No recently bought items"
+    },
+    "notifications": {
+      "itemAdded": "Item added",
+      "itemUpdated": "Item updated",
+      "itemBought": "{{name}} checked off",
+      "itemUndone": "{{name}} moved back to active"
+    }
+  },
+  "finance": {
+    "title": "Finance Tracker",
+    "tabs": {
+      "expenses": "Expenses",
+      "settlement": "Settlement"
+    },
+    "expense": {
+      "log": "Log Expense",
+      "edit": "Edit Expense",
+      "delete": "Delete Expense",
+      "deleteConfirm": "Are you sure you want to delete this expense?",
+      "amount": "Amount (€)",
+      "amountPlaceholder": "0.00",
+      "description": "Description",
+      "descriptionPlaceholder": "e.g. Weekly groceries",
+      "loggedBy": "Logged by {{name}}",
+      "ownOnly": "You can only edit/delete your own expenses"
+    },
+    "settlement": {
+      "title": "Settlement",
+      "allSettled": "All settled up! 🎉",
+      "owes": "{{from}} owes {{to}}",
+      "totalExpenses": "Total expenses",
+      "perPerson": "Per person"
+    },
+    "empty": "No expenses logged yet",
+    "notifications": {
+      "expenseCreated": "Expense logged",
+      "expenseUpdated": "Expense updated",
+      "expenseDeleted": "Expense deleted"
+    },
+    "validation": {
+      "amountPositive": "Amount must be greater than 0",
+      "amountFormat": "Enter a valid amount (e.g. 12.50)"
+    }
+  },
+  "comments": {
+    "title": "Comments",
+    "add": "Add a comment...",
+    "addButton": "Post",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this comment?",
+    "edited": "(edited)",
+    "empty": "No comments yet — start the conversation!",
+    "ownOnly": "You can only edit/delete your own comments",
+    "validation": {
+      "required": "Comment cannot be empty",
+      "maxLength": "Comment must be less than 2000 characters"
+    }
+  },
+  "validation": {
+    "required": "This field is required",
+    "maxLength": "Maximum {{max}} characters",
+    "minValue": "Must be at least {{min}}",
+    "itemNameRequired": "Item name is required",
+    "commentRequired": "Comment text is required"
+  }
+}

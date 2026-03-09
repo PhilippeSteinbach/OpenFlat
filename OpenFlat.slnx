@@ -1,0 +1,17 @@
+<Solution>
+  <Folder Name="/backend/">
+    <Project Path="backend/OpenFlat.Cleaning.Api/OpenFlat.Cleaning.Api.csproj" />
+    <Project Path="backend/OpenFlat.Finance.Api/OpenFlat.Finance.Api.csproj" />
+    <Project Path="backend/OpenFlat.Shared/OpenFlat.Shared.csproj" />
+    <Project Path="backend/OpenFlat.Shopping.Api/OpenFlat.Shopping.Api.csproj" />
+  </Folder>
+  <Folder Name="/backend/tests/">
+    <Project Path="backend/tests/OpenFlat.Cleaning.Tests/OpenFlat.Cleaning.Tests.csproj" />
+    <Project Path="backend/tests/OpenFlat.Finance.Tests/OpenFlat.Finance.Tests.csproj" />
+    <Project Path="backend/tests/OpenFlat.Integration.Tests/OpenFlat.Integration.Tests.csproj" />
+    <Project Path="backend/tests/OpenFlat.Shopping.Tests/OpenFlat.Shopping.Tests.csproj" />
+  </Folder>
+  <Project Path="OpenFlat.AppHost/OpenFlat.AppHost.csproj" />
+  <Project Path="OpenFlat.MigrationService/OpenFlat.MigrationService.csproj" />
+  <Project Path="OpenFlat.ServiceDefaults/OpenFlat.ServiceDefaults.csproj" />
+</Solution>

@@ -1,0 +1,154 @@
+{
+  "common": {
+    "appName": "OpenFlat",
+    "loading": "Laden...",
+    "error": "Etwas ist schiefgelaufen",
+    "retry": "Erneut versuchen",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "confirm": "Bestätigen",
+    "back": "Zurück",
+    "close": "Schließen",
+    "noData": "Keine Daten verfügbar",
+    "points": "Pkt.",
+    "euro": "€"
+  },
+  "userSelection": {
+    "title": "Wer bist du?",
+    "subtitle": "Wähle dein Profil aus, um fortzufahren",
+    "roles": {
+      "coordinator": "Koordinator",
+      "resident": "Bewohner"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "greeting": "Hey, {{name}}!",
+    "modules": {
+      "cleaning": "Putzplan",
+      "shopping": "Einkaufsliste",
+      "finance": "Finanzen"
+    },
+    "leaderboard": {
+      "title": "Rangliste",
+      "empty": "Noch keine Punkte — erledige Putzaufgaben, um Punkte zu sammeln!"
+    },
+    "switchUser": "Benutzer wechseln"
+  },
+  "cleaning": {
+    "title": "Putzplan",
+    "columns": {
+      "todo": "Offen",
+      "inProgress": "In Arbeit",
+      "awaitingReview": "Wartet auf Prüfung",
+      "done": "Erledigt"
+    },
+    "task": {
+      "create": "Aufgabe erstellen",
+      "edit": "Aufgabe bearbeiten",
+      "delete": "Aufgabe löschen",
+      "deleteConfirm": "Möchtest du diese Aufgabe wirklich löschen?",
+      "title": "Titel",
+      "titlePlaceholder": "z. B. Wohnzimmer staubsaugen",
+      "points": "Punkte",
+      "assignee": "Zugewiesen an",
+      "unassigned": "Nicht zugewiesen",
+      "unassignedWarning": "Kein Benutzer zugewiesen — es werden keine Punkte vergeben"
+    },
+    "notifications": {
+      "taskCreated": "Aufgabe erstellt",
+      "taskUpdated": "Aufgabe aktualisiert",
+      "taskDeleted": "Aufgabe gelöscht",
+      "pointsCredited": "{{points}} Punkte an {{name}} gutgeschrieben",
+      "pointsDeducted": "{{points}} Punkte von {{name}} abgezogen"
+    }
+  },
+  "shopping": {
+    "title": "Einkaufsliste",
+    "sections": {
+      "active": "Aktive Artikel",
+      "recentlyBought": "Kürzlich gekauft"
+    },
+    "item": {
+      "add": "Artikel hinzufügen",
+      "edit": "Artikel bearbeiten",
+      "name": "Artikelname",
+      "namePlaceholder": "z. B. Milch",
+      "quantity": "Menge",
+      "addedBy": "Hinzugefügt von {{name}}",
+      "boughtBy": "Gekauft von {{name}}",
+      "markBought": "Als gekauft markieren",
+      "undoBuy": "Zurück auf die Liste"
+    },
+    "empty": {
+      "active": "Keine Artikel — füge etwas zur Liste hinzu!",
+      "recentlyBought": "Keine kürzlich gekauften Artikel"
+    },
+    "notifications": {
+      "itemAdded": "Artikel hinzugefügt",
+      "itemUpdated": "Artikel aktualisiert",
+      "itemBought": "{{name}} abgehakt",
+      "itemUndone": "{{name}} zurück auf die aktive Liste"
+    }
+  },
+  "finance": {
+    "title": "Finanzen",
+    "tabs": {
+      "expenses": "Ausgaben",
+      "settlement": "Abrechnung"
+    },
+    "expense": {
+      "log": "Ausgabe erfassen",
+      "edit": "Ausgabe bearbeiten",
+      "delete": "Ausgabe löschen",
+      "deleteConfirm": "Möchtest du diese Ausgabe wirklich löschen?",
+      "amount": "Betrag (€)",
+      "amountPlaceholder": "0,00",
+      "description": "Beschreibung",
+      "descriptionPlaceholder": "z. B. Wocheneinkauf",
+      "loggedBy": "Erfasst von {{name}}",
+      "ownOnly": "Du kannst nur eigene Ausgaben bearbeiten/löschen"
+    },
+    "settlement": {
+      "title": "Abrechnung",
+      "allSettled": "Alles ausgeglichen! 🎉",
+      "owes": "{{from}} schuldet {{to}}",
+      "totalExpenses": "Gesamtausgaben",
+      "perPerson": "Pro Person"
+    },
+    "empty": "Noch keine Ausgaben erfasst",
+    "notifications": {
+      "expenseCreated": "Ausgabe erfasst",
+      "expenseUpdated": "Ausgabe aktualisiert",
+      "expenseDeleted": "Ausgabe gelöscht"
+    },
+    "validation": {
+      "amountPositive": "Betrag muss größer als 0 sein",
+      "amountFormat": "Gib einen gültigen Betrag ein (z. B. 12,50)"
+    }
+  },
+  "comments": {
+    "title": "Kommentare",
+    "add": "Kommentar schreiben...",
+    "addButton": "Absenden",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "deleteConfirm": "Kommentar löschen?",
+    "edited": "(bearbeitet)",
+    "empty": "Noch keine Kommentare — starte die Unterhaltung!",
+    "ownOnly": "Du kannst nur eigene Kommentare bearbeiten/löschen",
+    "validation": {
+      "required": "Kommentar darf nicht leer sein",
+      "maxLength": "Kommentar darf maximal 2000 Zeichen lang sein"
+    }
+  },
+  "validation": {
+    "required": "Dieses Feld ist erforderlich",
+    "maxLength": "Maximal {{max}} Zeichen",
+    "minValue": "Muss mindestens {{min}} sein",
+    "itemNameRequired": "Artikelname ist erforderlich",
+    "commentRequired": "Kommentartext ist erforderlich"
+  }
+}
