@@ -1,5 +1,9 @@
 import { defineConfig, devices } from '@playwright/test';
 
+// E2E tests require the full stack to be running locally.
+// Start it with: dotnet run --project ../OpenFlat.AppHost
+// API: https://localhost:5101  |  Frontend (Vite): http://localhost:5173
+
 export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: true,
@@ -24,6 +28,6 @@ export default defineConfig({
   webServer: {
     command: 'npm run dev',
     url: 'http://localhost:5173',
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: true,
   },
 });

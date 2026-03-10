@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OpenFlat.Api.Features.Cleaning.Data;
 using OpenFlat.Api.Features.Shopping.Data;
@@ -19,13 +18,31 @@ public class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.ConfigureAppConfiguration((_, config) =>
+        builder.ConfigureServices(services =>
         {
-            config.AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                ["ConnectionStrings:openflat"] = _postgres.GetConnectionString()
-            });
+            // Aspire's AddNpgsqlDbContext uses DbContextPool (singleton IDbContextPool<T>).
+            // We only replace DbContextOptions<T> — keeping it singleton so the pool
+            // can still consume it — but pointing it at the Testcontainers instance.
+            var cs = _postgres.GetConnectionString();
+            OverrideDbContextOptions<CleaningDbContext>(services, cs);
+            OverrideDbContextOptions<ShoppingDbContext>(services, cs);
+            OverrideDbContextOptions<FinanceDbContext>(services, cs);
         });
+    }
+
+    private static void OverrideDbContextOptions<T>(IServiceCollection services, string cs) where T : DbContext
+    {
+        var toRemove = services
+            .Where(d => d.ServiceType == typeof(DbContextOptions<T>)
+                     || d.ServiceType == typeof(DbContextOptions))
+            .ToList();
+        foreach (var d in toRemove) services.Remove(d);
+
+        var opts = new DbContextOptionsBuilder<T>()
+            .UseNpgsql(cs)
+            .Options;
+        services.AddSingleton<DbContextOptions<T>>(opts);
+        services.AddSingleton<DbContextOptions>(opts);
     }
 
     public async ValueTask InitializeAsync()
