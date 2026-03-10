@@ -8,7 +8,10 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Comments', () => {
   test.describe('Cleaning Task Comments', () => {
+    let taskName: string;
+
     test.beforeEach(async ({ page }) => {
+      taskName = `Comment Test Task ${Date.now()}`;
       await page.goto('/');
       await page.getByText('Alex').click();
       await expect(page.getByText(/hey, alex/i)).toBeVisible({ timeout: 5000 });
@@ -18,20 +21,19 @@ test.describe('Comments', () => {
       await expect(page.getByRole('heading', { level: 1 })).toBeVisible({ timeout: 5000 });
 
       await page.getByRole('button', { name: /Create Task/i }).click();
-      await page.getByLabel('Title').fill('Comment Test Task');
-      await page.getByLabel('Points').fill('5');
+      await page.getByLabel('Title').fill(taskName);
       await page.getByRole('dialog').getByRole('button', { name: 'Create Task' }).click();
-      await expect(page.getByText('Comment Test Task')).toBeVisible({ timeout: 5000 });
+      await expect(page.getByText(taskName)).toBeVisible({ timeout: 5000 });
 
       // Open task detail panel by clicking the task text
-      await page.getByText('Comment Test Task').click();
-      await expect(page.getByRole('dialog', { name: /Comment Test Task/i })).toBeVisible({
+      await page.getByText(taskName).click();
+      await expect(page.getByRole('dialog', { name: new RegExp(taskName) })).toBeVisible({
         timeout: 3000,
       });
     });
 
     test('should add a comment', async ({ page }) => {
-      const panel = page.getByRole('dialog', { name: /Comment Test Task/i });
+      const panel = page.getByRole('dialog', { name: new RegExp(taskName) });
 
       // Initially no comments
       await expect(panel.getByText(/No comments yet/i)).toBeVisible();
@@ -46,7 +48,7 @@ test.describe('Comments', () => {
     });
 
     test('should edit own comment', async ({ page }) => {
-      const panel = page.getByRole('dialog', { name: /Comment Test Task/i });
+      const panel = page.getByRole('dialog', { name: new RegExp(taskName) });
 
       // Add a comment first
       await panel.getByPlaceholder('Add a comment...').fill('Original comment');
@@ -64,7 +66,7 @@ test.describe('Comments', () => {
     });
 
     test('should delete own comment', async ({ page }) => {
-      const panel = page.getByRole('dialog', { name: /Comment Test Task/i });
+      const panel = page.getByRole('dialog', { name: new RegExp(taskName) });
 
       // Add a comment first
       await panel.getByPlaceholder('Add a comment...').fill('Comment to delete');
@@ -80,7 +82,7 @@ test.describe('Comments', () => {
     });
 
     test('should submit comment with Enter key', async ({ page }) => {
-      const panel = page.getByRole('dialog', { name: /Comment Test Task/i });
+      const panel = page.getByRole('dialog', { name: new RegExp(taskName) });
 
       // Type and press Enter
       await panel.getByPlaceholder('Add a comment...').fill('Keyboard shortcut test');
@@ -93,23 +95,27 @@ test.describe('Comments', () => {
 
   test.describe('Shopping Item Comments', () => {
     test('should add and view comment on shopping item', async ({ page }) => {
+      const itemName = `Comment Test Item ${Date.now()}`;
       // Log in and navigate to shopping
       await page.goto('/');
       await page.getByText('Alex').click();
       await expect(page.getByText(/hey, alex/i)).toBeVisible({ timeout: 5000 });
       await page.getByRole('button', { name: 'Shopping List' }).click();
-      await expect(page.getByText('Shopping List')).toBeVisible({ timeout: 5000 });
+      await expect(page.getByRole('heading', { name: 'Shopping List' })).toBeVisible({ timeout: 5000 });
 
       // Add an item
       await page.getByRole('button', { name: /Add Item/i }).click();
-      await page.getByLabel('Item name').fill('Comment Test Item');
+      await page.getByLabel('Item name').fill(itemName);
       await page.getByLabel('Quantity').fill('1');
       await page.getByRole('dialog').getByRole('button', { name: 'Save' }).click();
-      await expect(page.getByText('Comment Test Item')).toBeVisible({ timeout: 5000 });
+      await expect(page.getByText(itemName)).toBeVisible({ timeout: 5000 });
 
       // Open item detail panel
-      await page.getByRole('button', { name: /comment/i }).first().click();
-      const panel = page.getByRole('dialog', { name: /Comment Test Item/i });
+      await page.getByText(itemName, { exact: true })
+        .locator('xpath=ancestor::div[contains(@class,"rounded-lg")][1]')
+        .getByRole('button', { name: /comment/i })
+        .click();
+      const panel = page.getByRole('dialog', { name: new RegExp(itemName) });
       await expect(panel).toBeVisible({ timeout: 3000 });
 
       // Add a comment

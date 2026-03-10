@@ -37,14 +37,15 @@ test.describe('User Selection & Dashboard', () => {
     await page.getByText('Alex').click();
     await expect(page.getByText(/hey, alex/i)).toBeVisible({ timeout: 5000 });
 
-    // Dashboard should have 3 module navigation tiles
-    const cleaningTile = page.getByText(/cleaning/i).or(page.getByText(/putzplan/i));
-    const shoppingTile = page.getByText(/shopping list/i).or(page.getByText(/einkaufsliste/i));
-    const financeTile = page.getByText(/finance tracker/i).or(page.getByText(/finanzen/i));
+    // Module tiles have role="button" and aria-label — works on both mobile and desktop.
+    // Nav tabs use role="tab" so they won't interfere.
+    const cleaningTile = page.getByRole('button', { name: /cleaning/i });
+    const shoppingTile = page.getByRole('button', { name: /shopping/i });
+    const financeTile = page.getByRole('button', { name: /finance/i });
 
-    await expect(cleaningTile.first()).toBeVisible();
-    await expect(shoppingTile.first()).toBeVisible();
-    await expect(financeTile.first()).toBeVisible();
+    await expect(cleaningTile).toBeVisible();
+    await expect(shoppingTile).toBeVisible();
+    await expect(financeTile).toBeVisible();
   });
 
   test('should show leaderboard on dashboard', async ({ page }) => {
@@ -56,13 +57,19 @@ test.describe('User Selection & Dashboard', () => {
     await expect(leaderboard.first()).toBeVisible();
   });
 
-  test('should allow switching users', async ({ page }) => {
+  test('should allow switching users', async ({ page, isMobile }) => {
+    // The Switch User button lives in the desktop header (hidden sm:block) and is not
+    // present in the mobile bottom tab bar — skip this test on mobile viewports.
+    test.skip(isMobile, 'Switch User button is only available in the desktop header');
+
     // Select first user
     await page.getByText('Alex').click();
     await expect(page.getByText(/hey, alex/i)).toBeVisible({ timeout: 5000 });
 
-    // Find and click "Switch User" button
-    const switchButton = page.getByText(/switch user/i).or(page.getByText(/benutzer wechseln/i));
+    // Find and click "Switch User" button — use parent button to handle mobile (text is hidden md:inline)
+    const switchButton = page.locator('button, a').filter({ hasText: /switch user/i }).or(
+      page.locator('button, a').filter({ hasText: /benutzer wechseln/i }),
+    );
     await switchButton.first().click();
 
     // Should return to user selection

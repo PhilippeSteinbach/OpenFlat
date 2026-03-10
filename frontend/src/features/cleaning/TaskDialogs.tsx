@@ -67,7 +67,7 @@ export function TaskFormDialog({
       setCustomPoints(String(task?.points ?? 0));
       setFrequencyValue(String(task?.frequencyValue ?? 7));
       setFrequencyUnit(task?.frequencyUnit ?? FrequencyUnit.Days);
-      setDueDate(task?.dueDate ?? "");
+      setDueDate(task?.dueDate ?? new Date().toISOString().split("T")[0]);
       setRotationOrder(task?.rotationOrder ?? []);
       setError("");
     }
@@ -205,7 +205,7 @@ export function TaskFormDialog({
 
         {/* Frequency */}
         <div>
-          <label className="block text-sm font-medium text-foreground mb-1.5">
+          <label htmlFor="frequency-value" className="block text-sm font-medium text-foreground mb-1.5">
             {t("cleaning.task.frequency", "Frequency")}
           </label>
           <div className="flex items-center gap-2">
@@ -213,6 +213,7 @@ export function TaskFormDialog({
               {t("cleaning.frequency.every", "Every")}
             </span>
             <input
+              id="frequency-value"
               type="number"
               value={frequencyValue}
               onChange={(e) => setFrequencyValue(e.target.value)}
