@@ -6,7 +6,8 @@ using Xunit;
 
 namespace OpenFlat.Api.Tests.Integration;
 
-public class CleaningEndpointTests : IClassFixture<ApiFactory>
+[Collection("Integration")]
+public class CleaningEndpointTests
 {
     private readonly HttpClient _client;
     private readonly ApiFactory _factory;

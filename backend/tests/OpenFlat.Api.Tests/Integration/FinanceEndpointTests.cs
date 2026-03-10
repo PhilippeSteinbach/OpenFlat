@@ -6,7 +6,8 @@ using Xunit;
 
 namespace OpenFlat.Api.Tests.Integration;
 
-public class FinanceEndpointTests : IClassFixture<ApiFactory>
+[Collection("Integration")]
+public class FinanceEndpointTests
 {
     private readonly HttpClient _client;
     private readonly ApiFactory _factory;

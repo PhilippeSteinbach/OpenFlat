@@ -16,13 +16,9 @@ test.describe('User Selection & Dashboard', () => {
     await expect(page.getByText(/who are you/i)).toBeVisible();
 
     // Should show 5 predefined users
-    const userCards = page.locator('[data-testid="user-card"]');
-    // Fallback: look for user names if no test IDs
     const alex = page.getByText('Alex');
     const jordan = page.getByText('Jordan');
     const sam = page.getByText('Sam');
-    const taylor = page.getByText('Taylor');
-    const casey = page.getByText('Casey');
 
     // At least one of the user names should be visible
     await expect(alex.or(jordan).or(sam).first()).toBeVisible();
