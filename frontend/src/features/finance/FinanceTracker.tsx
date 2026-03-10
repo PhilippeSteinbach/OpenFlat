@@ -1,31 +1,33 @@
-import { useState, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Button, Card, EmptyState } from '@/shared/ui';
-import { Wallet, Pencil, Trash2 } from 'lucide-react';
+import { useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
+import { Button, Card, EmptyState } from "@/shared/ui";
+import { Wallet, Pencil, Trash2 } from "lucide-react";
 import {
   useExpensesQuery,
   useCreateExpenseMutation,
   useUpdateExpenseMutation,
   useDeleteExpenseMutation,
-} from './api';
-import { SettlementView } from './SettlementView';
-import { ExpenseFormDialog, DeleteConfirmDialog } from './FinanceDialogs';
-import type { ExpenseDto } from './types';
+} from "./api";
+import { SettlementView } from "./SettlementView";
+import { ExpenseFormDialog, DeleteConfirmDialog } from "./FinanceDialogs";
+import type { ExpenseDto } from "./types";
 
-type Tab = 'expenses' | 'settlement';
+type Tab = "expenses" | "settlement";
 
 export function FinanceTracker() {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState<Tab>('expenses');
+  const [activeTab, setActiveTab] = useState<Tab>("expenses");
 
   return (
     <div className="max-w-2xl mx-auto p-4 sm:p-6 space-y-6">
       {/* Header */}
-      <h1 className="text-2xl font-bold text-foreground">{t('finance.title')}</h1>
+      <h1 className="text-2xl font-bold text-foreground">
+        {t("finance.title")}
+      </h1>
 
       {/* Tab Bar */}
       <div className="flex border-b border-border" role="tablist">
-        {(['expenses', 'settlement'] as const).map((tab) => (
+        {(["expenses", "settlement"] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -33,8 +35,8 @@ export function FinanceTracker() {
             aria-selected={activeTab === tab}
             className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
               activeTab === tab
-                ? 'border-primary text-primary'
-                : 'border-transparent text-muted-foreground hover:text-foreground'
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
           >
             {t(`finance.tabs.${tab}`)}
@@ -43,7 +45,7 @@ export function FinanceTracker() {
       </div>
 
       {/* Tab Content */}
-      {activeTab === 'expenses' ? <ExpenseList /> : <SettlementView />}
+      {activeTab === "expenses" ? <ExpenseList /> : <SettlementView />}
     </div>
   );
 }
@@ -63,7 +65,10 @@ function ExpenseList() {
 
   const handleCreate = useCallback(
     (amountEur: number, description: string) => {
-      createMutation.mutate({ amountEur, description }, { onSuccess: () => setShowLogDialog(false) });
+      createMutation.mutate(
+        { amountEur, description },
+        { onSuccess: () => setShowLogDialog(false) },
+      );
     },
     [createMutation],
   );
@@ -81,7 +86,9 @@ function ExpenseList() {
 
   const handleDelete = useCallback(() => {
     if (!deleteExpenseId) return;
-    deleteMutation.mutate(deleteExpenseId, { onSuccess: () => setDeleteExpenseId(null) });
+    deleteMutation.mutate(deleteExpenseId, {
+      onSuccess: () => setDeleteExpenseId(null),
+    });
   }, [deleteExpenseId, deleteMutation]);
 
   if (isLoading) {
@@ -95,12 +102,14 @@ function ExpenseList() {
   if (error) {
     return (
       <div className="p-4 text-center">
-        <p className="text-center text-destructive">{t('common.error', 'Failed to load expenses')}</p>
+        <p className="text-center text-destructive">
+          {t("common.error", "Failed to load expenses")}
+        </p>
         <button
           onClick={() => refetch()}
           className="mt-2 text-sm text-primary hover:text-primary/80 underline"
         >
-          {t('common.retry', 'Retry')}
+          {t("common.retry", "Retry")}
         </button>
       </div>
     );
@@ -113,7 +122,7 @@ function ExpenseList() {
       {/* Log button */}
       <div className="flex justify-end">
         <Button onClick={() => setShowLogDialog(true)} size="sm">
-          + {t('finance.expense.log')}
+          + {t("finance.expense.log")}
         </Button>
       </div>
 
@@ -121,8 +130,11 @@ function ExpenseList() {
       {list.length === 0 ? (
         <EmptyState
           icon={Wallet}
-          title={t('finance.empty')}
-          action={{ label: t('finance.expense.log'), onClick: () => setShowLogDialog(true) }}
+          title={t("finance.empty")}
+          action={{
+            label: t("finance.expense.log"),
+            onClick: () => setShowLogDialog(true),
+          }}
         />
       ) : (
         <div className="space-y-2">
@@ -142,7 +154,7 @@ function ExpenseList() {
         isOpen={showLogDialog}
         onClose={() => setShowLogDialog(false)}
         onSubmit={handleCreate}
-        title={t('finance.expense.log')}
+        title={t("finance.expense.log")}
         isPending={createMutation.isPending}
       />
 
@@ -151,7 +163,7 @@ function ExpenseList() {
           isOpen
           onClose={() => setEditExpense(null)}
           onSubmit={handleUpdate}
-          title={t('finance.expense.edit')}
+          title={t("finance.expense.edit")}
           initialAmount={editExpense.amountEur.toFixed(2)}
           initialDescription={editExpense.description}
           isPending={updateMutation.isPending}
@@ -179,9 +191,9 @@ interface ExpenseCardProps {
 function ExpenseCard({ expense, onEdit, onDelete }: ExpenseCardProps) {
   const { t } = useTranslation();
   const date = new Date(expense.createdAt).toLocaleDateString(undefined, {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
+    day: "numeric",
+    month: "short",
+    year: "numeric",
   });
 
   return (
@@ -195,19 +207,32 @@ function ExpenseCard({ expense, onEdit, onDelete }: ExpenseCardProps) {
 
       {/* Description + meta */}
       <div className="flex-1 min-w-0">
-        <p className="font-medium text-foreground truncate">{expense.description}</p>
+        <p className="font-medium text-foreground truncate">
+          {expense.description}
+        </p>
         <p className="text-xs text-muted-foreground">
-          {t('finance.expense.loggedBy', { name: expense.loggedByUserName })} · {date}
+          {t("finance.expense.loggedBy", { name: expense.loggedByUserName })} ·{" "}
+          {date}
         </p>
       </div>
 
       {/* Own-only actions */}
       {expense.isOwn && (
         <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon" onClick={() => onEdit(expense)} aria-label={t('common.edit')}>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onEdit(expense)}
+            aria-label={t("common.edit")}
+          >
             <Pencil className="w-4 h-4" />
           </Button>
-          <Button variant="ghost" size="icon" onClick={() => onDelete(expense.id)} aria-label={t('common.delete')}>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onDelete(expense.id)}
+            aria-label={t("common.delete")}
+          >
             <Trash2 className="w-4 h-4" />
           </Button>
         </div>

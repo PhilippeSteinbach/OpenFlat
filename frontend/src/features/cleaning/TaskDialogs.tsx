@@ -1,17 +1,17 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Modal } from '@/shared/components';
-import { Button, Input } from '@/shared/ui';
-import { cn } from '@/shared/lib/utils';
-import { CleaningEffort, FrequencyUnit } from './types';
-import type { TaskDto } from './types';
+import { useState, useEffect, useCallback } from "react";
+import { useTranslation } from "react-i18next";
+import { Modal } from "@/shared/components";
+import { Button, Input } from "@/shared/ui";
+import { cn } from "@/shared/lib/utils";
+import { CleaningEffort, FrequencyUnit } from "./types";
+import type { TaskDto } from "./types";
 
 const PREDEFINED_USERS = [
-  { id: 1, name: 'Alex' },
-  { id: 2, name: 'Jordan' },
-  { id: 3, name: 'Sam' },
-  { id: 4, name: 'Taylor' },
-  { id: 5, name: 'Casey' },
+  { id: 1, name: "Alex" },
+  { id: 2, name: "Jordan" },
+  { id: 3, name: "Sam" },
+  { id: 4, name: "Taylor" },
+  { id: 5, name: "Casey" },
 ] as const;
 
 const EFFORT_OPTIONS: { value: CleaningEffort; pts: number | null }[] = [
@@ -40,29 +40,36 @@ interface TaskFormDialogProps {
   }) => void;
 }
 
-export function TaskFormDialog({ isOpen, task, onClose, onSubmit }: TaskFormDialogProps) {
+export function TaskFormDialog({
+  isOpen,
+  task,
+  onClose,
+  onSubmit,
+}: TaskFormDialogProps) {
   const { t } = useTranslation();
   const isEdit = !!task;
 
-  const [title, setTitle] = useState('');
+  const [title, setTitle] = useState("");
   const [effort, setEffort] = useState<CleaningEffort>(CleaningEffort.Normal);
-  const [customPoints, setCustomPoints] = useState('0');
-  const [frequencyValue, setFrequencyValue] = useState('7');
-  const [frequencyUnit, setFrequencyUnit] = useState<FrequencyUnit>(FrequencyUnit.Days);
-  const [dueDate, setDueDate] = useState('');
+  const [customPoints, setCustomPoints] = useState("0");
+  const [frequencyValue, setFrequencyValue] = useState("7");
+  const [frequencyUnit, setFrequencyUnit] = useState<FrequencyUnit>(
+    FrequencyUnit.Days,
+  );
+  const [dueDate, setDueDate] = useState("");
   const [rotationOrder, setRotationOrder] = useState<number[]>([]);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (isOpen) {
-      setTitle(task?.title ?? '');
+      setTitle(task?.title ?? "");
       setEffort(task?.effort ?? CleaningEffort.Normal);
       setCustomPoints(String(task?.points ?? 0));
       setFrequencyValue(String(task?.frequencyValue ?? 7));
       setFrequencyUnit(task?.frequencyUnit ?? FrequencyUnit.Days);
-      setDueDate(task?.dueDate ?? '');
+      setDueDate(task?.dueDate ?? "");
       setRotationOrder(task?.rotationOrder ?? []);
-      setError('');
+      setError("");
     }
   }, [isOpen, task]);
 
@@ -71,24 +78,25 @@ export function TaskFormDialog({ isOpen, task, onClose, onSubmit }: TaskFormDial
     const trimmedTitle = title.trim();
 
     if (!trimmedTitle) {
-      setError(t('validation.required', 'Title is required'));
+      setError(t("validation.required", "Title is required"));
       return;
     }
 
     const freqVal = parseInt(frequencyValue, 10);
     if (isNaN(freqVal) || freqVal < 1) {
-      setError(t('validation.minFrequency', 'Frequency must be at least 1'));
+      setError(t("validation.minFrequency", "Frequency must be at least 1"));
       return;
     }
 
     if (!dueDate) {
-      setError(t('validation.required', 'Due date is required'));
+      setError(t("validation.required", "Due date is required"));
       return;
     }
 
-    const pts = effort === CleaningEffort.Custom ? parseInt(customPoints, 10) : undefined;
+    const pts =
+      effort === CleaningEffort.Custom ? parseInt(customPoints, 10) : undefined;
     if (effort === CleaningEffort.Custom && (isNaN(pts!) || pts! < 0)) {
-      setError(t('validation.positiveNumber', 'Points must be non-negative'));
+      setError(t("validation.positiveNumber", "Points must be non-negative"));
       return;
     }
 
@@ -126,15 +134,25 @@ export function TaskFormDialog({ isOpen, task, onClose, onSubmit }: TaskFormDial
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={isEdit ? t('cleaning.task.edit', 'Edit Task') : t('cleaning.task.create', 'Create Task')}
+      title={
+        isEdit
+          ? t("cleaning.task.edit", "Edit Task")
+          : t("cleaning.task.create", "Create Task")
+      }
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Title */}
         <Input
-          label={t('cleaning.task.titleLabel', 'Title')}
+          label={t("cleaning.task.titleLabel", "Title")}
           value={title}
-          onChange={(e) => { setTitle(e.target.value); setError(''); }}
-          placeholder={t('cleaning.task.titlePlaceholder', 'Enter task title...')}
+          onChange={(e) => {
+            setTitle(e.target.value);
+            setError("");
+          }}
+          placeholder={t(
+            "cleaning.task.titlePlaceholder",
+            "Enter task title...",
+          )}
           maxLength={200}
           autoFocus
         />
@@ -142,24 +160,29 @@ export function TaskFormDialog({ isOpen, task, onClose, onSubmit }: TaskFormDial
         {/* Effort preset */}
         <div>
           <label className="block text-sm font-medium text-foreground mb-1.5">
-            {t('cleaning.task.effort', 'Effort')}
+            {t("cleaning.task.effort", "Effort")}
           </label>
           <div className="flex flex-wrap gap-2">
             {EFFORT_OPTIONS.map((opt) => (
               <button
                 key={opt.value}
                 type="button"
-                onClick={() => { setEffort(opt.value); setError(''); }}
+                onClick={() => {
+                  setEffort(opt.value);
+                  setError("");
+                }}
                 className={cn(
-                  'px-3 py-1.5 rounded-md text-sm font-medium border transition-colors',
+                  "px-3 py-1.5 rounded-md text-sm font-medium border transition-colors",
                   effort === opt.value
-                    ? 'bg-primary text-primary-foreground border-primary'
-                    : 'bg-card text-card-foreground border-border hover:border-primary/50',
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-card text-card-foreground border-border hover:border-primary/50",
                 )}
               >
                 {t(`cleaning.effort.${opt.value}`, opt.value)}
                 {opt.pts !== null && (
-                  <span className="ml-1 opacity-75">({opt.pts} {t('common.points', 'pts')})</span>
+                  <span className="ml-1 opacity-75">
+                    ({opt.pts} {t("common.points", "pts")})
+                  </span>
                 )}
               </button>
             ))}
@@ -169,10 +192,13 @@ export function TaskFormDialog({ isOpen, task, onClose, onSubmit }: TaskFormDial
         {/* Custom points (only when Custom effort selected) */}
         {effort === CleaningEffort.Custom && (
           <Input
-            label={t('cleaning.task.customPoints', 'Custom Points')}
+            label={t("cleaning.task.customPoints", "Custom Points")}
             type="number"
             value={customPoints}
-            onChange={(e) => { setCustomPoints(e.target.value); setError(''); }}
+            onChange={(e) => {
+              setCustomPoints(e.target.value);
+              setError("");
+            }}
             min={0}
           />
         )}
@@ -180,10 +206,12 @@ export function TaskFormDialog({ isOpen, task, onClose, onSubmit }: TaskFormDial
         {/* Frequency */}
         <div>
           <label className="block text-sm font-medium text-foreground mb-1.5">
-            {t('cleaning.task.frequency', 'Frequency')}
+            {t("cleaning.task.frequency", "Frequency")}
           </label>
           <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">{t('cleaning.frequency.every', 'Every')}</span>
+            <span className="text-sm text-muted-foreground">
+              {t("cleaning.frequency.every", "Every")}
+            </span>
             <input
               type="number"
               value={frequencyValue}
@@ -193,18 +221,28 @@ export function TaskFormDialog({ isOpen, task, onClose, onSubmit }: TaskFormDial
             />
             <select
               value={frequencyUnit}
-              onChange={(e) => setFrequencyUnit(e.target.value as FrequencyUnit)}
+              onChange={(e) =>
+                setFrequencyUnit(e.target.value as FrequencyUnit)
+              }
               className="rounded-md border border-input bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
             >
-              <option value={FrequencyUnit.Days}>{t('cleaning.frequency.days', 'Days')}</option>
-              <option value={FrequencyUnit.Weeks}>{t('cleaning.frequency.weeks', 'Weeks')}</option>
+              <option value={FrequencyUnit.Days}>
+                {t("cleaning.frequency.days", "Days")}
+              </option>
+              <option value={FrequencyUnit.Weeks}>
+                {t("cleaning.frequency.weeks", "Weeks")}
+              </option>
             </select>
           </div>
         </div>
 
         {/* Due date */}
         <Input
-          label={isEdit ? t('cleaning.task.dueDate', 'Due Date') : t('cleaning.task.firstDueDate', 'First Due Date')}
+          label={
+            isEdit
+              ? t("cleaning.task.dueDate", "Due Date")
+              : t("cleaning.task.firstDueDate", "First Due Date")
+          }
           type="date"
           value={dueDate}
           onChange={(e) => setDueDate(e.target.value)}
@@ -213,8 +251,10 @@ export function TaskFormDialog({ isOpen, task, onClose, onSubmit }: TaskFormDial
         {/* Rotation order */}
         <div>
           <label className="block text-sm font-medium text-foreground mb-1.5">
-            {t('cleaning.task.rotationOrder', 'Rotation Order')}
-            <span className="text-xs text-muted-foreground ml-1">({t('cleaning.task.rotationHint', 'optional')})</span>
+            {t("cleaning.task.rotationOrder", "Rotation Order")}
+            <span className="text-xs text-muted-foreground ml-1">
+              ({t("cleaning.task.rotationHint", "optional")})
+            </span>
           </label>
 
           <div className="flex flex-wrap gap-1.5 mb-2">
@@ -226,13 +266,14 @@ export function TaskFormDialog({ isOpen, task, onClose, onSubmit }: TaskFormDial
                   type="button"
                   onClick={() => toggleRotationUser(user.id)}
                   className={cn(
-                    'px-2.5 py-1 rounded-full text-xs font-medium border transition-colors',
+                    "px-2.5 py-1 rounded-full text-xs font-medium border transition-colors",
                     isSelected
-                      ? 'bg-primary/15 text-primary border-primary/30'
-                      : 'bg-muted text-muted-foreground border-border hover:border-primary/30',
+                      ? "bg-primary/15 text-primary border-primary/30"
+                      : "bg-muted text-muted-foreground border-border hover:border-primary/30",
                   )}
                 >
-                  {isSelected && '✓ '}{user.name}
+                  {isSelected && "✓ "}
+                  {user.name}
                 </button>
               );
             })}
@@ -245,8 +286,12 @@ export function TaskFormDialog({ isOpen, task, onClose, onSubmit }: TaskFormDial
                 const user = PREDEFINED_USERS.find((u) => u.id === uid);
                 return (
                   <div key={uid} className="flex items-center gap-2 text-sm">
-                    <span className="text-muted-foreground w-4 text-right">{idx + 1}.</span>
-                    <span className="flex-1 text-card-foreground">{user?.name ?? `User ${uid}`}</span>
+                    <span className="text-muted-foreground w-4 text-right">
+                      {idx + 1}.
+                    </span>
+                    <span className="flex-1 text-card-foreground">
+                      {user?.name ?? `User ${uid}`}
+                    </span>
                     <button
                       type="button"
                       disabled={idx === 0}
@@ -270,16 +315,16 @@ export function TaskFormDialog({ isOpen, task, onClose, onSubmit }: TaskFormDial
           )}
         </div>
 
-        {error && (
-          <p className="text-sm text-destructive">{error}</p>
-        )}
+        {error && <p className="text-sm text-destructive">{error}</p>}
 
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="secondary" onClick={onClose}>
-            {t('common.cancel', 'Cancel')}
+            {t("common.cancel", "Cancel")}
           </Button>
           <Button type="submit">
-            {isEdit ? t('common.save', 'Save') : t('cleaning.task.create', 'Create Task')}
+            {isEdit
+              ? t("common.save", "Save")
+              : t("cleaning.task.create", "Create Task")}
           </Button>
         </div>
       </form>
@@ -295,25 +340,38 @@ interface DeleteConfirmDialogProps {
   onConfirm: () => void;
 }
 
-export function DeleteConfirmDialog({ isOpen, onClose, onConfirm }: DeleteConfirmDialogProps) {
+export function DeleteConfirmDialog({
+  isOpen,
+  onClose,
+  onConfirm,
+}: DeleteConfirmDialogProps) {
   const { t } = useTranslation();
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={t('cleaning.task.deleteConfirm', 'Delete Task?')}
+      title={t("cleaning.task.deleteConfirm", "Delete Task?")}
     >
       <div className="space-y-4">
         <p className="text-sm text-muted-foreground">
-          {t('cleaning.task.deleteWarning', 'This action cannot be undone. Historical completion records will also be removed.')}
+          {t(
+            "cleaning.task.deleteWarning",
+            "This action cannot be undone. Historical completion records will also be removed.",
+          )}
         </p>
         <div className="flex gap-2 justify-end">
           <Button variant="secondary" onClick={onClose}>
-            {t('common.cancel', 'Cancel')}
+            {t("common.cancel", "Cancel")}
           </Button>
-          <Button variant="destructive" onClick={() => { onConfirm(); onClose(); }}>
-            {t('common.delete', 'Delete')}
+          <Button
+            variant="destructive"
+            onClick={() => {
+              onConfirm();
+              onClose();
+            }}
+          >
+            {t("common.delete", "Delete")}
           </Button>
         </div>
       </div>
@@ -330,34 +388,49 @@ interface AssignDialogProps {
   onAssign: (userId: number | null) => void;
 }
 
-export function AssignDialog({ isOpen, task, onClose, onAssign }: AssignDialogProps) {
+export function AssignDialog({
+  isOpen,
+  task,
+  onClose,
+  onAssign,
+}: AssignDialogProps) {
   const { t } = useTranslation();
 
   return (
     <Modal
       isOpen={isOpen && !!task}
       onClose={onClose}
-      title={t('cleaning.task.assign', 'Assign Task')}
+      title={t("cleaning.task.assign", "Assign Task")}
     >
       <div className="space-y-2">
         <button
-          onClick={() => { onAssign(null); onClose(); }}
+          onClick={() => {
+            onAssign(null);
+            onClose();
+          }}
           className={cn(
-            'w-full text-left px-3 py-2 rounded-md text-sm transition-colors',
-            task?.assignedUserId === null ? 'bg-accent font-medium' : 'hover:bg-accent',
+            "w-full text-left px-3 py-2 rounded-md text-sm transition-colors",
+            task?.assignedUserId === null
+              ? "bg-accent font-medium"
+              : "hover:bg-accent",
           )}
         >
-          <span className="italic text-muted-foreground">{t('cleaning.task.unassigned', 'Unassigned')}</span>
+          <span className="italic text-muted-foreground">
+            {t("cleaning.task.unassigned", "Unassigned")}
+          </span>
         </button>
         {PREDEFINED_USERS.map((user) => (
           <button
             key={user.id}
-            onClick={() => { onAssign(user.id); onClose(); }}
+            onClick={() => {
+              onAssign(user.id);
+              onClose();
+            }}
             className={cn(
-              'w-full text-left px-3 py-2 rounded-md text-sm transition-colors',
+              "w-full text-left px-3 py-2 rounded-md text-sm transition-colors",
               task?.assignedUserId === user.id
-                ? 'bg-primary/10 text-primary font-medium'
-                : 'hover:bg-accent text-card-foreground',
+                ? "bg-primary/10 text-primary font-medium"
+                : "hover:bg-accent text-card-foreground",
             )}
           >
             {user.name}

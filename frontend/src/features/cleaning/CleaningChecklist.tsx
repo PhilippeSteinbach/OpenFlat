@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Sparkles } from 'lucide-react';
-import { Button, Badge, EmptyState } from '@/shared/ui';
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Sparkles } from "lucide-react";
+import { Button, Badge, EmptyState } from "@/shared/ui";
 import {
   useTasksQuery,
   useLeaderboardQuery,
@@ -10,12 +10,16 @@ import {
   useDeleteTaskMutation,
   useCompleteTaskMutation,
   useAssignTaskMutation,
-} from './api';
-import { useCleaningHub } from './useCleaningHub';
-import { ChecklistItem } from './ChecklistItem';
-import { TaskFormDialog, DeleteConfirmDialog, AssignDialog } from './TaskDialogs';
-import { TaskDetail } from './TaskDetail';
-import type { TaskDto } from './types';
+} from "./api";
+import { useCleaningHub } from "./useCleaningHub";
+import { ChecklistItem } from "./ChecklistItem";
+import {
+  TaskFormDialog,
+  DeleteConfirmDialog,
+  AssignDialog,
+} from "./TaskDialogs";
+import { TaskDetail } from "./TaskDetail";
+import type { TaskDto } from "./types";
 
 export function CleaningChecklist() {
   const { t } = useTranslation();
@@ -37,7 +41,7 @@ export function CleaningChecklist() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <p className="text-muted-foreground">{t('common.loading')}</p>
+        <p className="text-muted-foreground">{t("common.loading")}</p>
       </div>
     );
   }
@@ -45,7 +49,7 @@ export function CleaningChecklist() {
   if (isError) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <p className="text-destructive">{t('common.error')}</p>
+        <p className="text-destructive">{t("common.error")}</p>
       </div>
     );
   }
@@ -58,15 +62,17 @@ export function CleaningChecklist() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">{t('cleaning.title')}</h1>
+          <h1 className="text-2xl font-bold text-foreground">
+            {t("cleaning.title")}
+          </h1>
           <p className="text-sm text-muted-foreground mt-0.5">
             {isConnected
-              ? t('cleaning.signalr.connected')
-              : t('cleaning.signalr.connecting')}
+              ? t("cleaning.signalr.connected")
+              : t("cleaning.signalr.connecting")}
           </p>
         </div>
         <Button onClick={() => setShowCreateDialog(true)} size="sm">
-          + {t('cleaning.task.create')}
+          + {t("cleaning.task.create")}
         </Button>
       </div>
 
@@ -74,9 +80,15 @@ export function CleaningChecklist() {
       {leaderboard && leaderboard.length > 0 && (
         <div className="flex gap-3 mb-6 flex-wrap">
           {leaderboard.map((entry) => (
-            <Badge key={entry.userId} variant="secondary" className="flex items-center gap-1.5 text-sm">
+            <Badge
+              key={entry.userId}
+              variant="secondary"
+              className="flex items-center gap-1.5 text-sm"
+            >
               <span className="font-medium">{entry.userName}</span>
-              <span className="text-primary font-semibold">{entry.totalPoints} {t('common.points')}</span>
+              <span className="text-primary font-semibold">
+                {entry.totalPoints} {t("common.points")}
+              </span>
             </Badge>
           ))}
         </div>
@@ -86,17 +98,20 @@ export function CleaningChecklist() {
       {taskList.length === 0 ? (
         <EmptyState
           icon={Sparkles}
-          title={t('cleaning.emptyState.title', 'No tasks yet')}
-          description={t('cleaning.emptyState.description', 'Create your first cleaning task to get started!')}
+          title={t("cleaning.emptyState.title", "No tasks yet")}
+          description={t(
+            "cleaning.emptyState.description",
+            "Create your first cleaning task to get started!",
+          )}
           action={{
-            label: t('cleaning.task.create'),
+            label: t("cleaning.task.create"),
             onClick: () => setShowCreateDialog(true),
           }}
         />
       ) : (
         <section>
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
-            {t('cleaning.sections.tasks', 'Tasks')} ({taskList.length})
+            {t("cleaning.sections.tasks", "Tasks")} ({taskList.length})
           </h2>
           <div className="space-y-1">
             {taskList.map((task) => (
@@ -104,7 +119,10 @@ export function CleaningChecklist() {
                 key={task.id}
                 task={task}
                 onComplete={(nextUserId) =>
-                  completeTask.mutate({ taskId: task.id, req: nextUserId != null ? { nextUserId } : undefined })
+                  completeTask.mutate({
+                    taskId: task.id,
+                    req: nextUserId != null ? { nextUserId } : undefined,
+                  })
                 }
                 onClick={() => setDetailTask(task)}
                 onEdit={() => setEditingTask(task)}
@@ -171,7 +189,10 @@ export function CleaningChecklist() {
         onClose={() => setAssigningTask(null)}
         onAssign={(userId) => {
           if (assigningTask) {
-            assignTask.mutate({ taskId: assigningTask.id, req: { assignedUserId: userId } });
+            assignTask.mutate({
+              taskId: assigningTask.id,
+              req: { assignedUserId: userId },
+            });
           }
         }}
       />

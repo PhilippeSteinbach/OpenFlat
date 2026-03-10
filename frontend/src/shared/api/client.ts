@@ -1,7 +1,7 @@
 const BASE_URLS = {
-  cleaning: '/api',
-  shopping: '/api',
-  finance: '/api',
+  cleaning: "/api",
+  shopping: "/api",
+  finance: "/api",
 } as const;
 
 type ServiceName = keyof typeof BASE_URLS;
@@ -16,7 +16,7 @@ async function request<T>(
   const url = `${BASE_URLS[service]}${path}`;
   const response = await fetch(url, {
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       ...extraHeaders,
       ...options?.headers,
     },
@@ -24,7 +24,7 @@ async function request<T>(
   });
 
   if (!response.ok) {
-    const errorBody = await response.text().catch(() => '');
+    const errorBody = await response.text().catch(() => "");
     throw new ApiError(response.status, response.statusText, errorBody);
   }
 
@@ -42,40 +42,83 @@ export class ApiError extends Error {
     public body: string,
   ) {
     super(`API Error ${status}: ${statusText}`);
-    this.name = 'ApiError';
+    this.name = "ApiError";
   }
 }
 
 export const cleaningApi = {
-  get: <T>(path: string, extraHeaders?: ExtraHeaders) => request<T>('cleaning', path, undefined, extraHeaders),
+  get: <T>(path: string, extraHeaders?: ExtraHeaders) =>
+    request<T>("cleaning", path, undefined, extraHeaders),
   post: <T>(path: string, body: unknown, extraHeaders?: ExtraHeaders) =>
-    request<T>('cleaning', path, { method: 'POST', body: JSON.stringify(body) }, extraHeaders),
+    request<T>(
+      "cleaning",
+      path,
+      { method: "POST", body: JSON.stringify(body) },
+      extraHeaders,
+    ),
   put: <T>(path: string, body: unknown, extraHeaders?: ExtraHeaders) =>
-    request<T>('cleaning', path, { method: 'PUT', body: JSON.stringify(body) }, extraHeaders),
+    request<T>(
+      "cleaning",
+      path,
+      { method: "PUT", body: JSON.stringify(body) },
+      extraHeaders,
+    ),
   patch: <T>(path: string, body: unknown, extraHeaders?: ExtraHeaders) =>
-    request<T>('cleaning', path, { method: 'PATCH', body: JSON.stringify(body) }, extraHeaders),
+    request<T>(
+      "cleaning",
+      path,
+      { method: "PATCH", body: JSON.stringify(body) },
+      extraHeaders,
+    ),
   delete: <T>(path: string, extraHeaders?: ExtraHeaders) =>
-    request<T>('cleaning', path, { method: 'DELETE' }, extraHeaders),
+    request<T>("cleaning", path, { method: "DELETE" }, extraHeaders),
 };
 
 export const shoppingApi = {
-  get: <T>(path: string, extraHeaders?: ExtraHeaders) => request<T>('shopping', path, undefined, extraHeaders),
+  get: <T>(path: string, extraHeaders?: ExtraHeaders) =>
+    request<T>("shopping", path, undefined, extraHeaders),
   post: <T>(path: string, body: unknown, extraHeaders?: ExtraHeaders) =>
-    request<T>('shopping', path, { method: 'POST', body: JSON.stringify(body) }, extraHeaders),
+    request<T>(
+      "shopping",
+      path,
+      { method: "POST", body: JSON.stringify(body) },
+      extraHeaders,
+    ),
   put: <T>(path: string, body: unknown, extraHeaders?: ExtraHeaders) =>
-    request<T>('shopping', path, { method: 'PUT', body: JSON.stringify(body) }, extraHeaders),
+    request<T>(
+      "shopping",
+      path,
+      { method: "PUT", body: JSON.stringify(body) },
+      extraHeaders,
+    ),
   patch: <T>(path: string, body: unknown, extraHeaders?: ExtraHeaders) =>
-    request<T>('shopping', path, { method: 'PATCH', body: JSON.stringify(body) }, extraHeaders),
+    request<T>(
+      "shopping",
+      path,
+      { method: "PATCH", body: JSON.stringify(body) },
+      extraHeaders,
+    ),
   delete: <T>(path: string, extraHeaders?: ExtraHeaders) =>
-    request<T>('shopping', path, { method: 'DELETE' }, extraHeaders),
+    request<T>("shopping", path, { method: "DELETE" }, extraHeaders),
 };
 
 export const financeApi = {
-  get: <T>(path: string, extraHeaders?: ExtraHeaders) => request<T>('finance', path, undefined, extraHeaders),
+  get: <T>(path: string, extraHeaders?: ExtraHeaders) =>
+    request<T>("finance", path, undefined, extraHeaders),
   post: <T>(path: string, body: unknown, extraHeaders?: ExtraHeaders) =>
-    request<T>('finance', path, { method: 'POST', body: JSON.stringify(body) }, extraHeaders),
+    request<T>(
+      "finance",
+      path,
+      { method: "POST", body: JSON.stringify(body) },
+      extraHeaders,
+    ),
   put: <T>(path: string, body: unknown, extraHeaders?: ExtraHeaders) =>
-    request<T>('finance', path, { method: 'PUT', body: JSON.stringify(body) }, extraHeaders),
+    request<T>(
+      "finance",
+      path,
+      { method: "PUT", body: JSON.stringify(body) },
+      extraHeaders,
+    ),
   delete: <T>(path: string, extraHeaders?: ExtraHeaders) =>
-    request<T>('finance', path, { method: 'DELETE' }, extraHeaders),
+    request<T>("finance", path, { method: "DELETE" }, extraHeaders),
 };

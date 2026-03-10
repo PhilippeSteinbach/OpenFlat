@@ -1,24 +1,24 @@
-import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router';
-import { useCurrentUserStore } from '@/shared/hooks/useCurrentUser';
-import { Card } from '@/shared/ui';
-import { ThemeToggle } from '@/shared/ui/theme-toggle';
-import { cn } from '@/shared/lib/utils';
+import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router";
+import { useCurrentUserStore } from "@/shared/hooks/useCurrentUser";
+import { Card } from "@/shared/ui";
+import { ThemeToggle } from "@/shared/ui/theme-toggle";
+import { cn } from "@/shared/lib/utils";
 
 const PREDEFINED_USERS = [
-  { id: 1, name: 'Alex', role: 'Coordinator' },
-  { id: 2, name: 'Jordan', role: 'Coordinator' },
-  { id: 3, name: 'Sam', role: 'Resident' },
-  { id: 4, name: 'Taylor', role: 'Resident' },
-  { id: 5, name: 'Casey', role: 'Resident' },
+  { id: 1, name: "Alex", role: "Coordinator" },
+  { id: 2, name: "Jordan", role: "Coordinator" },
+  { id: 3, name: "Sam", role: "Resident" },
+  { id: 4, name: "Taylor", role: "Resident" },
+  { id: 5, name: "Casey", role: "Resident" },
 ] as const;
 
 const AVATAR_COLORS = [
-  'bg-blue-500',
-  'bg-emerald-500',
-  'bg-amber-500',
-  'bg-violet-500',
-  'bg-rose-500',
+  "bg-blue-500",
+  "bg-emerald-500",
+  "bg-amber-500",
+  "bg-violet-500",
+  "bg-rose-500",
 ];
 
 function getAvatarColor(userId: number): string {
@@ -32,7 +32,7 @@ export function UserSelectionPage() {
 
   const handleSelectUser = (user: (typeof PREDEFINED_USERS)[number]) => {
     setCurrentUser({ id: user.id, name: user.name, role: user.role });
-    navigate('/dashboard');
+    navigate("/dashboard");
   };
 
   return (
@@ -43,9 +43,9 @@ export function UserSelectionPage() {
 
       <div className="mb-8 text-center">
         <h1 className="text-3xl font-bold text-foreground mb-2">
-          {t('userSelection.title')}
+          {t("userSelection.title")}
         </h1>
-        <p className="text-muted-foreground">{t('userSelection.subtitle')}</p>
+        <p className="text-muted-foreground">{t("userSelection.subtitle")}</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-2xl w-full">
@@ -56,11 +56,11 @@ export function UserSelectionPage() {
             onClick={() => handleSelectUser(user)}
             role="button"
             tabIndex={0}
-            onKeyDown={(e) => e.key === 'Enter' && handleSelectUser(user)}
+            onKeyDown={(e) => e.key === "Enter" && handleSelectUser(user)}
           >
             <div
               className={cn(
-                'w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold text-sm shrink-0',
+                "w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold text-sm shrink-0",
                 getAvatarColor(user.id),
               )}
               aria-hidden="true"
@@ -68,7 +68,9 @@ export function UserSelectionPage() {
               {user.name.charAt(0)}
             </div>
             <div>
-              <div className="font-medium text-card-foreground">{user.name}</div>
+              <div className="font-medium text-card-foreground">
+                {user.name}
+              </div>
               <div className="text-sm text-muted-foreground">
                 {t(`userSelection.roles.${user.role.toLowerCase()}`)}
               </div>

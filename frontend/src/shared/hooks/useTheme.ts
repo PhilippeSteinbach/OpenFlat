@@ -1,7 +1,7 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
-type Theme = 'dark' | 'light';
+type Theme = "dark" | "light";
 
 interface ThemeState {
   theme: Theme;
@@ -11,29 +11,29 @@ interface ThemeState {
 
 function applyTheme(theme: Theme) {
   const root = document.documentElement;
-  if (theme === 'dark') {
-    root.classList.add('dark');
+  if (theme === "dark") {
+    root.classList.add("dark");
   } else {
-    root.classList.remove('dark');
+    root.classList.remove("dark");
   }
 }
 
 export const useThemeStore = create<ThemeState>()(
   persist(
     (set, get) => ({
-      theme: 'dark',
+      theme: "dark",
       setTheme: (theme) => {
         applyTheme(theme);
         set({ theme });
       },
       toggleTheme: () => {
-        const next = get().theme === 'dark' ? 'light' : 'dark';
+        const next = get().theme === "dark" ? "light" : "dark";
         applyTheme(next);
         set({ theme: next });
       },
     }),
     {
-      name: 'openflat-theme',
+      name: "openflat-theme",
       onRehydrateStorage: () => (state) => {
         if (state) {
           applyTheme(state.theme);
@@ -44,14 +44,14 @@ export const useThemeStore = create<ThemeState>()(
 );
 
 // Apply theme immediately on module load (before React renders)
-const stored = localStorage.getItem('openflat-theme');
+const stored = localStorage.getItem("openflat-theme");
 if (stored) {
   try {
     const parsed = JSON.parse(stored);
-    applyTheme(parsed.state?.theme ?? 'dark');
+    applyTheme(parsed.state?.theme ?? "dark");
   } catch {
-    applyTheme('dark');
+    applyTheme("dark");
   }
 } else {
-  applyTheme('dark');
+  applyTheme("dark");
 }

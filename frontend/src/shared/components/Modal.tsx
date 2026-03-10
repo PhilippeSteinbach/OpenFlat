@@ -1,7 +1,7 @@
-import type { ReactNode } from 'react';
-import { useEffect, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
-import { X } from 'lucide-react';
+import type { ReactNode } from "react";
+import { useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
+import { X } from "lucide-react";
 
 interface ModalProps {
   isOpen: boolean;
@@ -36,13 +36,16 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
     >
       <div className="p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 id="modal-title" className="text-lg font-semibold text-foreground">
+          <h2
+            id="modal-title"
+            className="text-lg font-semibold text-foreground"
+          >
             {title}
           </h2>
           <button
             onClick={onClose}
             className="text-muted-foreground hover:text-foreground transition-colors rounded-sm p-1"
-            aria-label={t('common.close')}
+            aria-label={t("common.close")}
           >
             <X className="w-5 h-5" />
           </button>

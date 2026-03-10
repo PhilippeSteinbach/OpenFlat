@@ -1,7 +1,14 @@
-import { useState, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Button, Card, EmptyState } from '@/shared/ui';
-import { ShoppingCart, Pencil, Trash2, MessageCircle, Check, Undo2 } from 'lucide-react';
+import { useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
+import { Button, Card, EmptyState } from "@/shared/ui";
+import {
+  ShoppingCart,
+  Pencil,
+  Trash2,
+  MessageCircle,
+  Check,
+  Undo2,
+} from "lucide-react";
 import {
   useShoppingListQuery,
   useCreateItemMutation,
@@ -9,11 +16,11 @@ import {
   useDeleteItemMutation,
   useBuyItemMutation,
   useUndoBuyMutation,
-} from './api';
-import { useShoppingHub } from './useShoppingHub';
-import { ItemFormDialog, DeleteConfirmDialog } from './ShoppingDialogs';
-import { ItemDetail } from './ItemDetail';
-import type { ItemDto } from './types';
+} from "./api";
+import { useShoppingHub } from "./useShoppingHub";
+import { ItemFormDialog, DeleteConfirmDialog } from "./ShoppingDialogs";
+import { ItemDetail } from "./ItemDetail";
+import type { ItemDto } from "./types";
 
 export function ShoppingList() {
   const { t } = useTranslation();
@@ -35,7 +42,10 @@ export function ShoppingList() {
 
   const handleCreate = useCallback(
     (name: string, quantity: number) => {
-      createMutation.mutate({ name, quantity }, { onSuccess: () => setShowAddDialog(false) });
+      createMutation.mutate(
+        { name, quantity },
+        { onSuccess: () => setShowAddDialog(false) },
+      );
     },
     [createMutation],
   );
@@ -53,7 +63,9 @@ export function ShoppingList() {
 
   const handleDelete = useCallback(() => {
     if (!deleteItemId) return;
-    deleteMutation.mutate(deleteItemId, { onSuccess: () => setDeleteItemId(null) });
+    deleteMutation.mutate(deleteItemId, {
+      onSuccess: () => setDeleteItemId(null),
+    });
   }, [deleteItemId, deleteMutation]);
 
   const handleBuy = useCallback(
@@ -77,12 +89,14 @@ export function ShoppingList() {
   if (error) {
     return (
       <div className="p-6 text-center">
-        <p className="text-center text-destructive">{t('common.error', 'Failed to load shopping list')}</p>
+        <p className="text-center text-destructive">
+          {t("common.error", "Failed to load shopping list")}
+        </p>
         <button
           onClick={() => refetch()}
           className="mt-2 text-sm text-primary hover:text-primary/80 underline"
         >
-          {t('common.retry', 'Retry')}
+          {t("common.retry", "Retry")}
         </button>
       </div>
     );
@@ -96,17 +110,17 @@ export function ShoppingList() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-foreground">
-          {t('shopping.title')}
+          {t("shopping.title")}
         </h1>
         <Button onClick={() => setShowAddDialog(true)} size="sm">
-          + {t('shopping.item.add')}
+          + {t("shopping.item.add")}
         </Button>
       </div>
 
       {/* Active Items */}
       <section>
         <h2 className="text-lg font-semibold text-foreground mb-3">
-          {t('shopping.sections.active')}
+          {t("shopping.sections.active")}
           {active.length > 0 && (
             <span className="ml-2 text-sm font-normal text-muted-foreground">
               ({active.length})
@@ -117,8 +131,11 @@ export function ShoppingList() {
         {active.length === 0 ? (
           <EmptyState
             icon={ShoppingCart}
-            title={t('shopping.empty.active')}
-            action={{ label: t('shopping.item.add'), onClick: () => setShowAddDialog(true) }}
+            title={t("shopping.empty.active")}
+            action={{
+              label: t("shopping.item.add"),
+              onClick: () => setShowAddDialog(true),
+            }}
           />
         ) : (
           <div className="space-y-2">
@@ -140,7 +157,7 @@ export function ShoppingList() {
       {recentlyBought.length > 0 && (
         <section>
           <h2 className="text-lg font-semibold text-muted-foreground mb-3">
-            {t('shopping.sections.recentlyBought')}
+            {t("shopping.sections.recentlyBought")}
             <span className="ml-2 text-sm font-normal text-muted-foreground/70">
               ({recentlyBought.length})
             </span>
@@ -163,7 +180,7 @@ export function ShoppingList() {
         isOpen={showAddDialog}
         onClose={() => setShowAddDialog(false)}
         onSubmit={handleCreate}
-        title={t('shopping.item.add')}
+        title={t("shopping.item.add")}
         isPending={createMutation.isPending}
       />
 
@@ -172,7 +189,7 @@ export function ShoppingList() {
           isOpen
           onClose={() => setEditItem(null)}
           onSubmit={handleUpdate}
-          title={t('shopping.item.edit')}
+          title={t("shopping.item.edit")}
           initialName={editItem.name}
           initialQuantity={editItem.quantity}
           isPending={updateMutation.isPending}
@@ -187,10 +204,7 @@ export function ShoppingList() {
       />
 
       {detailItem && (
-        <ItemDetail
-          item={detailItem}
-          onClose={() => setDetailItem(null)}
-        />
+        <ItemDetail item={detailItem} onClose={() => setDetailItem(null)} />
       )}
     </div>
   );
@@ -206,7 +220,13 @@ interface ItemCardProps {
   onViewDetail: (item: ItemDto) => void;
 }
 
-function ItemCard({ item, onBuy, onEdit, onDelete, onViewDetail }: ItemCardProps) {
+function ItemCard({
+  item,
+  onBuy,
+  onEdit,
+  onDelete,
+  onViewDetail,
+}: ItemCardProps) {
   const { t } = useTranslation();
 
   return (
@@ -215,14 +235,16 @@ function ItemCard({ item, onBuy, onEdit, onDelete, onViewDetail }: ItemCardProps
       <button
         onClick={() => onBuy(item.id)}
         className="flex-shrink-0 w-6 h-6 rounded-full border-2 border-border hover:border-primary hover:bg-primary/10 transition-colors"
-        aria-label={t('shopping.item.markBought')}
-        title={t('shopping.item.markBought')}
+        aria-label={t("shopping.item.markBought")}
+        title={t("shopping.item.markBought")}
       />
 
       {/* Item info */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span className="font-medium text-foreground truncate">{item.name}</span>
+          <span className="font-medium text-foreground truncate">
+            {item.name}
+          </span>
           {item.quantity > 1 && (
             <span className="flex-shrink-0 text-xs bg-muted text-muted-foreground px-1.5 py-0.5 rounded">
               ×{item.quantity}
@@ -232,8 +254,10 @@ function ItemCard({ item, onBuy, onEdit, onDelete, onViewDetail }: ItemCardProps
             <button
               onClick={() => onViewDetail(item)}
               className="flex-shrink-0 flex items-center gap-0.5 text-xs text-muted-foreground hover:text-primary"
-              title={t('comments.title')}
-              aria-label={t('comments.countTooltip', { count: item.commentCount })}
+              title={t("comments.title")}
+              aria-label={t("comments.countTooltip", {
+                count: item.commentCount,
+              })}
             >
               <MessageCircle className="w-3.5 h-3.5" /> {item.commentCount}
             </button>
@@ -242,24 +266,34 @@ function ItemCard({ item, onBuy, onEdit, onDelete, onViewDetail }: ItemCardProps
             <button
               onClick={() => onViewDetail(item)}
               className="flex-shrink-0 text-xs text-muted-foreground/50 hover:text-primary"
-              title={t('comments.addTooltip')}
-              aria-label={t('comments.addTooltip')}
+              title={t("comments.addTooltip")}
+              aria-label={t("comments.addTooltip")}
             >
               <MessageCircle className="w-3.5 h-3.5" />
             </button>
           )}
         </div>
         <p className="text-xs text-muted-foreground">
-          {t('shopping.item.addedBy', { name: item.addedByUserName })}
+          {t("shopping.item.addedBy", { name: item.addedByUserName })}
         </p>
       </div>
 
       {/* Actions */}
       <div className="flex items-center gap-1">
-        <Button variant="ghost" size="icon" onClick={() => onEdit(item)} aria-label={t('common.edit')}>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => onEdit(item)}
+          aria-label={t("common.edit")}
+        >
           <Pencil className="w-4 h-4" />
         </Button>
-        <Button variant="ghost" size="icon" onClick={() => onDelete(item.id)} aria-label={t('common.delete')}>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => onDelete(item.id)}
+          aria-label={t("common.delete")}
+        >
           <Trash2 className="w-4 h-4" />
         </Button>
       </div>
@@ -292,7 +326,7 @@ function BoughtItemCard({ item, onUndo, onViewDetail }: BoughtItemCardProps) {
           {item.quantity > 1 && <span className="ml-1">×{item.quantity}</span>}
         </span>
         <p className="text-xs text-muted-foreground">
-          {t('shopping.item.boughtBy', { name: item.boughtByUserName })}
+          {t("shopping.item.boughtBy", { name: item.boughtByUserName })}
         </p>
       </div>
 
@@ -300,12 +334,18 @@ function BoughtItemCard({ item, onUndo, onViewDetail }: BoughtItemCardProps) {
       <button
         onClick={() => onViewDetail(item)}
         className="text-xs text-muted-foreground hover:text-primary px-1"
-        title={t('comments.title')}
-        aria-label={t('comments.title')}
+        title={t("comments.title")}
+        aria-label={t("comments.title")}
       >
         <MessageCircle className="w-3.5 h-3.5" />
       </button>
-      <Button variant="ghost" size="icon" onClick={() => onUndo(item.id)} title={t('shopping.item.undoBuy')} aria-label={t('shopping.item.undoBuy')}>
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => onUndo(item.id)}
+        title={t("shopping.item.undoBuy")}
+        aria-label={t("shopping.item.undoBuy")}
+      >
         <Undo2 className="w-4 h-4" />
       </Button>
     </Card>

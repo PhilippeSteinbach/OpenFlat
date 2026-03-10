@@ -1,5 +1,9 @@
-import { useEffect, useRef, useCallback, useState } from 'react';
-import { HubConnectionBuilder, HubConnection, HubConnectionState } from '@microsoft/signalr';
+import { useEffect, useRef, useCallback, useState } from "react";
+import {
+  HubConnectionBuilder,
+  HubConnection,
+  HubConnectionState,
+} from "@microsoft/signalr";
 
 interface UseSignalROptions {
   hubUrl: string;
@@ -26,17 +30,20 @@ export function useSignalR({ hubUrl, enabled = true }: UseSignalROptions) {
     connection
       .start()
       .then(() => setIsConnected(true))
-      .catch((err) => console.error('SignalR connection error:', err));
+      .catch((err) => console.error("SignalR connection error:", err));
 
     return () => {
       connection.stop();
     };
   }, [hubUrl, enabled]);
 
-  const on = useCallback((methodName: string, callback: (...args: unknown[]) => void) => {
-    connectionRef.current?.on(methodName, callback);
-    return () => connectionRef.current?.off(methodName, callback);
-  }, []);
+  const on = useCallback(
+    (methodName: string, callback: (...args: unknown[]) => void) => {
+      connectionRef.current?.on(methodName, callback);
+      return () => connectionRef.current?.off(methodName, callback);
+    },
+    [],
+  );
 
   const invoke = useCallback(async (methodName: string, ...args: unknown[]) => {
     if (connectionRef.current?.state === HubConnectionState.Connected) {

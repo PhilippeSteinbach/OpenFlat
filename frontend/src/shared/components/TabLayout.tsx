@@ -1,17 +1,37 @@
-import { Outlet, useLocation, useNavigate } from 'react-router';
-import { useTranslation } from 'react-i18next';
-import { Home, Sparkles, ShoppingCart, Wallet, LogOut } from 'lucide-react';
-import { useCurrentUserStore } from '@/shared/hooks/useCurrentUser';
-import { Button } from '@/shared/ui';
-import { ThemeToggle } from '@/shared/ui/theme-toggle';
-import { cn } from '@/shared/lib/utils';
-import type { LucideIcon } from 'lucide-react';
+import { Outlet, useLocation, useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
+import { Home, Sparkles, ShoppingCart, Wallet, LogOut } from "lucide-react";
+import { useCurrentUserStore } from "@/shared/hooks/useCurrentUser";
+import { Button } from "@/shared/ui";
+import { ThemeToggle } from "@/shared/ui/theme-toggle";
+import { cn } from "@/shared/lib/utils";
+import type { LucideIcon } from "lucide-react";
 
-const TAB_ITEMS: { key: string; path: string; icon: LucideIcon; labelKey: string }[] = [
-  { key: 'dashboard', path: '/dashboard', icon: Home, labelKey: 'dashboard.title' },
-  { key: 'cleaning', path: '/cleaning', icon: Sparkles, labelKey: 'cleaning.title' },
-  { key: 'shopping', path: '/shopping', icon: ShoppingCart, labelKey: 'shopping.title' },
-  { key: 'finance', path: '/finance', icon: Wallet, labelKey: 'finance.title' },
+const TAB_ITEMS: {
+  key: string;
+  path: string;
+  icon: LucideIcon;
+  labelKey: string;
+}[] = [
+  {
+    key: "dashboard",
+    path: "/dashboard",
+    icon: Home,
+    labelKey: "dashboard.title",
+  },
+  {
+    key: "cleaning",
+    path: "/cleaning",
+    icon: Sparkles,
+    labelKey: "cleaning.title",
+  },
+  {
+    key: "shopping",
+    path: "/shopping",
+    icon: ShoppingCart,
+    labelKey: "shopping.title",
+  },
+  { key: "finance", path: "/finance", icon: Wallet, labelKey: "finance.title" },
 ];
 
 export function TabLayout() {
@@ -23,7 +43,7 @@ export function TabLayout() {
 
   const handleSwitchUser = () => {
     clearCurrentUser();
-    navigate('/');
+    navigate("/");
   };
 
   const isActive = (path: string) => location.pathname === path;
@@ -43,10 +63,10 @@ export function TabLayout() {
                   aria-selected={isActive(tab.path)}
                   onClick={() => navigate(tab.path)}
                   className={cn(
-                    'flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors',
+                    "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors",
                     isActive(tab.path)
-                      ? 'bg-primary/10 text-primary'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-accent',
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:text-foreground hover:bg-accent",
                   )}
                 >
                   <Icon className="h-4 w-4" aria-hidden="true" />
@@ -60,9 +80,16 @@ export function TabLayout() {
               {currentUser?.name}
             </span>
             <ThemeToggle />
-            <Button variant="ghost" size="sm" onClick={handleSwitchUser} className="gap-1.5">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleSwitchUser}
+              className="gap-1.5"
+            >
               <LogOut className="h-4 w-4" />
-              <span className="hidden md:inline">{t('dashboard.switchUser')}</span>
+              <span className="hidden md:inline">
+                {t("dashboard.switchUser")}
+              </span>
             </Button>
           </div>
         </div>
@@ -88,10 +115,8 @@ export function TabLayout() {
                 aria-selected={isActive(tab.path)}
                 onClick={() => navigate(tab.path)}
                 className={cn(
-                  'flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-colors',
-                  isActive(tab.path)
-                    ? 'text-primary'
-                    : 'text-muted-foreground',
+                  "flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-colors",
+                  isActive(tab.path) ? "text-primary" : "text-muted-foreground",
                 )}
               >
                 <Icon className="h-5 w-5" aria-hidden="true" />

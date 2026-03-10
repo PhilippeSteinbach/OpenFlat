@@ -1,6 +1,6 @@
-import { useEffect } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
-import { useSignalR } from '@/shared/hooks/useSignalR';
+import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useSignalR } from "@/shared/hooks/useSignalR";
 
 /**
  * Connects to the Cleaning SignalR hub and invalidates relevant React Query
@@ -9,7 +9,7 @@ import { useSignalR } from '@/shared/hooks/useSignalR';
 export function useCleaningHub() {
   const queryClient = useQueryClient();
   const { isConnected, on } = useSignalR({
-    hubUrl: '/hubs/cleaning',
+    hubUrl: "/hubs/cleaning",
     enabled: true,
   });
 
@@ -18,32 +18,32 @@ export function useCleaningHub() {
 
     // Task mutations (v3: no TaskUncompleted — completion is one-way)
     const taskEvents = [
-      'TaskCreated',
-      'TaskUpdated',
-      'TaskDeleted',
-      'TaskCompleted',
-      'TaskAssigned',
+      "TaskCreated",
+      "TaskUpdated",
+      "TaskDeleted",
+      "TaskCompleted",
+      "TaskAssigned",
     ];
 
     for (const event of taskEvents) {
       const unsub = on(event, () => {
-        queryClient.invalidateQueries({ queryKey: ['cleaning', 'tasks'] });
+        queryClient.invalidateQueries({ queryKey: ["cleaning", "tasks"] });
       });
       if (unsub) unsubs.push(unsub);
     }
 
     // Comment mutations
-    const commentEvents = ['CommentAdded', 'CommentUpdated', 'CommentDeleted'];
+    const commentEvents = ["CommentAdded", "CommentUpdated", "CommentDeleted"];
     for (const event of commentEvents) {
       const unsub = on(event, () => {
-        queryClient.invalidateQueries({ queryKey: ['cleaning'] });
+        queryClient.invalidateQueries({ queryKey: ["cleaning"] });
       });
       if (unsub) unsubs.push(unsub);
     }
 
     // Leaderboard
-    const leaderboardUnsub = on('LeaderboardUpdated', () => {
-      queryClient.invalidateQueries({ queryKey: ['cleaning', 'leaderboard'] });
+    const leaderboardUnsub = on("LeaderboardUpdated", () => {
+      queryClient.invalidateQueries({ queryKey: ["cleaning", "leaderboard"] });
     });
     if (leaderboardUnsub) unsubs.push(leaderboardUnsub);
 

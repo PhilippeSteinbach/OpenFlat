@@ -1,5 +1,5 @@
-import { cn } from '@/shared/lib/utils';
-import type { LucideIcon } from 'lucide-react';
+import { cn } from "@/shared/lib/utils";
+import type { LucideIcon } from "lucide-react";
 
 interface EmptyStateProps {
   icon?: LucideIcon;
@@ -13,13 +13,31 @@ interface EmptyStateProps {
   className?: string;
 }
 
-export function EmptyState({ icon: Icon, iconEmoji, title, description, action, className }: EmptyStateProps) {
+export function EmptyState({
+  icon: Icon,
+  iconEmoji,
+  title,
+  description,
+  action,
+  className,
+}: EmptyStateProps) {
   return (
-    <div className={cn('flex flex-col items-center justify-center py-12 text-center', className)} role="status">
+    <div
+      className={cn(
+        "flex flex-col items-center justify-center py-12 text-center",
+        className,
+      )}
+      role="status"
+    >
       {Icon ? (
-        <Icon className="h-12 w-12 text-muted-foreground/50 mb-4" aria-hidden="true" />
+        <Icon
+          className="h-12 w-12 text-muted-foreground/50 mb-4"
+          aria-hidden="true"
+        />
       ) : (
-        <span className="text-4xl mb-3" aria-hidden="true">{iconEmoji ?? '📭'}</span>
+        <span className="text-4xl mb-3" aria-hidden="true">
+          {iconEmoji ?? "📭"}
+        </span>
       )}
       <h3 className="text-lg font-medium text-foreground mb-1">{title}</h3>
       {description && (

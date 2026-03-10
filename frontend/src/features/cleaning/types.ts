@@ -3,14 +3,15 @@
 // ── Enums ──────────────────────
 
 export const CleaningEffort = {
-  None: 'None',
-  Normal: 'Normal',
-  Big: 'Big',
-  Huge: 'Huge',
-  Custom: 'Custom',
+  None: "None",
+  Normal: "Normal",
+  Big: "Big",
+  Huge: "Huge",
+  Custom: "Custom",
 } as const;
 
-export type CleaningEffort = (typeof CleaningEffort)[keyof typeof CleaningEffort];
+export type CleaningEffort =
+  (typeof CleaningEffort)[keyof typeof CleaningEffort];
 
 /** Preset points for each effort level (Custom → user-defined) */
 export const EFFORT_POINTS: Record<CleaningEffort, number | null> = {
@@ -22,8 +23,8 @@ export const EFFORT_POINTS: Record<CleaningEffort, number | null> = {
 };
 
 export const FrequencyUnit = {
-  Days: 'Days',
-  Weeks: 'Weeks',
+  Days: "Days",
+  Weeks: "Weeks",
 } as const;
 
 export type FrequencyUnit = (typeof FrequencyUnit)[keyof typeof FrequencyUnit];

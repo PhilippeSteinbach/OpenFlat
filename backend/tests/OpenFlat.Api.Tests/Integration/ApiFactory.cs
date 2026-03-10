@@ -33,13 +33,13 @@ public class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         using var scope = Services.CreateScope();
 
         var cleaningDb = scope.ServiceProvider.GetRequiredService<CleaningDbContext>();
-        await cleaningDb.Database.EnsureCreatedAsync();
+        await cleaningDb.Database.MigrateAsync();
 
         var shoppingDb = scope.ServiceProvider.GetRequiredService<ShoppingDbContext>();
-        await shoppingDb.Database.EnsureCreatedAsync();
+        await shoppingDb.Database.MigrateAsync();
 
         var financeDb = scope.ServiceProvider.GetRequiredService<FinanceDbContext>();
-        await financeDb.Database.EnsureCreatedAsync();
+        await financeDb.Database.MigrateAsync();
     }
 
     public override async ValueTask DisposeAsync()

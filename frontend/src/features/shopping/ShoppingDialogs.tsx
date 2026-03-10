@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Modal, Input, Button } from '@/shared/components';
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Modal, Input, Button } from "@/shared/components";
 
 // ── Item Form Dialog (Add / Edit) ──────────────────────
 
@@ -19,22 +19,22 @@ export function ItemFormDialog({
   onClose,
   onSubmit,
   title,
-  initialName = '',
+  initialName = "",
   initialQuantity = 1,
   isPending = false,
 }: ItemFormDialogProps) {
   const { t } = useTranslation();
   const [name, setName] = useState(initialName);
   const [quantity, setQuantity] = useState(initialQuantity);
-  const [nameError, setNameError] = useState('');
+  const [nameError, setNameError] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
-      setNameError(t('validation.itemNameRequired', 'Item name is required'));
+      setNameError(t("validation.itemNameRequired", "Item name is required"));
       return;
     }
-    setNameError('');
+    setNameError("");
     onSubmit(name.trim(), Math.max(1, quantity));
   };
 
@@ -42,7 +42,7 @@ export function ItemFormDialog({
   const handleClose = () => {
     setName(initialName);
     setQuantity(initialQuantity);
-    setNameError('');
+    setNameError("");
     onClose();
   };
 
@@ -50,16 +50,19 @@ export function ItemFormDialog({
     <Modal isOpen={isOpen} onClose={handleClose} title={title}>
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input
-          label={t('shopping.item.name')}
-          placeholder={t('shopping.item.namePlaceholder')}
+          label={t("shopping.item.name")}
+          placeholder={t("shopping.item.namePlaceholder")}
           value={name}
-          onChange={(e) => { setName(e.target.value); setNameError(''); }}
+          onChange={(e) => {
+            setName(e.target.value);
+            setNameError("");
+          }}
           error={nameError}
           autoFocus
           required
         />
         <Input
-          label={t('shopping.item.quantity')}
+          label={t("shopping.item.quantity")}
           type="number"
           min={1}
           value={quantity}
@@ -67,10 +70,12 @@ export function ItemFormDialog({
         />
         <div className="flex justify-end gap-2 pt-2">
           <Button type="button" variant="secondary" onClick={handleClose}>
-            {t('common.cancel', 'Cancel')}
+            {t("common.cancel", "Cancel")}
           </Button>
           <Button type="submit" disabled={!name.trim() || isPending}>
-            {isPending ? t('common.saving', 'Saving...') : t('common.save', 'Save')}
+            {isPending
+              ? t("common.saving", "Saving...")
+              : t("common.save", "Save")}
           </Button>
         </div>
       </form>
@@ -99,17 +104,22 @@ export function DeleteConfirmDialog({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={t('common.confirmDelete', 'Confirm Delete')}
+      title={t("common.confirmDelete", "Confirm Delete")}
     >
       <p className="text-muted-foreground mb-6">
-        {t('common.deleteConfirmMessage', 'Are you sure you want to delete this item? This action cannot be undone.')}
+        {t(
+          "common.deleteConfirmMessage",
+          "Are you sure you want to delete this item? This action cannot be undone.",
+        )}
       </p>
       <div className="flex justify-end gap-2">
         <Button variant="secondary" onClick={onClose}>
-          {t('common.cancel', 'Cancel')}
+          {t("common.cancel", "Cancel")}
         </Button>
         <Button variant="destructive" onClick={onConfirm} disabled={isPending}>
-          {isPending ? t('common.deleting', 'Deleting...') : t('common.delete', 'Delete')}
+          {isPending
+            ? t("common.deleting", "Deleting...")
+            : t("common.delete", "Delete")}
         </Button>
       </div>
     </Modal>

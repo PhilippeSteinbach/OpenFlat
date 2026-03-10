@@ -1,28 +1,29 @@
-import type { ButtonHTMLAttributes, ReactNode } from 'react';
+import type { ButtonHTMLAttributes, ReactNode } from "react";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
-  size?: 'sm' | 'md' | 'lg';
+  variant?: "primary" | "secondary" | "danger" | "ghost";
+  size?: "sm" | "md" | "lg";
   children: ReactNode;
 }
 
 const variantClasses = {
-  primary: 'bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500',
-  secondary: 'bg-gray-200 text-gray-800 hover:bg-gray-300 focus:ring-gray-400',
-  danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
-  ghost: 'bg-transparent text-gray-600 hover:bg-gray-100 focus:ring-gray-400',
+  primary:
+    "bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500",
+  secondary: "bg-gray-200 text-gray-800 hover:bg-gray-300 focus:ring-gray-400",
+  danger: "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500",
+  ghost: "bg-transparent text-gray-600 hover:bg-gray-100 focus:ring-gray-400",
 };
 
 const sizeClasses = {
-  sm: 'px-3 py-1.5 text-sm',
-  md: 'px-4 py-2 text-base',
-  lg: 'px-6 py-3 text-lg',
+  sm: "px-3 py-1.5 text-sm",
+  md: "px-4 py-2 text-base",
+  lg: "px-6 py-3 text-lg",
 };
 
 export function Button({
-  variant = 'primary',
-  size = 'md',
-  className = '',
+  variant = "primary",
+  size = "md",
+  className = "",
   disabled,
   children,
   ...props

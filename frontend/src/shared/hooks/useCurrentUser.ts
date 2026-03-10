@@ -1,5 +1,5 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 export interface UserInfo {
   id: number;
@@ -21,7 +21,7 @@ export const useCurrentUserStore = create<CurrentUserState>()(
       clearCurrentUser: () => set({ currentUser: null }),
     }),
     {
-      name: 'openflat-current-user',
+      name: "openflat-current-user",
     },
   ),
 );

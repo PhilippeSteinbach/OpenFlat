@@ -1,6 +1,6 @@
-import { useEffect } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
-import { useSignalR } from '@/shared/hooks/useSignalR';
+import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useSignalR } from "@/shared/hooks/useSignalR";
 
 /**
  * Connects to the Shopping SignalR hub and invalidates relevant React Query
@@ -9,7 +9,7 @@ import { useSignalR } from '@/shared/hooks/useSignalR';
 export function useShoppingHub() {
   const queryClient = useQueryClient();
   const { isConnected, on } = useSignalR({
-    hubUrl: '/hubs/shopping',
+    hubUrl: "/hubs/shopping",
     enabled: true,
   });
 
@@ -18,26 +18,26 @@ export function useShoppingHub() {
 
     // Item mutations
     const itemEvents = [
-      'ItemCreated',
-      'ItemUpdated',
-      'ItemBought',
-      'ItemUndone',
-      'ItemDeleted',
-      'ItemAutoCleared',
+      "ItemCreated",
+      "ItemUpdated",
+      "ItemBought",
+      "ItemUndone",
+      "ItemDeleted",
+      "ItemAutoCleared",
     ];
 
     for (const event of itemEvents) {
       const unsub = on(event, () => {
-        queryClient.invalidateQueries({ queryKey: ['shopping', 'items'] });
+        queryClient.invalidateQueries({ queryKey: ["shopping", "items"] });
       });
       if (unsub) unsubs.push(unsub);
     }
 
     // Comment mutations
-    const commentEvents = ['CommentAdded', 'CommentUpdated', 'CommentDeleted'];
+    const commentEvents = ["CommentAdded", "CommentUpdated", "CommentDeleted"];
     for (const event of commentEvents) {
       const unsub = on(event, () => {
-        queryClient.invalidateQueries({ queryKey: ['shopping'] });
+        queryClient.invalidateQueries({ queryKey: ["shopping"] });
       });
       if (unsub) unsubs.push(unsub);
     }
