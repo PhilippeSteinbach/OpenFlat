@@ -205,7 +205,10 @@ export function TaskFormDialog({
 
         {/* Frequency */}
         <div>
-          <label htmlFor="frequency-value" className="block text-sm font-medium text-foreground mb-1.5">
+          <label
+            htmlFor="frequency-value"
+            className="block text-sm font-medium text-foreground mb-1.5"
+          >
             {t("cleaning.task.frequency", "Frequency")}
           </label>
           <div className="flex items-center gap-2">
