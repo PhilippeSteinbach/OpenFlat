@@ -1,4 +1,7 @@
 {
+    "playwright.configFiles": [
+        "frontend/playwright.config.ts"
+    ],
     "chat.promptFilesRecommendations": {
         "speckit.constitution": true,
         "speckit.specify": true,
